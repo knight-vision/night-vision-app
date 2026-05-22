@@ -26,12 +26,9 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "YOUR_APPLE_ID",
-        "ascAppId": "YOUR_ASC_APP_ID"
-      },
-      "android": {
-        "serviceAccountKeyPath": "./google-service-account.json",
-        "track": "internal"
+        "appleId": "koh.kaw@icloud.com",
+        "ascAppId": "YOUR_ASC_APP_ID",
+        "appleTeamId": "HCF97943N8"
       }
     }
   }

@@ -15,7 +15,8 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "jp.kushiro.nightvision",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "appleTeamId": "HCF97943N8"
     },
     "android": {
       "adaptiveIcon": {
@@ -32,7 +33,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      "expo-splash-screen"
     ],
     "experiments": {
       "typedRoutes": true
