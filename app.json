@@ -16,7 +16,10 @@
       "supportsTablet": false,
       "bundleIdentifier": "jp.kushiro.nightvision",
       "buildNumber": "1",
-      "appleTeamId": "HCF97943N8"
+      "appleTeamId": "HCF97943N8",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
