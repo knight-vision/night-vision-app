@@ -12,15 +12,20 @@
     },
     "preview": {
       "distribution": "internal",
+      "credentialsSource": "remote",
       "ios": {
-        "simulator": false
+        "simulator": false,
+        "entitlements": {
+          "aps-environment": "development"
+        }
       },
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "credentialsSource": "remote"
     }
   },
   "submit": {

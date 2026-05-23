@@ -18,6 +18,12 @@ on:
         default: 'preview'
         type: choice
         options: [preview, production]
+      clear_cache:
+        description: 'Clear credentials cache'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
 
 jobs:
   build:
@@ -31,7 +37,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
@@ -46,6 +51,10 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: eas build --platform all --profile preview --non-interactive
 
-      - name: Build (manual dispatch)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Build (manual - with cache clear)
+        if: github.event_name == 'workflow_dispatch' && inputs.clear_cache == 'true'
+        run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --clear-cache
+
+      - name: Build (manual - normal)
+        if: github.event_name == 'workflow_dispatch' && inputs.clear_cache == 'false'
         run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive
