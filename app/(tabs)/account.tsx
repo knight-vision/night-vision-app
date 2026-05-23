@@ -3,53 +3,61 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Colors } from '../../constants/theme';
+import { useAuthStore } from '../../store/auth';
 
 type MenuItem = { icon: React.ComponentProps<typeof Ionicons>['name']; label: string; sub: string };
 
 const MENU_ITEMS: MenuItem[][] = [
   [
-    { icon: 'person-outline',       label: 'プロフィール編集',    sub: '名前・連絡先の変更' },
-    { icon: 'lock-closed-outline',  label: 'パスワード変更',      sub: 'セキュリティ設定' },
+    { icon: 'person-outline',        label: 'プロフィール編集',     sub: '名前・連絡先の変更' },
+    { icon: 'lock-closed-outline',   label: 'パスワード変更',       sub: 'セキュリティ設定' },
   ],
   [
-    { icon: 'notifications-outline', label: '通知設定',           sub: 'プッシュ通知の管理' },
-    { icon: 'moon-outline',          label: 'ダークモード',        sub: '常にダーク' },
+    { icon: 'notifications-outline', label: '通知設定',             sub: 'プッシュ通知の管理' },
+    { icon: 'moon-outline',          label: 'ダークモード',          sub: '常にダーク' },
   ],
   [
-    { icon: 'help-circle-outline',  label: 'ヘルプ・お問い合わせ', sub: 'サポートへ連絡' },
+    { icon: 'help-circle-outline',   label: 'ヘルプ・お問い合わせ', sub: 'サポートへ連絡' },
     { icon: 'information-circle-outline', label: 'アプリバージョン', sub: 'v1.0.0' },
   ],
 ];
 
 export default function AccountScreen() {
+  const { name, role, shopName, logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/');
+  };
+
+  const roleLabel = role === 'owner' ? 'オーナー' : 'キャスト';
+  const roleColor = role === 'owner' ? Colors.gold : Colors.purple;
+  const roleBg    = role === 'owner' ? Colors.goldDim : Colors.purpleDim;
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={styles.screenTitle}>アカウント</Text>
 
-        {/* Profile */}
         <View style={styles.profileCard}>
-          <View style={styles.profileAvatar}>
-            <Text style={styles.profileAvatarText}>桜</Text>
+          <View style={[styles.profileAvatar, { borderColor: roleColor, backgroundColor: roleBg }]}>
+            <Text style={[styles.profileAvatarText, { color: roleColor }]}>{name?.[0] || '?'}</Text>
           </View>
           <View>
-            <Text style={styles.profileName}>桜 -Sakura-</Text>
-            <View style={styles.roleBadge}>
-              <Text style={styles.roleBadgeText}>キャスト</Text>
+            <Text style={styles.profileName}>{name}</Text>
+            {shopName && <Text style={styles.shopName}>{shopName}</Text>}
+            <View style={[styles.roleBadge, { backgroundColor: roleBg, borderColor: roleColor + '60' }]}>
+              <Text style={[styles.roleBadgeText, { color: roleColor }]}>{roleLabel}</Text>
             </View>
           </View>
         </View>
 
-        {/* Menu groups */}
         {MENU_ITEMS.map((group, gi) => (
           <View key={gi} style={styles.menuGroup}>
             {group.map(({ icon, label, sub }, i) => (
               <TouchableOpacity
                 key={label}
-                style={[
-                  styles.menuItem,
-                  i < group.length - 1 && { borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-                ]}
+                style={[styles.menuItem, i < group.length - 1 && { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}
                 activeOpacity={0.7}
               >
                 <View style={styles.menuIconWrap}>
@@ -65,8 +73,7 @@ export default function AccountScreen() {
           </View>
         ))}
 
-        {/* Logout */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={() => router.replace('/')} activeOpacity={0.8}>
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
           <Ionicons name="log-out-outline" size={16} color={Colors.red} />
           <Text style={styles.logoutText}>ログアウト</Text>
         </TouchableOpacity>
@@ -76,20 +83,21 @@ export default function AccountScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe:        { flex: 1, backgroundColor: Colors.bg },
-  scroll:      { paddingHorizontal: 16, paddingBottom: 40 },
-  screenTitle: { fontSize: 20, fontWeight: '500', color: Colors.text, paddingVertical: 16 },
-  profileCard: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: Colors.surface, borderRadius: 14, borderWidth: 0.5, borderColor: Colors.border, padding: 16, marginBottom: 20 },
-  profileAvatar: { width: 52, height: 52, borderRadius: 26, backgroundColor: Colors.goldDim, borderWidth: 1.5, borderColor: Colors.gold, justifyContent: 'center', alignItems: 'center' },
-  profileAvatarText: { fontSize: 18, color: Colors.gold, fontWeight: '500' },
-  profileName: { fontSize: 16, fontWeight: '500', color: Colors.text, marginBottom: 5 },
-  roleBadge:   { backgroundColor: Colors.purpleDim, borderRadius: 8, borderWidth: 0.5, borderColor: 'rgba(155,127,232,0.35)', paddingHorizontal: 8, paddingVertical: 2, alignSelf: 'flex-start' },
-  roleBadgeText: { fontSize: 10, color: Colors.purple },
-  menuGroup:   { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, marginBottom: 12 },
-  menuItem:    { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
-  menuIconWrap:{ width: 32, height: 32, borderRadius: 8, backgroundColor: Colors.purpleDim, justifyContent: 'center', alignItems: 'center' },
-  menuLabel:   { fontSize: 13, color: Colors.text, fontWeight: '500' },
-  menuSub:     { fontSize: 11, color: Colors.text3, marginTop: 1 },
-  logoutBtn:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(224,92,106,0.25)', padding: 16, marginTop: 8 },
-  logoutText:  { fontSize: 14, color: Colors.red, fontWeight: '500' },
+  safe:              { flex: 1, backgroundColor: Colors.bg },
+  scroll:            { paddingHorizontal: 16, paddingBottom: 40 },
+  screenTitle:       { fontSize: 20, fontWeight: '500', color: Colors.text, paddingVertical: 16 },
+  profileCard:       { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: Colors.surface, borderRadius: 14, borderWidth: 0.5, borderColor: Colors.border, padding: 16, marginBottom: 20 },
+  profileAvatar:     { width: 52, height: 52, borderRadius: 26, borderWidth: 1.5, justifyContent: 'center', alignItems: 'center' },
+  profileAvatarText: { fontSize: 18, fontWeight: '500' },
+  profileName:       { fontSize: 16, fontWeight: '500', color: Colors.text, marginBottom: 2 },
+  shopName:          { fontSize: 11, color: Colors.text3, marginBottom: 5 },
+  roleBadge:         { borderRadius: 8, borderWidth: 0.5, paddingHorizontal: 8, paddingVertical: 2, alignSelf: 'flex-start' },
+  roleBadgeText:     { fontSize: 10 },
+  menuGroup:         { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, marginBottom: 12 },
+  menuItem:          { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
+  menuIconWrap:      { width: 32, height: 32, borderRadius: 8, backgroundColor: Colors.purpleDim, justifyContent: 'center', alignItems: 'center' },
+  menuLabel:         { fontSize: 13, color: Colors.text, fontWeight: '500' },
+  menuSub:           { fontSize: 11, color: Colors.text3, marginTop: 1 },
+  logoutBtn:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(224,92,106,0.25)', padding: 16, marginTop: 8 },
+  logoutText:        { fontSize: 14, color: Colors.red, fontWeight: '500' },
 });
