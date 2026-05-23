@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "jp.kushiro.nightvision",
+      "bundleIdentifier": "jp.kushiro.nightvision2",
       "buildNumber": "1",
       "appleTeamId": "HCF97943N8",
       "infoPlist": {
