@@ -14,3 +14,6 @@ export const Colors = {
   red:         '#e05c6a',
   green:       '#4ecb8a',
 };
+
+// 金額を¥1,234,567形式で表示（略式なし）
+export const fmtYen = (n: number): string => `¥${Math.round(n).toLocaleString('ja-JP')}`;

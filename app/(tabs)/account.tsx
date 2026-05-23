@@ -1,43 +1,110 @@
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Colors } from '../../constants/theme';
 import { useAuthStore } from '../../store/auth';
+import { API_BASE } from '../../constants/api';
 
-type MenuItem = { icon: React.ComponentProps<typeof Ionicons>['name']; label: string; sub: string };
+function ChangePasswordModal({ visible, onClose, userId, role }: {
+  visible: boolean; onClose: () => void; userId: string; role: string;
+}) {
+  const [current, setCurrent] = useState('');
+  const [newPass, setNewPass] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
 
-const MENU_ITEMS: MenuItem[][] = [
-  [
-    { icon: 'person-outline',        label: 'プロフィール編集',     sub: '名前・連絡先の変更' },
-    { icon: 'lock-closed-outline',   label: 'パスワード変更',       sub: 'セキュリティ設定' },
-  ],
-  [
-    { icon: 'notifications-outline', label: '通知設定',             sub: 'プッシュ通知の管理' },
-    { icon: 'moon-outline',          label: 'ダークモード',          sub: '常にダーク' },
-  ],
-  [
-    { icon: 'help-circle-outline',   label: 'ヘルプ・お問い合わせ', sub: 'サポートへ連絡' },
-    { icon: 'information-circle-outline', label: 'アプリバージョン', sub: 'v1.0.0' },
-  ],
-];
+  const handleSubmit = async () => {
+    if (!current || !newPass) { Alert.alert('エラー', 'すべて入力してください'); return; }
+    if (newPass !== confirm) { Alert.alert('エラー', '新しいパスワードが一致しません'); return; }
+    if (newPass.length < 6) { Alert.alert('エラー', 'パスワードは6文字以上にしてください'); return; }
+    setLoading(true);
+    try {
+      const endpoint = role === 'owner' ? `${API_BASE}/owner-account-update` : `${API_BASE}/cast-account-update`;
+      const res = await fetch(endpoint, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: userId, current_password: current, new_password: newPass }),
+      });
+      const data = await res.json();
+      if (!res.ok) { Alert.alert('エラー', data.error || '変更に失敗しました'); return; }
+      Alert.alert('変更しました', 'パスワードを変更しました');
+      setCurrent(''); setNewPass(''); setConfirm('');
+      onClose();
+    } catch { Alert.alert('エラー', '通信エラーが発生しました'); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+      <View style={modal.container}>
+        <View style={modal.header}>
+          <TouchableOpacity onPress={onClose} style={modal.closeBtn}>
+            <Ionicons name="close" size={22} color={Colors.text2} />
+          </TouchableOpacity>
+          <Text style={modal.title}>パスワード変更</Text>
+          <View style={{ width: 36 }} />
+        </View>
+        <View style={modal.body}>
+          <Text style={modal.label}>現在のパスワード</Text>
+          <TextInput style={modal.input} secureTextEntry placeholder="現在のパスワード"
+            placeholderTextColor={Colors.text3} value={current} onChangeText={setCurrent} />
+          <Text style={modal.label}>新しいパスワード</Text>
+          <TextInput style={modal.input} secureTextEntry placeholder="6文字以上"
+            placeholderTextColor={Colors.text3} value={newPass} onChangeText={setNewPass} />
+          <Text style={modal.label}>新しいパスワード（確認）</Text>
+          <TextInput style={modal.input} secureTextEntry placeholder="もう一度入力"
+            placeholderTextColor={Colors.text3} value={confirm} onChangeText={setConfirm} />
+          <TouchableOpacity style={modal.submitBtn} onPress={handleSubmit} disabled={loading}>
+            {loading ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>変更する</Text>}
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
 
 export default function AccountScreen() {
-  const { name, role, shopName, logout } = useAuthStore();
+  const { name, role, shopName, userId, logout } = useAuthStore();
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const handleLogout = () => {
-    logout();
-    router.replace('/');
+    Alert.alert('ログアウト', 'ログアウトしますか？', [
+      { text: 'キャンセル', style: 'cancel' },
+      { text: 'ログアウト', style: 'destructive', onPress: () => { logout(); router.replace('/'); } },
+    ]);
   };
 
   const roleLabel = role === 'owner' ? 'オーナー' : 'キャスト';
   const roleColor = role === 'owner' ? Colors.gold : Colors.purple;
   const roleBg    = role === 'owner' ? Colors.goldDim : Colors.purpleDim;
 
+  const MENU_ITEMS = [
+    [
+      { icon: 'lock-closed-outline' as const, label: 'パスワード変更', sub: 'セキュリティ設定', onPress: () => setShowPasswordModal(true) },
+    ],
+    [
+      { icon: 'notifications-outline' as const, label: '通知設定', sub: 'プッシュ通知の管理', onPress: () => Alert.alert('通知設定', 'iOSの設定アプリから変更できます') },
+      { icon: 'moon-outline' as const, label: 'ダークモード', sub: '常にダーク', onPress: () => {} },
+    ],
+    [
+      { icon: 'help-circle-outline' as const, label: 'ヘルプ・お問い合わせ', sub: 'サポートへ連絡', onPress: () => Alert.alert('お問い合わせ', 'kushiro.night.vision@gmail.com\nまでご連絡ください') },
+      { icon: 'information-circle-outline' as const, label: 'アプリバージョン', sub: 'v1.0.0', onPress: () => {} },
+    ],
+  ];
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={styles.screenTitle}>アカウント</Text>
+
+        <ChangePasswordModal
+          visible={showPasswordModal}
+          onClose={() => setShowPasswordModal(false)}
+          userId={userId || ''}
+          role={role || ''}
+        />
 
         <View style={styles.profileCard}>
           <View style={[styles.profileAvatar, { borderColor: roleColor, backgroundColor: roleBg }]}>
@@ -45,7 +112,7 @@ export default function AccountScreen() {
           </View>
           <View>
             <Text style={styles.profileName}>{name}</Text>
-            {shopName && <Text style={styles.shopName}>{shopName}</Text>}
+            {shopName && role === 'owner' && <Text style={styles.shopName}>{shopName}</Text>}
             <View style={[styles.roleBadge, { backgroundColor: roleBg, borderColor: roleColor + '60' }]}>
               <Text style={[styles.roleBadgeText, { color: roleColor }]}>{roleLabel}</Text>
             </View>
@@ -54,11 +121,12 @@ export default function AccountScreen() {
 
         {MENU_ITEMS.map((group, gi) => (
           <View key={gi} style={styles.menuGroup}>
-            {group.map(({ icon, label, sub }, i) => (
+            {group.map(({ icon, label, sub, onPress }, i) => (
               <TouchableOpacity
                 key={label}
                 style={[styles.menuItem, i < group.length - 1 && { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}
                 activeOpacity={0.7}
+                onPress={onPress}
               >
                 <View style={styles.menuIconWrap}>
                   <Ionicons name={icon} size={18} color={Colors.purple} />
@@ -81,6 +149,18 @@ export default function AccountScreen() {
     </SafeAreaView>
   );
 }
+
+const modal = StyleSheet.create({
+  container: { flex: 1, backgroundColor: Colors.bg },
+  header:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  closeBtn:  { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
+  title:     { fontSize: 16, fontWeight: '500', color: Colors.text },
+  body:      { padding: 20, gap: 8 },
+  label:     { fontSize: 12, color: Colors.text2, marginTop: 8 },
+  input:     { backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, padding: 12, color: Colors.text, fontSize: 14 },
+  submitBtn: { backgroundColor: Colors.gold, borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 16 },
+  submitText: { color: '#1a1200', fontSize: 15, fontWeight: '600' },
+});
 
 const styles = StyleSheet.create({
   safe:              { flex: 1, backgroundColor: Colors.bg },

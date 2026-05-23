@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Colors } from '../constants/theme';
 import { API_BASE } from '../constants/api';
 import { useAuthStore } from '../store/auth';
+import { registerPushToken } from '../lib/notifications';
 
 export default function LoginScreen() {
   const [id, setId] = useState('');
@@ -18,36 +19,33 @@ export default function LoginScreen() {
     if (!id || !password) { setError('IDとパスワードを入力してください'); return; }
     setLoading(true);
     setError('');
-
     try {
-      // まずオーナーとして試行
+      // オーナーとして試行
       const ownerRes = await fetch(`${API_BASE}/owner-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: id, password }),
       });
-
       if (ownerRes.ok) {
         const data = await ownerRes.json();
         setOwner({ owner_id: String(data.owner_id), shop_id: String(data.shop_id), shop_name: data.shop_name });
+        registerPushToken(String(data.owner_id), 'owner');
         router.replace('/(tabs)');
         return;
       }
-
-      // 次にキャストとして試行
+      // キャストとして試行
       const castRes = await fetch(`${API_BASE}/cast-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: id, password }),
       });
-
       if (castRes.ok) {
         const data = await castRes.json();
         setCast({ id: String(data.id), cast_id: String(data.cast_id), cast_name: data.cast_name, shop_id: String(data.shop_id) });
+        registerPushToken(String(data.id), 'cast');
         router.replace('/(tabs)');
         return;
       }
-
       setError('メールアドレスまたはパスワードが違います');
     } catch {
       setError('通信エラーが発生しました。再度お試しください');
@@ -64,43 +62,23 @@ export default function LoginScreen() {
           <Text style={styles.logoText}>NIGHT VISION</Text>
           <Text style={styles.logoSub}>KUSHIRO</Text>
         </View>
-
         <View style={styles.form}>
           <View style={styles.inputWrap}>
             <Ionicons name="mail-outline" size={16} color={Colors.text3} style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="メールアドレス"
-              placeholderTextColor={Colors.text3}
-              value={id}
-              onChangeText={setId}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
+            <TextInput style={styles.input} placeholder="メールアドレス" placeholderTextColor={Colors.text3}
+              value={id} onChangeText={setId} keyboardType="email-address" autoCapitalize="none" />
           </View>
-
           <View style={styles.inputWrap}>
             <Ionicons name="lock-closed-outline" size={16} color={Colors.text3} style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, { flex: 1 }]}
-              placeholder="パスワード"
-              placeholderTextColor={Colors.text3}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPass}
-            />
+            <TextInput style={[styles.input, { flex: 1 }]} placeholder="パスワード" placeholderTextColor={Colors.text3}
+              value={password} onChangeText={setPassword} secureTextEntry={!showPass} />
             <TouchableOpacity onPress={() => setShowPass(!showPass)} style={styles.eyeBtn}>
               <Ionicons name={showPass ? "eye-off-outline" : "eye-outline"} size={16} color={Colors.text3} />
             </TouchableOpacity>
           </View>
-
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
           <TouchableOpacity style={styles.loginBtn} onPress={handleLogin} activeOpacity={0.85} disabled={loading}>
-            {loading
-              ? <ActivityIndicator color="#1a1200" />
-              : <Text style={styles.loginBtnText}>ログイン</Text>
-            }
+            {loading ? <ActivityIndicator color="#1a1200" /> : <Text style={styles.loginBtnText}>ログイン</Text>}
           </TouchableOpacity>
         </View>
       </View>
