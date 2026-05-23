@@ -14,10 +14,7 @@
       "distribution": "internal",
       "credentialsSource": "remote",
       "ios": {
-        "simulator": false,
-        "entitlements": {
-          "aps-environment": "development"
-        }
+        "simulator": false
       },
       "android": {
         "buildType": "apk"

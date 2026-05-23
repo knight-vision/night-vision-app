@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "NIGHT VISION",
-    "slug": "night-vision-kushiro",
+    "slug": "night-vision",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "jp.kushiro.nightvision2",
+      "bundleIdentifier": "app.nightvision",
       "buildNumber": "1",
       "appleTeamId": "HCF97943N8",
       "infoPlist": {
@@ -26,7 +26,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0a0a0f"
       },
-      "package": "jp.kushiro.nightvision",
+      "package": "app.nightvision",
       "versionCode": 1
     },
     "web": {

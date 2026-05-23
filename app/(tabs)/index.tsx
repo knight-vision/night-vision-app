@@ -49,7 +49,6 @@ export default function HomeScreen() {
             <Image source={require('../../assets/images/icon.png')} style={styles.logoImg} />
             <View>
               <Text style={styles.logoText}>NIGHT VISION</Text>
-              <Text style={styles.logoSub}>KUSHIRO</Text>
             </View>
           </View>
           <View style={styles.headerRight}>

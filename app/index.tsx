@@ -60,7 +60,6 @@ export default function LoginScreen() {
         <View style={styles.logoWrap}>
           <Image source={require('../assets/images/icon.png')} style={styles.logoImg} />
           <Text style={styles.logoText}>NIGHT VISION</Text>
-          <Text style={styles.logoSub}>KUSHIRO</Text>
         </View>
         <View style={styles.form}>
           <View style={styles.inputWrap}>
