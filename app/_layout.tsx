@@ -1,7 +1,17 @@
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { useAuthStore } from '../store/auth';
 
 export default function RootLayout() {
+  const { role } = useAuthStore();
+
+  useEffect(() => {
+    if (role === null) {
+      router.replace('/');
+    }
+  }, [role]);
+
   return (
     <>
       <Stack

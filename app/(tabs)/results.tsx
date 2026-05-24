@@ -1,15 +1,12 @@
 import { ScrollView, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
-import { Colors } from '../../constants/theme';
+import { Colors, fmtYen } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 import { StatCard } from '../../components/StatCard';
 import { SectionCard } from '../../components/SectionCard';
 
-const fmt = (n: number) => n >= 1000000
-  ? `¥${(n / 1000000).toFixed(2)}M`
-  : n >= 1000 ? `¥${Math.round(n / 1000)}k` : `¥${n.toLocaleString()}`;
 
 // オーナー向け：店舗全体の売上サマリー
 function OwnerResultsView({ shopId }: { shopId: string }) {
@@ -31,10 +28,10 @@ function OwnerResultsView({ shopId }: { shopId: string }) {
   return (
     <>
       <View style={styles.statGrid}>
-        <StatCard label="今月売上" value={fmt(data.monthly_sales)}
+        <StatCard label="今月売上" value={fmtYen(data.monthly_sales)}
           sub={data.sales_growth !== null ? `${data.sales_growth >= 0 ? '↑' : '↓'} 前月比 ${data.sales_growth > 0 ? '+' : ''}${data.sales_growth}%` : ''}
           subColor={data.sales_growth >= 0 ? Colors.green : Colors.red} valueColor={Colors.gold} />
-        <StatCard label="客単価" value={fmt(data.avg_spend)} />
+        <StatCard label="客単価" value={fmtYen(data.avg_spend)} />
       </View>
       <View style={[styles.statGrid, { marginTop: 8, marginBottom: 16 }]}>
         <StatCard label="本日出勤" value={`${data.today_staff_count}名`} />
@@ -48,7 +45,7 @@ function OwnerResultsView({ shopId }: { shopId: string }) {
             <View style={styles.barTrack}>
               <View style={[styles.barFill, { width: `${(total / maxSales) * 100}%`, opacity: total === 0 ? 0.2 : 1 }]} />
             </View>
-            <Text style={[styles.barVal, total === 0 && { opacity: 0.4 }]}>{total > 0 ? fmt(total) : '—'}</Text>
+            <Text style={[styles.barVal, total === 0 && { opacity: 0.4 }]}>{total > 0 ? fmtYen(total) : '—'}</Text>
           </View>
         ))}
       </SectionCard>
@@ -60,7 +57,7 @@ function OwnerResultsView({ shopId }: { shopId: string }) {
           <View key={c.cast_id} style={[styles.rankRow, i === data.cast_ranking.length - 1 && { borderBottomWidth: 0 }]}>
             <Text style={[styles.rankNum, i === 0 && { color: Colors.gold }]}>{i + 1}</Text>
             <Text style={styles.rankName}>{c.name}</Text>
-            <Text style={[styles.rankSales, i === 0 && { color: Colors.gold }]}>{fmt(c.total)}</Text>
+            <Text style={[styles.rankSales, i === 0 && { color: Colors.gold }]}>{fmtYen(c.total)}</Text>
           </View>
         ))}
       </SectionCard>
@@ -88,14 +85,14 @@ function CastResultsView({ castId, shopId }: { castId: string; shopId: string })
   return (
     <>
       <View style={styles.statGrid}>
-        <StatCard label="今月売上" value={fmt(data.monthly_sales)}
+        <StatCard label="今月売上" value={fmtYen(data.monthly_sales)}
           sub={data.sales_growth !== null ? `${data.sales_growth >= 0 ? '↑' : '↓'} 前月比 ${data.sales_growth > 0 ? '+' : ''}${data.sales_growth}%` : ''}
           subColor={data.sales_growth !== null && data.sales_growth >= 0 ? Colors.green : Colors.red}
           valueColor={Colors.gold} />
         <StatCard label="出勤日数" value={`${data.shift_count}日`} sub="今月確定" />
       </View>
       <View style={[styles.statGrid, { marginTop: 8, marginBottom: 16 }]}>
-        <StatCard label="ドリンクバック" value={fmt(data.drink_back)} />
+        <StatCard label="ドリンクバック" value={fmtYen(data.drink_back)} />
         <StatCard label="店内ランキング" value={data.shop_rank ? `${data.shop_rank}位` : '-'}
           sub="今月" valueColor={data.shop_rank === 1 ? Colors.gold : Colors.text} />
       </View>
@@ -107,7 +104,7 @@ function CastResultsView({ castId, shopId }: { castId: string; shopId: string })
             <View style={styles.barTrack}>
               <View style={[styles.barFill, { width: `${(total / maxSales) * 100}%` }]} />
             </View>
-            <Text style={styles.barVal}>{fmt(total)}</Text>
+            <Text style={styles.barVal}>{fmtYen(total)}</Text>
           </View>
         ))}
       </SectionCard>
