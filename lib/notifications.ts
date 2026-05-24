@@ -1,31 +1,32 @@
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { API_BASE } from '../constants/api';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
 export async function registerPushToken(userId: string, role: 'owner' | 'cast') {
-  if (!Device.isDevice) return;
-
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-  if (finalStatus !== 'granted') return;
-
   try {
-    const token = (await Notifications.getExpoPushTokenAsync({
+    const Notifications = await import('expo-notifications');
+    const Device = await import('expo-device');
+
+    if (!Device.default.isDevice) return;
+
+    Notifications.default.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+
+    const { status: existingStatus } = await Notifications.default.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.default.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') return;
+
+    const token = (await Notifications.default.getExpoPushTokenAsync({
       projectId: 'ef432d11-9794-4de8-ad5b-095cac6076aa',
     })).data;
 
@@ -38,8 +39,7 @@ export async function registerPushToken(userId: string, role: 'owner' | 'cast') 
         ...(role === 'owner' ? { shop_owner_id: userId } : { cast_account_id: userId }),
       }),
     });
-    console.log('Push token registered:', token);
   } catch (e) {
-    console.log('Push token registration failed:', e);
+    console.log('Push notification setup failed:', e);
   }
 }
