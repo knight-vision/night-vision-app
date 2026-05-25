@@ -8,12 +8,12 @@ export default function TabLayout() {
   const { role } = useAuthStore();
 
   useEffect(() => {
-    if (!role) {
-      router.replace('/');
-    }
+    if (!role) router.replace('/');
   }, [role]);
 
   if (!role) return null;
+
+  const isOwner = role === 'owner';
 
   return (
     <Tabs
@@ -33,28 +33,39 @@ export default function TabLayout() {
     >
       <Tabs.Screen name="index" options={{
         title: 'ホーム',
-        tabBarIcon: ({ focused, color }) => (
-          <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
-        ),
+        tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />,
       }} />
       <Tabs.Screen name="shift" options={{
         title: 'シフト',
-        tabBarIcon: ({ focused, color }) => (
-          <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={22} color={color} />
-        ),
+        tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={22} color={color} />,
       }} />
+      {isOwner && (
+        <Tabs.Screen name="slip" options={{
+          title: '伝票',
+          tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={22} color={color} />,
+        }} />
+      )}
+      {isOwner && (
+        <Tabs.Screen name="manage" options={{
+          title: '管理',
+          tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'settings' : 'settings-outline'} size={22} color={color} />,
+        }} />
+      )}
       <Tabs.Screen name="results" options={{
         title: '成績',
-        tabBarIcon: ({ focused, color }) => (
-          <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} size={22} color={color} />
-        ),
+        tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} size={22} color={color} />,
       }} />
       <Tabs.Screen name="account" options={{
         title: 'アカウント',
-        tabBarIcon: ({ focused, color }) => (
-          <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />
-        ),
+        tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />,
       }} />
+      {/* キャスト専用 - オーナーには非表示 */}
+      {!isOwner && (
+        <Tabs.Screen name="slip" options={{ href: null }} />
+      )}
+      {!isOwner && (
+        <Tabs.Screen name="manage" options={{ href: null }} />
+      )}
     </Tabs>
   );
 }
