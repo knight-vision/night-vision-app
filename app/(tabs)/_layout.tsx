@@ -1,44 +1,60 @@
-import { Tabs } from 'expo-router';
+import { Tabs, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-
-type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
-
-const TAB_CONFIG: { name: string; title: string; icon: IoniconsName; activeIcon: IoniconsName }[] = [
-  { name: 'index',    title: 'ホーム',   icon: 'home-outline',      activeIcon: 'home' },
-  { name: 'shift',    title: 'シフト',   icon: 'calendar-outline',  activeIcon: 'calendar' },
-  { name: 'results',  title: '成績',     icon: 'bar-chart-outline', activeIcon: 'bar-chart' },
-  { name: 'account',  title: 'アカウント', icon: 'person-outline',  activeIcon: 'person' },
-];
+import { useEffect } from 'react';
+import { useAuthStore } from '../../store/auth';
+import { Colors } from '../../constants/theme';
 
 export default function TabLayout() {
+  const { role } = useAuthStore();
+
+  useEffect(() => {
+    if (!role) {
+      router.replace('/');
+    }
+  }, [role]);
+
+  if (!role) return null;
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#13131a',
-          borderTopColor: 'rgba(180,160,255,0.12)',
+          backgroundColor: Colors.surface,
+          borderTopColor: Colors.border,
           borderTopWidth: 0.5,
           height: 80,
           paddingBottom: 16,
         },
-        tabBarActiveTintColor: '#c9a84c',
-        tabBarInactiveTintColor: '#5a5868',
+        tabBarActiveTintColor: Colors.gold,
+        tabBarInactiveTintColor: Colors.text3,
         tabBarLabelStyle: { fontSize: 10, marginTop: 2 },
       }}
     >
-      {TAB_CONFIG.map(({ name, title, icon, activeIcon }) => (
-        <Tabs.Screen
-          key={name}
-          name={name}
-          options={{
-            title,
-            tabBarIcon: ({ focused, color, size }) => (
-              <Ionicons name={focused ? activeIcon : icon} size={22} color={color} />
-            ),
-          }}
-        />
-      ))}
+      <Tabs.Screen name="index" options={{
+        title: 'ホーム',
+        tabBarIcon: ({ focused, color }) => (
+          <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
+        ),
+      }} />
+      <Tabs.Screen name="shift" options={{
+        title: 'シフト',
+        tabBarIcon: ({ focused, color }) => (
+          <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={22} color={color} />
+        ),
+      }} />
+      <Tabs.Screen name="results" options={{
+        title: '成績',
+        tabBarIcon: ({ focused, color }) => (
+          <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} size={22} color={color} />
+        ),
+      }} />
+      <Tabs.Screen name="account" options={{
+        title: 'アカウント',
+        tabBarIcon: ({ focused, color }) => (
+          <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />
+        ),
+      }} />
     </Tabs>
   );
 }

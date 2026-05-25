@@ -72,11 +72,7 @@ export default function AccountScreen() {
   const handleLogout = () => {
     Alert.alert('ログアウト', 'ログアウトしますか？', [
       { text: 'キャンセル', style: 'cancel' },
-      { text: 'ログアウト', style: 'destructive', onPress: async () => {
-        logout();
-        await new Promise(r => setTimeout(r, 100));
-        router.replace('/');
-      } },
+      { text: 'ログアウト', style: 'destructive', onPress: () => { logout(); router.replace('/'); } },
     ]);
   };
 
