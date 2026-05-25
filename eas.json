@@ -7,25 +7,32 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "ios": { "simulator": true }
+      "ios": {
+        "simulator": true
+      }
     },
     "preview": {
       "distribution": "internal",
       "credentialsSource": "remote",
-      "ios": { "simulator": false, "autoIncrement": true },
-      "android": { "buildType": "apk", "autoIncrement": true }
+      "ios": {
+        "simulator": false,
+        "autoIncrement": true
+      },
+      "android": {
+        "buildType": "apk",
+        "autoIncrement": true
+      }
     },
     "production": {
       "autoIncrement": true,
-      "credentialsSource": "remote",
-      "ios": { "autoIncrement": true }
+      "credentialsSource": "remote"
     }
   },
   "submit": {
     "production": {
       "ios": {
         "appleId": "koh.kaw@icloud.com",
-        "ascAppId": "YOUR_ASC_APP_ID",
+        "ascAppId": "6772972448",
         "appleTeamId": "HCF97943N8"
       }
     }
