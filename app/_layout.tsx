@@ -1,29 +1,24 @@
-import { Stack, router } from 'expo-router';
+import { Slot, router, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { useAuthStore } from '../store/auth';
 
 export default function RootLayout() {
   const { role } = useAuthStore();
+  const segments = useSegments();
 
   useEffect(() => {
-    if (role === null) {
+    const inTabsGroup = segments[0] === '(tabs)';
+    if (!role && inTabsGroup) {
       router.replace('/');
+    } else if (role && !inTabsGroup && segments[0] !== undefined) {
+      router.replace('/(tabs)');
     }
-  }, [role]);
+  }, [role, segments]);
 
   return (
     <>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: '#0a0a0f' },
-          animation: 'fade',
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(tabs)" />
-      </Stack>
+      <Slot />
       <StatusBar style="light" />
     </>
   );

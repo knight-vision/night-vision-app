@@ -153,6 +153,7 @@ export default function ResultsScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={styles.screenTitle}>成績・給与</Text>
+        {/* role={role} shopId={shopId} castId={castId} */}
         {role === 'owner' && shopId
           ? <OwnerResultsView shopId={shopId} />
           : role === 'cast' && castId && shopId
