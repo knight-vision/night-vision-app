@@ -54,8 +54,7 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "newArchEnabled": true
+      "typedRoutes": true
     },
     "updates": {
       "url": "https://u.expo.dev/ef432d11-9794-4de8-ad5b-095cac6076aa"
