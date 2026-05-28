@@ -1,16 +1,17 @@
 import {
   ScrollView, View, Text, StyleSheet, ActivityIndicator,
-  TouchableOpacity, Modal, Alert,
+  TouchableOpacity, Modal, Alert, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 import { Colors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 
 const CAST_COLORS = ['#ff6b9d','#00d4ff','#ffd700','#a855f7','#00e5a0','#ff9500','#00c7be','#ff3b30','#34aadc','#4cd964'];
-const HOURS = Array.from({ length: 31 }, (_, i) => i); // 0〜30（翌6時まで）
+const HOURS = Array.from({ length: 31 }, (_, i) => i);
 const MINUTES = ['00', '10', '20', '30', '40', '50'];
 const CAL_DAYS = ['月', '火', '水', '木', '金', '土', '日'];
 
@@ -35,31 +36,69 @@ function fmtFull(ds: string) {
 function tLabel(h: number) { return h >= 24 ? `翌${h-24}時` : `${h}時`; }
 function getCastColor(index: number) { return CAST_COLORS[index % CAST_COLORS.length]; }
 
-// 時間セレクター
-function TimeSelector({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+// iOSネイティブPickerで時間選択
+function TimeSelector({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
+  const [modalVisible, setModalVisible] = useState(false);
   const parts = value.split(':');
   const h = parseInt(parts[0]) || 0;
   const m = parts[1] || '00';
+  const [tempH, setTempH] = useState(h);
+  const [tempM, setTempM] = useState(m);
+
+  const openPicker = () => {
+    setTempH(h);
+    setTempM(m);
+    setModalVisible(true);
+  };
+
+  const confirm = () => {
+    onChange(`${String(tempH % 24).padStart(2,'0')}:${tempM}`);
+    setModalVisible(false);
+  };
+
   return (
-    <View style={ts.wrap}>
-      <ScrollView style={ts.scroll} showsVerticalScrollIndicator={false} nestedScrollEnabled>
-        {HOURS.map(hh => (
-          <TouchableOpacity key={hh} onPress={() => onChange(`${String(hh % 24).padStart(2,'0')}:${m}`)}
-            style={[ts.item, h === hh && ts.active]}>
-            <Text style={[ts.text, h === hh && ts.textActive]}>{tLabel(hh)}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-      <Text style={ts.colon}>:</Text>
-      <ScrollView style={[ts.scroll, { width: 44 }]} showsVerticalScrollIndicator={false} nestedScrollEnabled>
-        {MINUTES.map(mm => (
-          <TouchableOpacity key={mm} onPress={() => onChange(`${String(h % 24).padStart(2,'0')}:${mm}`)}
-            style={[ts.item, m === mm && ts.active]}>
-            <Text style={[ts.text, m === mm && ts.textActive]}>{mm}分</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </View>
+    <>
+      <TouchableOpacity onPress={openPicker} style={ts.btn}>
+        {label && <Text style={ts.btnLabel}>{label}</Text>}
+        <Text style={ts.btnValue}>{tLabel(h)} {m}分</Text>
+        <Ionicons name="chevron-down" size={14} color={Colors.text3} />
+      </TouchableOpacity>
+
+      <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
+        <TouchableOpacity style={ts.overlay} activeOpacity={1} onPress={() => setModalVisible(false)} />
+        <View style={ts.sheet}>
+          <View style={ts.sheetHeader}>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={ts.sheetCancel}>キャンセル</Text>
+            </TouchableOpacity>
+            <Text style={ts.sheetTitle}>{label || '時間を選択'}</Text>
+            <TouchableOpacity onPress={confirm}>
+              <Text style={ts.sheetDone}>完了</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ flexDirection: 'row' }}>
+            <Picker
+              selectedValue={tempH}
+              onValueChange={setTempH}
+              style={{ flex: 1 }}
+              itemStyle={{ color: Colors.text, fontSize: 18 }}>
+              {HOURS.map(hh => (
+                <Picker.Item key={hh} label={tLabel(hh)} value={hh} />
+              ))}
+            </Picker>
+            <Picker
+              selectedValue={tempM}
+              onValueChange={setTempM}
+              style={{ flex: 1 }}
+              itemStyle={{ color: Colors.text, fontSize: 18 }}>
+              {MINUTES.map(mm => (
+                <Picker.Item key={mm} label={`${mm}分`} value={mm} />
+              ))}
+            </Picker>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -298,15 +337,9 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                     <View key={entry.cast_id} style={[styles.timeSetBlock, { backgroundColor: color + '11', borderColor: color + '44' }]}>
                       <Text style={[styles.timeSetName, { color }]}>{cast?.name}</Text>
                       <View style={styles.timeSetRow}>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.timeSetLabel}>開始</Text>
-                          <TimeSelector value={entry.start_time} onChange={v => updateDraftTime(date, entry.cast_id, 'start_time', v)} />
-                        </View>
+                        <TimeSelector value={entry.start_time} onChange={v => updateDraftTime(date, entry.cast_id, 'start_time', v)} label="開始" />
                         <Text style={styles.timeSetSep}>〜</Text>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.timeSetLabel}>終了</Text>
-                          <TimeSelector value={entry.end_time} onChange={v => updateDraftTime(date, entry.cast_id, 'end_time', v)} />
-                        </View>
+                        <TimeSelector value={entry.end_time} onChange={v => updateDraftTime(date, entry.cast_id, 'end_time', v)} label="終了" />
                       </View>
                     </View>
                   );
@@ -499,10 +532,10 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
             <Text style={[styles.modalLabel, { marginTop: 16 }]}>選択日: <Text style={{ color: Colors.gold }}>{selDate}</Text></Text>
 
             <Text style={[styles.modalLabel, { marginTop: 16 }]}>開始時間</Text>
-            <TimeSelector value={startTime} onChange={setStartTime} />
+            <TimeSelector value={startTime} onChange={setStartTime} label="開始" />
 
             <Text style={[styles.modalLabel, { marginTop: 16 }]}>終了時間</Text>
-            <TimeSelector value={endTime} onChange={setEndTime} />
+            <TimeSelector value={endTime} onChange={setEndTime} label="終了" />
 
             <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={submitting}>
               {submitting ? <ActivityIndicator color="#1a1200" /> : <Text style={styles.submitBtnText}>提出する</Text>}
@@ -535,13 +568,15 @@ export default function ShiftScreen() {
 }
 
 const ts = StyleSheet.create({
-  wrap:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  scroll:    { width: 50, height: 100, backgroundColor: Colors.surface, borderRadius: 8, borderWidth: 0.5, borderColor: Colors.border },
-  item:      { padding: 6, alignItems: 'center' },
-  active:    { backgroundColor: Colors.goldDim },
-  text:      { fontSize: 12, color: Colors.text3 },
-  textActive:{ color: Colors.gold, fontWeight: '600' },
-  colon:     { color: Colors.text2, fontSize: 16 },
+  btn:         { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, paddingHorizontal: 12, paddingVertical: 10 },
+  btnLabel:    { fontSize: 11, color: Colors.text3, marginRight: 4 },
+  btnValue:    { fontSize: 14, color: Colors.gold, fontWeight: '600', flex: 1 },
+  overlay:     { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  sheet:       { backgroundColor: Colors.surface, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  sheetCancel: { fontSize: 15, color: Colors.text2 },
+  sheetTitle:  { fontSize: 15, fontWeight: '600', color: Colors.text },
+  sheetDone:   { fontSize: 15, color: Colors.gold, fontWeight: '700' },
 });
 
 const styles = StyleSheet.create({

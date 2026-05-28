@@ -198,7 +198,7 @@ function JobsSection({ shopId }: { shopId: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/jobs?shop_id=${shopId}`);
+      const res = await fetch(`${API_BASE}/job-postings?shop_id=${shopId}`);
       const data = await res.json();
       setJobs(Array.isArray(data) ? data : []);
     } catch { setJobs([]); } finally { setLoading(false); }
@@ -214,9 +214,9 @@ function JobsSection({ shopId }: { shopId: string }) {
 
   const openEdit = (job: any) => {
     setEditTarget(job);
-    setTitle(job.title || ''); setWageMin(String(job.wage_min || '')); setWageMax(String(job.wage_max || ''));
-    setWorkDays(job.work_days || ''); setConditions(job.conditions || ''); setBenefits(job.benefits || '');
-    setIsPublic(job.is_public !== false);
+    setTitle(job.title || ''); setWageMin(String(job.hourly_wage_min || '')); setWageMax(String(job.hourly_wage_max || ''));
+    setWorkDays(job.work_days || ''); setConditions(job.requirements || ''); setBenefits(job.benefits || '');
+    setIsPublic(job.is_active !== false);
     setModalVisible(true);
   };
 
@@ -224,9 +224,9 @@ function JobsSection({ shopId }: { shopId: string }) {
     if (!title) { Alert.alert('エラー', 'タイトルを入力してください'); return; }
     setSaving(true);
     try {
-      const body = { shop_id: shopId, title, wage_min: Number(wageMin) || null, wage_max: Number(wageMax) || null, work_days: workDays, conditions, benefits, is_public: isPublic };
-      await fetch(`${API_BASE}/jobs`, {
-        method: editTarget ? 'PATCH' : 'POST',
+      const body = { shop_id: shopId, title, hourly_wage_min: Number(wageMin) || null, hourly_wage_max: Number(wageMax) || null, work_days: workDays, conditions, benefits, is_active: isPublic };
+      await fetch(`${API_BASE}/job-postings`, {
+        method: editTarget ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editTarget ? { ...body, id: editTarget.id } : body),
       });
@@ -239,7 +239,7 @@ function JobsSection({ shopId }: { shopId: string }) {
     Alert.alert('削除確認', `「${jobTitle}」を削除しますか？`, [
       { text: 'キャンセル', style: 'cancel' },
       { text: '削除', style: 'destructive', onPress: async () => {
-        await fetch(`${API_BASE}/jobs`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+        await fetch(`${API_BASE}/job-postings`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
         load();
       }},
     ]);
@@ -261,15 +261,15 @@ function JobsSection({ shopId }: { shopId: string }) {
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
             <View style={{ flex: 1 }}>
               <Text style={styles.jobTitle}>{job.title}</Text>
-              {(job.wage_min || job.wage_max) && (
+              {(job.hourly_wage_min || job.hourly_wage_max) && (
                 <Text style={{ fontSize: 12, color: Colors.gold, marginTop: 2 }}>
-                  時給 {job.wage_min ? fmtYen(job.wage_min) : '?'} 〜 {job.wage_max ? fmtYen(job.wage_max) : '?'}
+                  時給 {job.hourly_wage_min ? fmtYen(job.hourly_wage_min) : '?'} 〜 {job.hourly_wage_max ? fmtYen(job.hourly_wage_max) : '?'}
                 </Text>
               )}
             </View>
-            <View style={[styles.publicBadge, { backgroundColor: job.is_public ? 'rgba(78,203,138,0.15)' : Colors.surface2 }]}>
-              <Text style={{ fontSize: 11, fontWeight: '600', color: job.is_public ? Colors.green : Colors.text3 }}>
-                {job.is_public ? '公開中' : '非公開'}
+            <View style={[styles.publicBadge, { backgroundColor: job.is_active ? 'rgba(78,203,138,0.15)' : Colors.surface2 }]}>
+              <Text style={{ fontSize: 11, fontWeight: '600', color: job.is_active ? Colors.green : Colors.text3 }}>
+                {job.is_active ? '公開中' : '非公開'}
               </Text>
             </View>
           </View>

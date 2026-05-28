@@ -234,7 +234,7 @@ function SalarySummary({ shopId, month }: { shopId: string; month: string }) {
         fetch(`${API_BASE}/cast-allowances?shop_id=${shopId}&month=${month}`),
       ]);
       const c = await castRes.json(); setCasts(Array.isArray(c) ? c : []);
-      const s = await shiftRes.json(); setShifts(Array.isArray(s) ? s : []);
+      const s = await shiftRes.json(); setShifts(Array.isArray(s) ? s : Array.isArray(s?.confirmed) ? s.confirmed : []);
       const a = await allowRes.json(); setAllowances(Array.isArray(a) ? a : []);
     } catch { } finally { setLoading(false); }
   }, [shopId, month]);
