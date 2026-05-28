@@ -39,30 +39,36 @@ function getCastColor(index: number) { return CAST_COLORS[index % CAST_COLORS.le
 // iOSネイティブPickerで時間選択
 function TimeSelector({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [tempH, setTempH] = useState(0);
+  const [tempH, setTempH] = useState(20);
   const [tempM, setTempM] = useState('00');
 
-  // valueから時・分を取得（24時=翌0時などを考慮）
-  const parseValue = (v: string) => {
-    const parts = v.split(':');
-    const hour = parseInt(parts[0]) || 0;
-    const min = parts[1]?.slice(0, 2) || '00';
-    // HOURS配列のindex（0-30）に変換
-    const idx = HOURS.findIndex(hh => hh % 24 === hour % 24 && (hour >= 24 ? hh >= 24 : hh < 24));
-    return { h: idx >= 0 ? HOURS[idx] : hour, m: min };
+  // "20:00" → HOURS配列の値（0-30）に変換
+  // DBは常に "HH:MM" 形式（24時台は24,25...で保存）
+  const parseHour = (v: string): number => {
+    const raw = parseInt(v.split(':')[0]) || 0;
+    // 0〜5時は翌0時〜翌5時（24〜29）として扱う可能性があるが
+    // DBの値をそのままHOURSの値として使う（0-30の範囲）
+    return Math.min(raw, 30);
+  };
+  const parseMin = (v: string): string => {
+    const raw = v.split(':')[1]?.slice(0, 2) || '00';
+    return MINUTES.includes(raw) ? raw : '00';
   };
 
-  const { h, m } = parseValue(value);
-  const displayLabel = `${tLabel(h)}${m}分`;
+  const currentH = parseHour(value);
+  const currentM = parseMin(value);
+  const displayLabel = `${tLabel(currentH)} ${currentM}分`;
 
   const openPicker = () => {
-    setTempH(h);
-    setTempM(m);
+    setTempH(currentH);
+    setTempM(currentM);
     setModalVisible(true);
   };
 
   const confirm = () => {
-    const hh = String(tempH % 24).padStart(2, '0');
+    // tempHが24以上の場合はそのまま保存（翌1時=25→"25:00"）
+    // APIはstart_time/end_timeをそのまま受け取る
+    const hh = String(tempH).padStart(2, '0');
     onChange(`${hh}:${tempM}`);
     setModalVisible(false);
   };
@@ -76,35 +82,35 @@ function TimeSelector({ value, onChange, label }: { value: string; onChange: (v:
       </TouchableOpacity>
 
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, justifyContent: 'flex-end' }}>
           <TouchableOpacity style={ts.overlay} activeOpacity={1} onPress={() => setModalVisible(false)} />
           <View style={ts.sheet}>
             <View style={ts.sheetHeader}>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 4 }}>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 8 }}>
                 <Text style={ts.sheetCancel}>キャンセル</Text>
               </TouchableOpacity>
               <Text style={ts.sheetTitle}>{label || '時間を選択'}</Text>
-              <TouchableOpacity onPress={confirm} style={{ padding: 4 }}>
+              <TouchableOpacity onPress={confirm} style={{ padding: 8 }}>
                 <Text style={ts.sheetDone}>完了</Text>
               </TouchableOpacity>
             </View>
-            <View style={{ flexDirection: 'row', height: 200 }}>
+            <View style={{ flexDirection: 'row', height: 216, backgroundColor: Colors.surface }}>
               <Picker
                 selectedValue={tempH}
                 onValueChange={(v) => setTempH(Number(v))}
-                style={{ flex: 1 }}
-                itemStyle={{ color: '#000', fontSize: 20 }}>
+                style={{ flex: 1, backgroundColor: Colors.surface }}
+                itemStyle={{ color: Colors.text, fontSize: 20, backgroundColor: Colors.surface }}>
                 {HOURS.map(hh => (
-                  <Picker.Item key={hh} label={tLabel(hh)} value={hh} />
+                  <Picker.Item key={hh} label={tLabel(hh)} value={hh} color={Colors.text} />
                 ))}
               </Picker>
               <Picker
                 selectedValue={tempM}
                 onValueChange={(v) => setTempM(String(v))}
-                style={{ flex: 1 }}
-                itemStyle={{ color: '#000', fontSize: 20 }}>
+                style={{ flex: 1, backgroundColor: Colors.surface }}
+                itemStyle={{ color: Colors.text, fontSize: 20, backgroundColor: Colors.surface }}>
                 {MINUTES.map(mm => (
-                  <Picker.Item key={mm} label={`${mm}分`} value={mm} />
+                  <Picker.Item key={mm} label={`${mm}分`} value={mm} color={Colors.text} />
                 ))}
               </Picker>
             </View>
@@ -607,9 +613,9 @@ const ts = StyleSheet.create({
   btn:         { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, paddingHorizontal: 12, paddingVertical: 10 },
   btnLabel:    { fontSize: 11, color: Colors.text3, marginRight: 4 },
   btnValue:    { fontSize: 14, color: Colors.gold, fontWeight: '600', flex: 1 },
-  overlay:     { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  overlay:     { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet:       { backgroundColor: Colors.surface, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
-  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 0.5, borderBottomColor: Colors.border, backgroundColor: Colors.surface, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
   sheetCancel: { fontSize: 15, color: Colors.text2 },
   sheetTitle:  { fontSize: 15, fontWeight: '600', color: Colors.text },
   sheetDone:   { fontSize: 15, color: Colors.gold, fontWeight: '700' },

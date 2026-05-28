@@ -368,47 +368,132 @@ function SlipInput({ shopId }: { shopId: string }) {
   );
 }
 
-// ── 店舗売上（日次/週次/月次） ──────────────────────────────────
+// ── 店舗売上（日次/週次/月次/年次） ──────────────────────────
+type SalesPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
+
 function ShopSales({ shopId }: { shopId: string }) {
   const now = new Date();
-  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
-  const [period, setPeriod] = useState<'daily' | 'monthly'>('monthly');
-  const [dailySales, setDailySales] = useState<any[]>([]);
+  const [period, setPeriod] = useState<SalesPeriod>('monthly');
+  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [weekBase, setWeekBase] = useState(getDateStr(now));
+  const [dailyDate, setDailyDate] = useState(getDateStr(now));
+  const [allSales, setAllSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const changeMonth = (delta: number) => {
-    const d = new Date(month + '-01');
-    d.setMonth(d.getMonth() + delta);
-    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-  };
+  const monthStr = `${year}-${String(month).padStart(2, '0')}`;
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/daily-sales?shop_id=${shopId}&month=${month}`);
-      const data = await res.json();
-      setDailySales(Array.isArray(data) ? data : []);
-    } catch { setDailySales([]); } finally { setLoading(false); }
-  }, [shopId, month]);
+      // 年次は12ヶ月分まとめて取得
+      if (period === 'yearly') {
+        const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
+        const results = await Promise.all(months.map(m => fetch(`${API_BASE}/daily-sales?shop_id=${shopId}&month=${m}`).then(r => r.json())));
+        setAllSales(results.flat().filter(Array.isArray(results[0]) ? Boolean : Boolean));
+      } else {
+        const res = await fetch(`${API_BASE}/daily-sales?shop_id=${shopId}&month=${monthStr}`);
+        const data = await res.json();
+        setAllSales(Array.isArray(data) ? data : []);
+      }
+    } catch { setAllSales([]); } finally { setLoading(false); }
+  }, [shopId, period, monthStr, year]);
 
   useEffect(() => { load(); }, [load]);
 
-  const total = dailySales.reduce((s, d) => s + (d.cash_sales || 0) + (d.card_sales || 0), 0);
-  const totalCost = dailySales.reduce((s, d) => s + (d.cost || 0), 0);
+  // 週の7日
+  const getWeekDates = (base: string) => {
+    const b = new Date(base + 'T00:00:00');
+    const day = b.getDay();
+    const mon = new Date(b); mon.setDate(b.getDate() - (day === 0 ? 6 : day - 1));
+    return Array.from({ length: 7 }, (_, i) => { const d = new Date(mon); d.setDate(mon.getDate() + i); return getDateStr(d); });
+  };
+
+  // 期間別データ
+  const getDisplayData = () => {
+    if (period === 'daily') {
+      const d = allSales.find((s: any) => s.date === dailyDate);
+      return d ? [d] : [];
+    }
+    if (period === 'weekly') {
+      const week = getWeekDates(weekBase);
+      return allSales.filter((s: any) => week.includes(s.date));
+    }
+    if (period === 'monthly') return allSales;
+    // yearly: 月別集計
+    return Array.from({ length: 12 }, (_, i) => {
+      const m = `${year}-${String(i + 1).padStart(2, '0')}`;
+      const monthData = allSales.filter((s: any) => s.date?.startsWith(m));
+      return {
+        date: m,
+        cash_sales: monthData.reduce((a: number, b: any) => a + (b.cash_sales || 0), 0),
+        card_sales: monthData.reduce((a: number, b: any) => a + (b.card_sales || 0), 0),
+        cost: monthData.reduce((a: number, b: any) => a + (b.cost || 0), 0),
+      };
+    }).filter((d: any) => (d.cash_sales + d.card_sales) > 0);
+  };
+
+  const displayData = getDisplayData();
+  const total = displayData.reduce((s: number, d: any) => s + (d.cash_sales || 0) + (d.card_sales || 0), 0);
+  const totalCost = displayData.reduce((s: number, d: any) => s + (d.cost || 0), 0);
+
+  const addDay = (ds: string, n: number) => { const d = new Date(ds + 'T00:00:00'); d.setDate(d.getDate() + n); return getDateStr(d); };
+
+  const PERIODS: { key: SalesPeriod; label: string }[] = [
+    { key: 'daily', label: '日次' },
+    { key: 'weekly', label: '週次' },
+    { key: 'monthly', label: '月次' },
+    { key: 'yearly', label: '年次' },
+  ];
 
   return (
     <View>
-      <View style={s.monthNav}>
-        <TouchableOpacity onPress={() => changeMonth(-1)} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></TouchableOpacity>
-        <Text style={s.monthLabel}>{month}</Text>
-        <TouchableOpacity onPress={() => changeMonth(1)} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></TouchableOpacity>
+      {/* 期間切替 */}
+      <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
+        {PERIODS.map(p => (
+          <TouchableOpacity key={p.key} onPress={() => setPeriod(p.key)}
+            style={[s.periodBtn, period === p.key && s.periodBtnActive]}>
+            <Text style={[s.periodBtnText, period === p.key && s.periodBtnTextActive]}>{p.label}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
+      {/* ナビゲーション */}
+      {period === 'daily' && (
+        <View style={s.monthNav}>
+          <TouchableOpacity onPress={() => setDailyDate(addDay(dailyDate, -1))} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></TouchableOpacity>
+          <Text style={s.monthLabel}>{fmtDateLabel(dailyDate)}</Text>
+          <TouchableOpacity onPress={() => setDailyDate(addDay(dailyDate, 1))} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></TouchableOpacity>
+        </View>
+      )}
+      {period === 'weekly' && (
+        <View style={s.monthNav}>
+          <TouchableOpacity onPress={() => setWeekBase(addDay(weekBase, -7))} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></TouchableOpacity>
+          <Text style={s.monthLabel}>{(() => { const w = getWeekDates(weekBase); return `${w[0].slice(5).replace('-','/')} 〜 ${w[6].slice(5).replace('-','/')}`; })()}</Text>
+          <TouchableOpacity onPress={() => setWeekBase(addDay(weekBase, 7))} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></TouchableOpacity>
+        </View>
+      )}
+      {period === 'monthly' && (
+        <View style={s.monthNav}>
+          <TouchableOpacity onPress={() => { const d = new Date(year, month - 2, 1); setYear(d.getFullYear()); setMonth(d.getMonth() + 1); }} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></TouchableOpacity>
+          <Text style={s.monthLabel}>{monthStr}</Text>
+          <TouchableOpacity onPress={() => { const d = new Date(year, month, 1); setYear(d.getFullYear()); setMonth(d.getMonth() + 1); }} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></TouchableOpacity>
+        </View>
+      )}
+      {period === 'yearly' && (
+        <View style={s.monthNav}>
+          <TouchableOpacity onPress={() => setYear(y => y - 1)} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></TouchableOpacity>
+          <Text style={s.monthLabel}>{year}年</Text>
+          <TouchableOpacity onPress={() => setYear(y => y + 1)} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></TouchableOpacity>
+        </View>
+      )}
+
+      {/* サマリー */}
       <View style={s.summaryRow}>
         {[
-          { label: '月間売上', value: fmtYen(total), color: Colors.gold },
+          { label: '売上', value: fmtYen(total), color: Colors.gold },
           { label: 'コスト', value: fmtYen(totalCost), color: Colors.red },
-          { label: '純利益', value: fmtYen(total - totalCost), color: Colors.green },
+          { label: '純利益', value: fmtYen(total - totalCost), color: total - totalCost >= 0 ? Colors.green : Colors.red },
         ].map(({ label, value, color }) => (
           <View key={label} style={s.summaryCard}>
             <Text style={s.summaryLabel}>{label}</Text>
@@ -419,11 +504,11 @@ function ShopSales({ shopId }: { shopId: string }) {
 
       {loading && <ActivityIndicator color={Colors.gold} style={{ marginTop: 20 }} />}
 
-      <Text style={s.sectionTitle}>日次一覧</Text>
-      {!loading && dailySales.length === 0 && <Text style={s.empty}>この月の売上データがありません</Text>}
-      {dailySales.sort((a, b) => b.date.localeCompare(a.date)).map((d: any) => (
+      {/* 一覧 */}
+      {!loading && displayData.length === 0 && <Text style={s.empty}>この期間の売上データがありません</Text>}
+      {!loading && displayData.sort((a: any, b: any) => b.date.localeCompare(a.date)).map((d: any) => (
         <View key={d.id || d.date} style={s.dailyRow}>
-          <Text style={s.dailyDate}>{fmtDateLabel(d.date)}</Text>
+          <Text style={s.dailyDate}>{period === 'yearly' ? d.date.slice(0, 7) : fmtDateLabel(d.date)}</Text>
           <View style={{ flex: 1 }}>
             <Text style={s.dailyTotal}>{fmtYen((d.cash_sales || 0) + (d.card_sales || 0))}</Text>
             <Text style={s.dailySub}>現金 {fmtYen(d.cash_sales || 0)} / カード {fmtYen(d.card_sales || 0)}</Text>
@@ -639,4 +724,8 @@ const s = StyleSheet.create({
   menuName:         { flex: 1, fontSize: 14, color: Colors.text },
   menuPrice:        { fontSize: 13, color: Colors.gold, fontWeight: '500', marginRight: 8 },
   empty:            { fontSize: 13, color: Colors.text3, paddingVertical: 20, textAlign: 'center' },
+  periodBtn:        { flex: 1, paddingVertical: 8, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, alignItems: 'center' },
+  periodBtnActive:  { backgroundColor: Colors.goldDim, borderColor: Colors.gold },
+  periodBtnText:    { fontSize: 12, color: Colors.text3 },
+  periodBtnTextActive: { color: Colors.gold, fontWeight: '600' },
 });

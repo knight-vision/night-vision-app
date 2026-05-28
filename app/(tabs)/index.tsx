@@ -42,12 +42,15 @@ export default function HomeScreen() {
         ) : data ? (
           <>
             <View style={styles.statGrid}>
-              <StatCard label="今月売上" value={fmtYen(data.monthly_sales)}
-                sub={data.sales_growth !== null ? `${data.sales_growth >= 0 ? '↑' : '↓'} 前月比 ${data.sales_growth > 0 ? '+' : ''}${data.sales_growth}%` : ''}
-                subColor={(data.sales_growth ?? 0) >= 0 ? Colors.green : Colors.red}
-                valueColor={Colors.gold} />
+              {/* 今月売上 → タップで売上タブへ */}
+              <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push('/(tabs)/slip')}>
+                <StatCard label="今月売上" value={fmtYen(data.monthly_sales)}
+                  sub={data.sales_growth !== null ? `${data.sales_growth >= 0 ? '↑' : '↓'} 前月比 ${data.sales_growth > 0 ? '+' : ''}${data.sales_growth}%` : ''}
+                  subColor={(data.sales_growth ?? 0) >= 0 ? Colors.green : Colors.red}
+                  valueColor={Colors.gold} />
+              </TouchableOpacity>
               {/* 本日出勤 → タップでシフトタブへ */}
-              <TouchableOpacity onPress={() => router.push('/(tabs)/shift')}>
+              <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push('/(tabs)/shift')}>
                 <StatCard label="本日出勤" value={`${data.today_staff_count}名`} sub="確定シフト確認 →" subColor={Colors.gold} />
               </TouchableOpacity>
             </View>
