@@ -709,10 +709,58 @@ function ResultsSection({ shopId }: { shopId: string }) {
   );
 }
 
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 顧客管理
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const CAL_DAYS_C = ['月','火','水','木','金','土','日'];
+function getDateStrC(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function DatePickerC({ value, onChange }: { value: string; onChange: (d: string) => void }) {
+  const init = value ? new Date(value + 'T00:00:00') : new Date();
+  const [y, setY] = useState(init.getFullYear());
+  const [m, setM] = useState(init.getMonth() + 1);
+  const first = new Date(y, m - 1, 1);
+  const last  = new Date(y, m, 0);
+  const pad   = first.getDay() === 0 ? 6 : first.getDay() - 1;
+  const days: (number | null)[] = [...Array(pad).fill(null), ...Array.from({ length: last.getDate() }, (_, i) => i + 1)];
+  return (
+    <View style={cStyles.cal}>
+      <View style={cStyles.calHeader}>
+        <TouchableOpacity onPress={() => { const d = new Date(y, m-2, 1); setY(d.getFullYear()); setM(d.getMonth()+1); }}>
+          <Ionicons name="chevron-back" size={16} color={Colors.text2} />
+        </TouchableOpacity>
+        <Text style={cStyles.calTitle}>{y}年{m}月</Text>
+        <TouchableOpacity onPress={() => { const d = new Date(y, m, 1); setY(d.getFullYear()); setM(d.getMonth()+1); }}>
+          <Ionicons name="chevron-forward" size={16} color={Colors.text2} />
+        </TouchableOpacity>
+      </View>
+      <View style={cStyles.calDayRow}>
+        {CAL_DAYS_C.map(d => <Text key={d} style={cStyles.calDayLabel}>{d}</Text>)}
+      </View>
+      <View style={cStyles.calGrid}>
+        {days.map((day, i) => {
+          if (!day) return <View key={`p${i}`} style={cStyles.calCell} />;
+          const ds = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+          const sel = ds === value;
+          const today = ds === getDateStrC(new Date());
+          return (
+            <TouchableOpacity key={ds} onPress={() => onChange(ds)}
+              style={[cStyles.calCell, sel && cStyles.calCellSel, today && !sel && cStyles.calCellToday]}>
+              <Text style={[cStyles.calDay, sel && cStyles.calDaySel, today && !sel && cStyles.calDayToday]}>{day}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 function CustomerSection({ shopId }: { shopId: string }) {
+  const now = new Date();
+  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`);
   const [customers, setCustomers] = useState<any[]>([]);
   const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -721,28 +769,35 @@ function CustomerSection({ shopId }: { shopId: string }) {
   const [custName, setCustName] = useState('');
   const [castId, setCastId] = useState('');
   const [memo, setMemo] = useState('');
-  const [visitedAt, setVisitedAt] = useState('');
+  const [visitDate, setVisitDate] = useState(getDateStrC(now));
+  const [visitCount, setVisitCount] = useState('1');
   const [saving, setSaving] = useState(false);
   const [filterCast, setFilterCast] = useState('');
+
+  const changeMonth = (delta: number) => {
+    const d = new Date(month + '-01');
+    d.setMonth(d.getMonth() + delta);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const [custRes, castRes] = await Promise.all([
-        fetch(`${API_BASE}/customers?shop_id=${shopId}`),
+        fetch(`${API_BASE}/customers?shop_id=${shopId}&month=${month}`),
         fetch(`${API_BASE}/casts?shop_id=${shopId}`),
       ]);
-      const c = await custRes.json(); setCustomers(Array.isArray(c) ? c : []);
+      const c  = await custRes.json(); setCustomers(Array.isArray(c) ? c : []);
       const ca = await castRes.json(); setCasts(Array.isArray(ca) ? ca : []);
     } catch { } finally { setLoading(false); }
-  }, [shopId]);
+  }, [shopId, month]);
 
   useEffect(() => { load(); }, [load]);
 
   const openAdd = () => {
     setEditTarget(null);
     setCustName(''); setCastId(''); setMemo('');
-    setVisitedAt(new Date().toISOString().slice(0, 16));
+    setVisitDate(getDateStrC(now)); setVisitCount('1');
     setModalVisible(true);
   };
 
@@ -751,33 +806,34 @@ function CustomerSection({ shopId }: { shopId: string }) {
     setCustName(c.name || '');
     setCastId(c.cast_id ? String(c.cast_id) : '');
     setMemo(c.memo || '');
-    setVisitedAt(c.last_visited ? c.last_visited.slice(0, 16) : new Date().toISOString().slice(0, 16));
+    setVisitDate(c.visit_date || getDateStrC(now));
+    setVisitCount(String(c.visit_count || 1));
     setModalVisible(true);
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const body = {
-        shop_id: shopId,
-        cast_id: castId || null,
-        name: custName || '名前なし',
-        memo,
-        visited_at: visitedAt ? new Date(visitedAt).toISOString() : new Date().toISOString(),
-      };
-      const method = editTarget ? 'PATCH' : 'POST';
-      await fetch(`${API_BASE}/customers`, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editTarget ? { ...body, id: editTarget.id } : body),
-      });
+      if (editTarget) {
+        await fetch(`${API_BASE}/customers`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editTarget.id, name: custName || '名前なし', memo, visit_count: Number(visitCount) || 1 }),
+        });
+      } else {
+        await fetch(`${API_BASE}/customers`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shop_id: shopId, cast_id: castId || null, visit_date: visitDate, name: custName || '名前なし', memo, visit_count: Number(visitCount) || 1 }),
+        });
+      }
       setModalVisible(false);
       load();
     } catch { Alert.alert('エラー', '保存に失敗しました'); } finally { setSaving(false); }
   };
 
-  const handleDelete = (id: string, name: string) => {
-    Alert.alert('削除確認', `「${name}」を削除しますか？`, [
+  const handleDelete = (id: string, n: string) => {
+    Alert.alert('削除確認', `「${n}」を削除しますか？`, [
       { text: 'キャンセル', style: 'cancel' },
       { text: '削除', style: 'destructive', onPress: async () => {
         await fetch(`${API_BASE}/customers`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
@@ -788,27 +844,21 @@ function CustomerSection({ shopId }: { shopId: string }) {
 
   const filtered = filterCast ? customers.filter((c: any) => String(c.cast_id) === filterCast) : customers;
 
-  const fmtVisit = (iso: string) => {
-    try {
-      const d = new Date(iso);
-      return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    } catch { return iso; }
-  };
-
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
 
   return (
     <View>
-      {/* キャストでフィルター */}
+      <View style={styles.monthNav}>
+        <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></TouchableOpacity>
+        <Text style={styles.monthLabel}>{month}</Text>
+        <TouchableOpacity onPress={() => changeMonth(1)} style={styles.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></TouchableOpacity>
+      </View>
+
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-        <TouchableOpacity onPress={() => setFilterCast('')}
-          style={[styles.filterChip, !filterCast && styles.filterChipActive]}>
-          <Text style={[styles.filterChipText, !filterCast && styles.filterChipTextActive]}>全員</Text>
-        </TouchableOpacity>
-        {casts.map((c: any) => (
-          <TouchableOpacity key={c.id} onPress={() => setFilterCast(String(c.id))}
-            style={[styles.filterChip, filterCast === String(c.id) && styles.filterChipActive]}>
-            <Text style={[styles.filterChipText, filterCast === String(c.id) && styles.filterChipTextActive]}>{c.name}</Text>
+        {[{ id: '', name: '全員' }, ...casts].map((c: any) => (
+          <TouchableOpacity key={c.id} onPress={() => setFilterCast(c.id)}
+            style={[styles.filterChip, filterCast === c.id && styles.filterChipActive]}>
+            <Text style={[styles.filterChipText, filterCast === c.id && styles.filterChipTextActive]}>{c.name}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -818,18 +868,21 @@ function CustomerSection({ shopId }: { shopId: string }) {
         <Text style={styles.addBtnText}>顧客を追加</Text>
       </TouchableOpacity>
 
-      {filtered.length === 0 && <Text style={styles.empty}>顧客が登録されていません</Text>}
+      {filtered.length === 0 && <Text style={styles.empty}>この月の顧客データがありません</Text>}
 
       {filtered.map((c: any) => {
         const cast = casts.find((ca: any) => String(ca.id) === String(c.cast_id));
         return (
           <View key={c.id} style={styles.customerCard}>
             <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                 <Text style={styles.customerName}>{c.name}</Text>
                 {cast && <View style={styles.castTagBadge}><Text style={styles.castTagText}>{cast.name}</Text></View>}
+                {(c.visit_count || 0) > 1 && (
+                  <View style={styles.visitCountBadge}><Text style={styles.visitCountText}>{c.visit_count}回目</Text></View>
+                )}
               </View>
-              <Text style={styles.customerVisit}>📅 {fmtVisit(c.last_visited)}</Text>
+              <Text style={styles.customerVisit}>📅 {c.visit_date}</Text>
               {c.memo ? <Text style={styles.customerMemo}>📝 {c.memo}</Text> : null}
             </View>
             <View style={{ gap: 6 }}>
@@ -857,26 +910,41 @@ function CustomerSection({ shopId }: { shopId: string }) {
             <Text style={modal.label}>顧客名</Text>
             <TextInput style={modal.input} value={custName} onChangeText={setCustName}
               placeholder="例: 田中様" placeholderTextColor={Colors.text3} />
-            <Text style={modal.label}>担当キャスト</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-              <TouchableOpacity onPress={() => setCastId('')}
-                style={[modal.chip, !castId && modal.chipActive]}>
-                <Text style={[modal.chipText, !castId && modal.chipTextActive]}>未設定</Text>
+
+            {!editTarget && (
+              <>
+                <Text style={modal.label}>来店日</Text>
+                <DatePickerC value={visitDate} onChange={setVisitDate} />
+                <Text style={[modal.label, { marginTop: 8 }]}>選択日: <Text style={{ color: Colors.gold }}>{visitDate}</Text></Text>
+                <Text style={[modal.label, { marginTop: 12 }]}>担当キャスト</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+                  {[{ id: '', name: '未設定' }, ...casts].map((c: any) => (
+                    <TouchableOpacity key={c.id} onPress={() => setCastId(c.id)}
+                      style={[modal.chip, castId === c.id && modal.chipActive]}>
+                      <Text style={[modal.chipText, castId === c.id && modal.chipTextActive]}>{c.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </>
+            )}
+
+            <Text style={modal.label}>来店回数</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 12 }}>
+              <TouchableOpacity onPress={() => setVisitCount(v => String(Math.max(1, Number(v) - 1)))} style={cStyles.counterBtn}>
+                <Text style={cStyles.counterBtnText}>−</Text>
               </TouchableOpacity>
-              {casts.map((c: any) => (
-                <TouchableOpacity key={c.id} onPress={() => setCastId(String(c.id))}
-                  style={[modal.chip, castId === String(c.id) && modal.chipActive]}>
-                  <Text style={[modal.chipText, castId === String(c.id) && modal.chipTextActive]}>{c.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <Text style={modal.label}>来店日時</Text>
-            <TextInput style={modal.input} value={visitedAt} onChangeText={setVisitedAt}
-              placeholder="例: 2026-05-28T20:00" placeholderTextColor={Colors.text3} />
+              <Text style={cStyles.counterValue}>{visitCount}回目</Text>
+              <TouchableOpacity onPress={() => setVisitCount(v => String(Number(v) + 1))} style={cStyles.counterBtn}>
+                <Text style={cStyles.counterBtnText}>＋</Text>
+              </TouchableOpacity>
+            </View>
+
             <Text style={modal.label}>メモ</Text>
             <TextInput style={[modal.input, { height: 100, textAlignVertical: 'top' }]}
               value={memo} onChangeText={setMemo}
-              placeholder="好きなお酒、会話メモなど" placeholderTextColor={Colors.text3} multiline />
+              placeholder="好きなお酒、話題、次回への引き継ぎなど"
+              placeholderTextColor={Colors.text3} multiline />
+
             <TouchableOpacity style={modal.submitBtn} onPress={handleSave} disabled={saving}>
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
             </TouchableOpacity>
@@ -887,6 +955,7 @@ function CustomerSection({ shopId }: { shopId: string }) {
     </View>
   );
 }
+
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // メイン
@@ -994,4 +1063,24 @@ const styles = StyleSheet.create({
   customerMemo:   { fontSize: 12, color: Colors.text3 },
   castTagBadge:   { backgroundColor: Colors.purpleDim, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
   castTagText:    { fontSize: 11, color: Colors.purple, fontWeight: '500' },
+  visitCountBadge:{ backgroundColor: 'rgba(0,212,255,0.15)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
+  visitCountText: { fontSize: 11, color: '#00d4ff', fontWeight: '600' },
+});
+
+const cStyles = StyleSheet.create({
+  cal:          { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 12, marginBottom: 4 },
+  calHeader:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  calTitle:     { fontSize: 14, fontWeight: '600', color: Colors.text },
+  calDayRow:    { flexDirection: 'row', marginBottom: 6 },
+  calDayLabel:  { flex: 1, textAlign: 'center', fontSize: 10, color: Colors.text3, fontWeight: '600' },
+  calGrid:      { flexDirection: 'row', flexWrap: 'wrap' },
+  calCell:      { width: '14.28%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 6 },
+  calCellSel:   { backgroundColor: Colors.gold },
+  calCellToday: { backgroundColor: Colors.purpleDim },
+  calDay:       { fontSize: 13, color: Colors.text },
+  calDaySel:    { color: '#1a1200', fontWeight: '700' },
+  calDayToday:  { color: Colors.purple, fontWeight: '600' },
+  counterBtn:   { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.surface2, borderWidth: 0.5, borderColor: Colors.border, justifyContent: 'center', alignItems: 'center' },
+  counterBtnText:{ fontSize: 20, color: Colors.text, fontWeight: '300' },
+  counterValue: { fontSize: 16, color: Colors.gold, fontWeight: '600', minWidth: 60, textAlign: 'center' },
 });
