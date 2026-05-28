@@ -55,9 +55,8 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
             <View style={[styles.statGrid, { marginTop: 8, marginBottom: 16 }]}>
-              <StatCard label="客単価" value={fmtYen(data.avg_spend)} />
               {/* 承認待ち → タップでシフトタブへ */}
-              <TouchableOpacity onPress={() => router.push('/(tabs)/shift')}>
+              <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push('/(tabs)/shift')}>
                 <StatCard label="シフト承認待ち" value={`${data.pending_shift_count}件`}
                   sub={data.pending_shift_count > 0 ? '要対応 →' : ''}
                   valueColor={data.pending_shift_count > 0 ? Colors.gold : Colors.text} />
