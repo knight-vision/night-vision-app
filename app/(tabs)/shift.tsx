@@ -225,8 +225,32 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
 
+  const todayStr = getDateStr(new Date());
+  const todayConfirmed = confirmed.filter((s: any) => s.date === todayStr);
+  const pendingCount = requests.filter((r: any) => r.status === 'pending').length;
+  const weekConfirmed = dates.flatMap(date =>
+    confirmed.filter((s: any) => s.date === date).map((s: any) => ({ ...s, date }))
+  );
+
   return (
     <View>
+      {/* 今日・承認待ちサマリー */}
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+        <View style={[styles.summaryCard, { flex: 1 }]}>
+          <Text style={styles.summaryLabel}>本日出勤</Text>
+          <Text style={[styles.summaryValue, { color: Colors.green }]}>{todayConfirmed.length}名</Text>
+          {todayConfirmed.map((s: any) => {
+            const cast = casts.find((c: any) => String(c.id) === String(s.cast_id));
+            return <Text key={s.id} style={styles.summaryDetail}>{cast?.name} {s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>;
+          })}
+        </View>
+        <View style={[styles.summaryCard, { flex: 1 }]}>
+          <Text style={styles.summaryLabel}>承認待ち</Text>
+          <Text style={[styles.summaryValue, { color: pendingCount > 0 ? Colors.gold : Colors.text2 }]}>{pendingCount}件</Text>
+          {pendingCount > 0 && <Text style={styles.summaryDetail}>↓ 下のカレンダーで確認</Text>}
+        </View>
+      </View>
+
       {/* 週ナビ */}
       <View style={styles.weekNav}>
         <TouchableOpacity onPress={() => { const d = new Date(weekBase + 'T00:00:00'); d.setDate(d.getDate()-7); setWeekBase(getDateStr(d)); }} style={styles.weekBtn}>
@@ -592,7 +616,10 @@ const ts = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
-  safe:              { flex: 1, backgroundColor: Colors.bg },
+  summaryCard:       { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 12 },
+  summaryLabel:      { fontSize: 11, color: Colors.text3, marginBottom: 4 },
+  summaryValue:      { fontSize: 20, fontWeight: '700', marginBottom: 4 },
+  summaryDetail:     { fontSize: 11, color: Colors.text2, marginTop: 2 },
   screenTitle:       { fontSize: 20, fontWeight: '500', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   scroll:            { paddingHorizontal: 16, paddingBottom: 40 },
   weekNav:           { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },

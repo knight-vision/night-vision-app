@@ -9,7 +9,7 @@ import { Colors, fmtYen } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 
-type ManageTab = 'casts' | 'salary' | 'results';
+type ManageTab = 'casts' | 'salary' | 'results' | 'customers';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // キャスト一覧
@@ -663,6 +663,9 @@ function ResultsSection({ shopId }: { shopId: string }) {
     return { ...cast, byType, total };
   }).sort((a, b) => b.total - a.total);
 
+  const [showAll, setShowAll] = useState(false);
+  const displayed = showAll ? castTotals : castTotals.slice(0, 3);
+
   return (
     <View>
       <View style={styles.monthNav}>
@@ -677,7 +680,7 @@ function ResultsSection({ shopId }: { shopId: string }) {
 
       {loading && <ActivityIndicator color={Colors.gold} style={{ marginTop: 20 }} />}
 
-      {!loading && castTotals.map((cast: any, i: number) => (
+      {!loading && displayed.map((cast: any, i: number) => (
         <View key={cast.id} style={styles.salaryCard}>
           <View style={styles.salaryHeader}>
             <Text style={{ fontSize: 14, fontWeight: '600', color: i === 0 ? Colors.gold : Colors.text2, width: 24 }}>#{i+1}</Text>
@@ -695,7 +698,192 @@ function ResultsSection({ shopId }: { shopId: string }) {
           </View>
         </View>
       ))}
+
+      {!loading && castTotals.length > 3 && (
+        <TouchableOpacity style={styles.showAllBtn} onPress={() => setShowAll(v => !v)}>
+          <Text style={styles.showAllBtnText}>{showAll ? '▲ 折りたたむ' : `▼ 全員表示（${castTotals.length}名）`}</Text>
+        </TouchableOpacity>
+      )}
       {!loading && castTotals.length === 0 && <Text style={styles.empty}>売上データがありません</Text>}
+    </View>
+  );
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 顧客管理
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function CustomerSection({ shopId }: { shopId: string }) {
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [casts, setCasts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editTarget, setEditTarget] = useState<any>(null);
+  const [custName, setCustName] = useState('');
+  const [castId, setCastId] = useState('');
+  const [memo, setMemo] = useState('');
+  const [visitedAt, setVisitedAt] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [filterCast, setFilterCast] = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [custRes, castRes] = await Promise.all([
+        fetch(`${API_BASE}/customers?shop_id=${shopId}`),
+        fetch(`${API_BASE}/casts?shop_id=${shopId}`),
+      ]);
+      const c = await custRes.json(); setCustomers(Array.isArray(c) ? c : []);
+      const ca = await castRes.json(); setCasts(Array.isArray(ca) ? ca : []);
+    } catch { } finally { setLoading(false); }
+  }, [shopId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openAdd = () => {
+    setEditTarget(null);
+    setCustName(''); setCastId(''); setMemo('');
+    setVisitedAt(new Date().toISOString().slice(0, 16));
+    setModalVisible(true);
+  };
+
+  const openEdit = (c: any) => {
+    setEditTarget(c);
+    setCustName(c.name || '');
+    setCastId(c.cast_id ? String(c.cast_id) : '');
+    setMemo(c.memo || '');
+    setVisitedAt(c.last_visited ? c.last_visited.slice(0, 16) : new Date().toISOString().slice(0, 16));
+    setModalVisible(true);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const body = {
+        shop_id: shopId,
+        cast_id: castId || null,
+        name: custName || '名前なし',
+        memo,
+        visited_at: visitedAt ? new Date(visitedAt).toISOString() : new Date().toISOString(),
+      };
+      const method = editTarget ? 'PATCH' : 'POST';
+      await fetch(`${API_BASE}/customers`, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editTarget ? { ...body, id: editTarget.id } : body),
+      });
+      setModalVisible(false);
+      load();
+    } catch { Alert.alert('エラー', '保存に失敗しました'); } finally { setSaving(false); }
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    Alert.alert('削除確認', `「${name}」を削除しますか？`, [
+      { text: 'キャンセル', style: 'cancel' },
+      { text: '削除', style: 'destructive', onPress: async () => {
+        await fetch(`${API_BASE}/customers`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+        load();
+      }},
+    ]);
+  };
+
+  const filtered = filterCast ? customers.filter((c: any) => String(c.cast_id) === filterCast) : customers;
+
+  const fmtVisit = (iso: string) => {
+    try {
+      const d = new Date(iso);
+      return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    } catch { return iso; }
+  };
+
+  if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
+
+  return (
+    <View>
+      {/* キャストでフィルター */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+        <TouchableOpacity onPress={() => setFilterCast('')}
+          style={[styles.filterChip, !filterCast && styles.filterChipActive]}>
+          <Text style={[styles.filterChipText, !filterCast && styles.filterChipTextActive]}>全員</Text>
+        </TouchableOpacity>
+        {casts.map((c: any) => (
+          <TouchableOpacity key={c.id} onPress={() => setFilterCast(String(c.id))}
+            style={[styles.filterChip, filterCast === String(c.id) && styles.filterChipActive]}>
+            <Text style={[styles.filterChipText, filterCast === String(c.id) && styles.filterChipTextActive]}>{c.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      <TouchableOpacity style={styles.addBtn} onPress={openAdd}>
+        <Ionicons name="person-add-outline" size={16} color={Colors.gold} />
+        <Text style={styles.addBtnText}>顧客を追加</Text>
+      </TouchableOpacity>
+
+      {filtered.length === 0 && <Text style={styles.empty}>顧客が登録されていません</Text>}
+
+      {filtered.map((c: any) => {
+        const cast = casts.find((ca: any) => String(ca.id) === String(c.cast_id));
+        return (
+          <View key={c.id} style={styles.customerCard}>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <Text style={styles.customerName}>{c.name}</Text>
+                {cast && <View style={styles.castTagBadge}><Text style={styles.castTagText}>{cast.name}</Text></View>}
+              </View>
+              <Text style={styles.customerVisit}>📅 {fmtVisit(c.last_visited)}</Text>
+              {c.memo ? <Text style={styles.customerMemo}>📝 {c.memo}</Text> : null}
+            </View>
+            <View style={{ gap: 6 }}>
+              <TouchableOpacity onPress={() => openEdit(c)} style={styles.iconBtn}>
+                <Ionicons name="create-outline" size={18} color={Colors.text2} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleDelete(c.id, c.name)} style={styles.iconBtn}>
+                <Ionicons name="trash-outline" size={18} color={Colors.red} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        );
+      })}
+
+      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
+        <View style={modal.container}>
+          <View style={modal.header}>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={modal.closeBtn}>
+              <Ionicons name="close" size={22} color={Colors.text2} />
+            </TouchableOpacity>
+            <Text style={modal.title}>{editTarget ? '顧客を編集' : '顧客を追加'}</Text>
+            <View style={{ width: 36 }} />
+          </View>
+          <ScrollView style={{ padding: 20 }}>
+            <Text style={modal.label}>顧客名</Text>
+            <TextInput style={modal.input} value={custName} onChangeText={setCustName}
+              placeholder="例: 田中様" placeholderTextColor={Colors.text3} />
+            <Text style={modal.label}>担当キャスト</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+              <TouchableOpacity onPress={() => setCastId('')}
+                style={[modal.chip, !castId && modal.chipActive]}>
+                <Text style={[modal.chipText, !castId && modal.chipTextActive]}>未設定</Text>
+              </TouchableOpacity>
+              {casts.map((c: any) => (
+                <TouchableOpacity key={c.id} onPress={() => setCastId(String(c.id))}
+                  style={[modal.chip, castId === String(c.id) && modal.chipActive]}>
+                  <Text style={[modal.chipText, castId === String(c.id) && modal.chipTextActive]}>{c.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <Text style={modal.label}>来店日時</Text>
+            <TextInput style={modal.input} value={visitedAt} onChangeText={setVisitedAt}
+              placeholder="例: 2026-05-28T20:00" placeholderTextColor={Colors.text3} />
+            <Text style={modal.label}>メモ</Text>
+            <TextInput style={[modal.input, { height: 100, textAlignVertical: 'top' }]}
+              value={memo} onChangeText={setMemo}
+              placeholder="好きなお酒、会話メモなど" placeholderTextColor={Colors.text3} multiline />
+            <TouchableOpacity style={modal.submitBtn} onPress={handleSave} disabled={saving}>
+              {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
+            </TouchableOpacity>
+            <View style={{ height: 40 }} />
+          </ScrollView>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -708,9 +896,10 @@ export default function ManageScreen() {
   const [activeTab, setActiveTab] = useState<ManageTab>('casts');
 
   const TABS: { key: ManageTab; label: string; icon: string }[] = [
-    { key: 'casts',   label: 'キャスト', icon: 'people-outline' },
-    { key: 'salary',  label: '給与管理', icon: 'wallet-outline' },
-    { key: 'results', label: '成績',     icon: 'trophy-outline' },
+    { key: 'casts',     label: 'キャスト',  icon: 'people-outline' },
+    { key: 'salary',    label: '給与管理',  icon: 'wallet-outline' },
+    { key: 'results',   label: '成績',      icon: 'trophy-outline' },
+    { key: 'customers', label: '顧客管理',  icon: 'person-circle-outline' },
   ];
 
   if (!shopId) return null;
@@ -728,9 +917,10 @@ export default function ManageScreen() {
         ))}
       </ScrollView>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {activeTab === 'casts'   && <CastManagement shopId={shopId} />}
-        {activeTab === 'salary'  && <SalarySection shopId={shopId} />}
-        {activeTab === 'results' && <ResultsSection shopId={shopId} />}
+        {activeTab === 'casts'     && <CastManagement shopId={shopId} />}
+        {activeTab === 'salary'    && <SalarySection shopId={shopId} />}
+        {activeTab === 'results'   && <ResultsSection shopId={shopId} />}
+        {activeTab === 'customers' && <CustomerSection shopId={shopId} />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -792,4 +982,16 @@ const styles = StyleSheet.create({
   todayTime:      { fontSize: 12, color: Colors.green },
   ondutyBadge:    { backgroundColor: 'rgba(78,203,138,0.2)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
   ondutyBadgeText:{ fontSize: 10, color: Colors.green, fontWeight: '700' },
+  showAllBtn:     { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 12, alignItems: 'center', marginTop: 8 },
+  showAllBtnText: { fontSize: 13, color: Colors.text2, fontWeight: '500' },
+  filterChip:     { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 0.5, borderColor: Colors.border, backgroundColor: Colors.surface, marginRight: 8 },
+  filterChipActive:{ backgroundColor: Colors.goldDim, borderColor: Colors.gold },
+  filterChipText: { fontSize: 12, color: Colors.text2 },
+  filterChipTextActive: { color: Colors.gold, fontWeight: '600' },
+  customerCard:   { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 14, marginBottom: 8 },
+  customerName:   { fontSize: 15, fontWeight: '600', color: Colors.text },
+  customerVisit:  { fontSize: 12, color: Colors.text2, marginBottom: 3 },
+  customerMemo:   { fontSize: 12, color: Colors.text3 },
+  castTagBadge:   { backgroundColor: Colors.purpleDim, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
+  castTagText:    { fontSize: 11, color: Colors.purple, fontWeight: '500' },
 });
