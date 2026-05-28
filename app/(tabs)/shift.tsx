@@ -83,7 +83,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
       const wy = wb.getFullYear(), wm = wb.getMonth() + 1;
       const [r1, castRes] = await Promise.all([
         fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${wy}&month=${wm}`),
-        fetch(`${API_BASE}/cast-wage?shop_id=${shopId}`),
+        fetch(`${API_BASE}/casts?shop_id=${shopId}`),
       ]);
       const d1 = await r1.json();
       setConfirmed(Array.isArray(d1.confirmed) ? d1.confirmed : Array.isArray(d1) ? d1 : []);
@@ -219,7 +219,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                   const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
                   const color = getCastColor(ci);
                   return (
-                    <View key={s.id} style={[styles.castChip, { backgroundColor: color + '22', borderColor: color + '55' }]}>
+                    <View key={s.id} style={[styles.castChip, { backgroundColor: color + '33', borderColor: color }]}>
                       <Text style={[styles.castChipText, { color }]}>{s.casts?.name} {s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
                     </View>
                   );
@@ -564,8 +564,8 @@ const styles = StyleSheet.create({
   todayBadge:        { backgroundColor: Colors.goldDim, borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 },
   todayBadgeText:    { fontSize: 10, color: Colors.gold, fontWeight: '600' },
   pendingBadge:      { backgroundColor: 'rgba(155,127,232,0.2)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, fontSize: 11, color: Colors.purple } as any,
-  castChip:          { borderRadius: 8, borderWidth: 0.5, paddingHorizontal: 8, paddingVertical: 3 },
-  castChipText:      { fontSize: 11, fontWeight: '600' },
+  castChip:          { borderRadius: 8, borderWidth: 1, paddingHorizontal: 8, paddingVertical: 4 },
+  castChipText:      { fontSize: 12, fontWeight: '700' },
   datePanel:         { backgroundColor: Colors.surface, padding: 14, gap: 12 },
   panelSection:      { gap: 8 },
   panelSectionTitle: { fontSize: 11, fontWeight: '700', color: Colors.text3, textTransform: 'uppercase', letterSpacing: 0.5 },

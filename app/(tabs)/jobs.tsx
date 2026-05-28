@@ -1,2 +1,2 @@
-// このファイルは shopmanage.tsx に統合されました
-export { default } from './shopmanage';
+import { View } from 'react-native';
+export default function JobsScreen() { return <View />; }

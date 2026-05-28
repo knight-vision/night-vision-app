@@ -30,7 +30,7 @@ function CastManagement({ shopId }: { shopId: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/cast-wage?shop_id=${shopId}`);
+      const res = await fetch(`${API_BASE}/casts?shop_id=${shopId}`);
       const data = await res.json();
       setCasts(Array.isArray(data) ? data : []);
     } catch { setCasts([]); } finally { setLoading(false); }
@@ -69,7 +69,7 @@ function CastManagement({ shopId }: { shopId: string }) {
         instagram,
       };
       const method = editTarget ? 'PATCH' : 'POST';
-      const url = editTarget ? `${API_BASE}/cast-wage` : `${API_BASE}/cast-wage`;
+      const url = editTarget ? `${API_BASE}/casts` : `${API_BASE}/casts`;
       await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -86,7 +86,7 @@ function CastManagement({ shopId }: { shopId: string }) {
       { text: 'キャンセル', style: 'cancel' },
       { text: '削除', style: 'destructive', onPress: async () => {
         try {
-          await fetch(`${API_BASE}/cast-wage`, {
+          await fetch(`${API_BASE}/casts`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id }),
@@ -229,7 +229,7 @@ function SalarySummary({ shopId, month }: { shopId: string; month: string }) {
     setLoading(true);
     try {
       const [castRes, shiftRes, allowRes] = await Promise.all([
-        fetch(`${API_BASE}/cast-wage?shop_id=${shopId}`),
+        fetch(`${API_BASE}/casts?shop_id=${shopId}`),
         fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${month.slice(0,4)}&month=${month.slice(5,7)}`),
         fetch(`${API_BASE}/cast-allowances?shop_id=${shopId}&month=${month}`),
       ]);
@@ -309,7 +309,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
     try {
       const [aRes, cRes, pRes] = await Promise.all([
         fetch(`${API_BASE}/cast-allowances?shop_id=${shopId}&month=${month}`),
-        fetch(`${API_BASE}/cast-wage?shop_id=${shopId}`),
+        fetch(`${API_BASE}/casts?shop_id=${shopId}`),
         fetch(`${API_BASE}/allowance-presets?shop_id=${shopId}`),
       ]);
       const a = await aRes.json(); setAllowances(Array.isArray(a) ? a : []);
@@ -561,7 +561,7 @@ function ResultsSection({ shopId }: { shopId: string }) {
     try {
       const [salesRes, castRes] = await Promise.all([
         fetch(`${API_BASE}/cast-sales?shop_id=${shopId}&month=${month}`),
-        fetch(`${API_BASE}/cast-wage?shop_id=${shopId}`),
+        fetch(`${API_BASE}/casts?shop_id=${shopId}`),
       ]);
       const sales = await salesRes.json();
       const castList = await castRes.json();

@@ -87,7 +87,7 @@ function SlipInput({ shopId }: { shopId: string }) {
     setLoading(true);
     try {
       const [castRes, menuRes] = await Promise.all([
-        fetch(`${API_BASE}/cast-wage?shop_id=${shopId}`),
+        fetch(`${API_BASE}/casts?shop_id=${shopId}`),
         fetch(`${API_BASE}/shop-menus?shop_id=${shopId}`),
       ]);
       const c = await castRes.json(); setCasts(Array.isArray(c) ? c : []);
