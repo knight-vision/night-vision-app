@@ -1,9 +1,9 @@
 import {
   ScrollView, View, Text, StyleSheet, ActivityIndicator,
-  TouchableOpacity, Modal, Alert,
+  TouchableOpacity, Modal, Alert, FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
@@ -35,34 +35,105 @@ function fmtFull(ds: string) {
 function tLabel(h: number) { return h >= 24 ? `翌${h-24}時` : `${h}時`; }
 function getCastColor(index: number) { return CAST_COLORS[index % CAST_COLORS.length]; }
 
-// ドラムロール風時間選択（@react-native-picker/pickerを使わない）
+const ITEM_H = 48; // 1アイテムの高さ
+const VISIBLE = 5; // 表示する行数（奇数）
+const DRUM_H = ITEM_H * VISIBLE;
+
+// スナップスクロール式ドラムカラム
+function DrumColumn({ items, selectedIndex, onSelect }: {
+  items: string[];
+  selectedIndex: number;
+  onSelect: (index: number) => void;
+}) {
+  const ref = useRef<FlatList>(null);
+  const pad = Math.floor(VISIBLE / 2); // 上下パディング行数
+
+  // 表示用データ（上下にダミー行を追加）
+  const padded = [...Array(pad).fill(''), ...items, ...Array(pad).fill('')];
+
+  const onMomentumEnd = (e: any) => {
+    const idx = Math.round(e.nativeEvent.contentOffset.y / ITEM_H);
+    const clamped = Math.max(0, Math.min(idx, items.length - 1));
+    onSelect(clamped);
+  };
+
+  // 選択変化時にスクロール
+  useEffect(() => {
+    ref.current?.scrollToOffset({ offset: selectedIndex * ITEM_H, animated: true });
+  }, [selectedIndex]);
+
+  return (
+    <FlatList
+      ref={ref}
+      data={padded}
+      keyExtractor={(_, i) => String(i)}
+      showsVerticalScrollIndicator={false}
+      snapToInterval={ITEM_H}
+      decelerationRate="fast"
+      initialScrollIndex={selectedIndex}
+      getItemLayout={(_, index) => ({ length: ITEM_H, offset: ITEM_H * index, index })}
+      style={{ height: DRUM_H, flex: 1 }}
+      onMomentumScrollEnd={onMomentumEnd}
+      renderItem={({ item, index }) => {
+        const realIndex = index - pad;
+        const isSelected = realIndex === selectedIndex;
+        const isEmpty = item === '';
+        return (
+          <TouchableOpacity
+            onPress={() => !isEmpty && onSelect(realIndex)}
+            style={[ts.drumItem, isSelected && ts.drumItemActive]}
+            activeOpacity={isEmpty ? 1 : 0.7}>
+            <Text style={[ts.drumText, isSelected && ts.drumTextActive]}>
+              {item}
+            </Text>
+          </TouchableOpacity>
+        );
+      }}
+    />
+  );
+}
+
+// iOSドラムロール風時間選択
 function TimeSelector({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
   const [modalVisible, setModalVisible] = useState(false);
 
-  // "20:00" "24:00" "01:00" → HOURS配列の値（0-30）に変換
   const toHourIndex = (v: string): number => {
     const raw = parseInt(v.split(':')[0], 10);
     return isNaN(raw) ? 20 : Math.max(0, Math.min(raw, 30));
   };
-  const toMin = (v: string): string => {
+  const toMinIndex = (v: string): number => {
     const raw = v.split(':')[1]?.slice(0, 2) ?? '00';
-    return MINUTES.includes(raw) ? raw : '00';
+    const idx = MINUTES.indexOf(MINUTES.includes(raw) ? raw : '00');
+    return idx >= 0 ? idx : 0;
   };
 
-  const [tempH, setTempH] = useState(() => toHourIndex(value));
-  const [tempM, setTempM] = useState(() => toMin(value));
+  const [tempHIdx, setTempHIdx] = useState(() => toHourIndex(value));
+  const [tempMIdx, setTempMIdx] = useState(() => toMinIndex(value));
+
+  const hourLabels = HOURS.map(h => tLabel(h));
+  const minLabels  = MINUTES.map(m => `${m}分`);
 
   const currentH = toHourIndex(value);
-  const currentM = toMin(value);
+  const currentM = toMinIndex(value);
 
-  const open = () => { setTempH(currentH); setTempM(currentM); setModalVisible(true); };
-  const confirm = () => { onChange(`${String(tempH).padStart(2, '0')}:${tempM}`); setModalVisible(false); };
+  const open = () => {
+    setTempHIdx(currentH);
+    setTempMIdx(currentM);
+    setModalVisible(true);
+  };
+
+  const confirm = () => {
+    const h = String(HOURS[tempHIdx]).padStart(2, '0');
+    const m = MINUTES[tempMIdx];
+    onChange(`${h}:${m}`);
+    setModalVisible(false);
+  };
 
   return (
     <>
       <TouchableOpacity onPress={open} style={ts.btn}>
         {label && <Text style={ts.btnLabel}>{label}</Text>}
-        <Text style={ts.btnValue}>{tLabel(currentH)} {currentM}分</Text>
+        <Text style={ts.btnValue}>{tLabel(currentH)} {MINUTES[currentM]}分</Text>
         <Ionicons name="time-outline" size={14} color={Colors.gold} />
       </TouchableOpacity>
 
@@ -70,7 +141,6 @@ function TimeSelector({ value, onChange, label }: { value: string; onChange: (v:
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
           <TouchableOpacity style={ts.overlay} activeOpacity={1} onPress={() => setModalVisible(false)} />
           <View style={ts.sheet}>
-            {/* ヘッダー */}
             <View style={ts.sheetHeader}>
               <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 8 }}>
                 <Text style={ts.sheetCancel}>キャンセル</Text>
@@ -80,38 +150,16 @@ function TimeSelector({ value, onChange, label }: { value: string; onChange: (v:
                 <Text style={ts.sheetDone}>完了</Text>
               </TouchableOpacity>
             </View>
-            {/* ドラムロール */}
-            <View style={ts.drumRow}>
-              {/* 時間列 */}
-              <View style={{ flex: 1 }}>
-                <ScrollView
-                  showsVerticalScrollIndicator={false}
-                  style={ts.drumScroll}
-                  contentContainerStyle={{ paddingVertical: 80 }}
-                  nestedScrollEnabled>
-                  {HOURS.map(hh => (
-                    <TouchableOpacity key={hh} onPress={() => setTempH(hh)}
-                      style={[ts.drumItem, tempH === hh && ts.drumItemActive]}>
-                      <Text style={[ts.drumText, tempH === hh && ts.drumTextActive]}>{tLabel(hh)}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-              <Text style={ts.drumSep}>:</Text>
-              {/* 分列 */}
-              <View style={{ flex: 1 }}>
-                <ScrollView
-                  showsVerticalScrollIndicator={false}
-                  style={ts.drumScroll}
-                  contentContainerStyle={{ paddingVertical: 80 }}
-                  nestedScrollEnabled>
-                  {MINUTES.map(mm => (
-                    <TouchableOpacity key={mm} onPress={() => setTempM(mm)}
-                      style={[ts.drumItem, tempM === mm && ts.drumItemActive]}>
-                      <Text style={[ts.drumText, tempM === mm && ts.drumTextActive]}>{mm}分</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+
+            {/* セレクター枠線 */}
+            <View style={{ position: 'relative' }}>
+              <View style={ts.selectorLine} pointerEvents="none" />
+              <View style={[ts.selectorLine, { top: ITEM_H * (Math.floor(VISIBLE / 2) + 1) }]} pointerEvents="none" />
+
+              <View style={ts.drumRow}>
+                <DrumColumn items={hourLabels} selectedIndex={tempHIdx} onSelect={setTempHIdx} />
+                <Text style={ts.drumSep}>:</Text>
+                <DrumColumn items={minLabels}  selectedIndex={tempMIdx} onSelect={setTempMIdx} />
               </View>
             </View>
           </View>
@@ -619,16 +667,17 @@ const ts = StyleSheet.create({
   sheetCancel:    { fontSize: 15, color: Colors.text2 },
   sheetTitle:     { fontSize: 15, fontWeight: '600', color: Colors.text },
   sheetDone:      { fontSize: 15, color: Colors.gold, fontWeight: '700' },
-  drumRow:        { flexDirection: 'row', alignItems: 'center', height: 220, backgroundColor: Colors.bg },
-  drumScroll:     { flex: 1 },
-  drumItem:       { height: 44, justifyContent: 'center', alignItems: 'center' },
-  drumItemActive: { backgroundColor: Colors.goldDim, borderRadius: 10, marginHorizontal: 12 },
-  drumText:       { fontSize: 17, color: Colors.text3 },
-  drumTextActive: { fontSize: 18, color: Colors.gold, fontWeight: '700' },
-  drumSep:        { fontSize: 22, color: Colors.text2, fontWeight: '600', marginBottom: 4 },
+  drumRow:        { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.bg },
+  drumItem:       { height: ITEM_H, justifyContent: 'center', alignItems: 'center' },
+  drumItemActive: { backgroundColor: Colors.goldDim },
+  drumText:       { fontSize: 18, color: Colors.text3 },
+  drumTextActive: { fontSize: 20, color: Colors.gold, fontWeight: '700' },
+  drumSep:        { fontSize: 22, color: Colors.text2, fontWeight: '600', paddingHorizontal: 4, marginBottom: 4 },
+  selectorLine:   { position: 'absolute', left: 0, right: 0, top: ITEM_H * Math.floor(VISIBLE / 2), height: ITEM_H, borderTopWidth: 0.5, borderBottomWidth: 0, borderColor: Colors.border, backgroundColor: Colors.surface2, zIndex: 0 },
 });
 
 const styles = StyleSheet.create({
+  safe:              { flex: 1, backgroundColor: Colors.bg },
   summaryCard:       { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 12 },
   summaryLabel:      { fontSize: 11, color: Colors.text3, marginBottom: 4 },
   summaryValue:      { fontSize: 20, fontWeight: '700', marginBottom: 4 },
