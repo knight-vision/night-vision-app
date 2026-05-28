@@ -1,357 +1,373 @@
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator, Modal } from 'react-native';
+import {
+  ScrollView, View, Text, StyleSheet, TouchableOpacity,
+  TextInput, Alert, ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, fmtYen } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 
-const SHIMEI_TYPES = [
-  { key: 'free', label: 'フリー' },
-  { key: 'baai', label: '場内指名' },
+type SlipTab = 'input' | 'sales' | 'cast';
+
+const SALES_TYPES = [
   { key: 'honshimei', label: '本指名' },
+  { key: 'baai',      label: '場内指名' },
+  { key: 'douhan',    label: '同伴' },
+  { key: 'bottle',    label: 'ボトルバック' },
+  { key: 'other',     label: 'その他' },
 ];
 
-const PAYMENT_TYPES = [
-  { key: 'cash', label: '現金' },
-  { key: 'card', label: 'カード' },
-];
-
-export default function SlipScreen() {
-  const { shopId } = useAuthStore();
+// ── 伝票入力 ──────────────────────────────────────────────────
+function SlipInput({ shopId }: { shopId: string }) {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [payment, setPayment] = useState('cash');
   const [casts, setCasts] = useState<any[]>([]);
-  const [menus, setMenus] = useState<any[]>([]);
-  const [selectedCast, setSelectedCast] = useState<any>(null);
-  const [shimei, setShimei] = useState('free');
-  const [items, setItems] = useState<{ menu_id: string; name: string; price: number; qty: number }[]>([]);
-  const [memo, setMemo] = useState('');
-  const [slips, setSlips] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [castModalVisible, setCastModalVisible] = useState(false);
-  const [menuModalVisible, setMenuModalVisible] = useState(false);
+  const [castSales, setCastSales] = useState<Record<string, Record<string, string>>>({});
+  const [cash, setCash] = useState('');
+  const [card, setCard] = useState('');
+  const [cost, setCost] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!shopId) return;
-    Promise.all([
-      fetch(`${API_BASE}/cast-sales?shop_id=${shopId}&type=casts`).then(r => r.json()).catch(() => []),
-      fetch(`${API_BASE}/shop-menus?shop_id=${shopId}`).then(r => r.json()).catch(() => []),
-      loadSlips(),
-    ]).then(([c, m]) => {
-      // キャスト一覧はcast-wageから取得
-      fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${new Date().getFullYear()}&month=${new Date().getMonth()+1}`)
-        .then(r => r.json())
-        .then(shifts => {
-          const uniqueCasts = Object.values(
-            (Array.isArray(shifts) ? shifts : []).reduce((acc: any, s: any) => {
-              if (s.cast_id && s.casts) acc[s.cast_id] = { id: s.cast_id, name: s.casts.name };
-              return acc;
-            }, {})
-          );
-          setCasts(uniqueCasts as any[]);
-        }).catch(() => {});
-      setMenus(Array.isArray(m) ? m : []);
-    });
-  }, [shopId]);
-
-  const loadSlips = async () => {
-    if (!shopId) return;
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/slips?shop_id=${shopId}&date=${date}`);
+      const res = await fetch(`${API_BASE}/cast-wage?shop_id=${shopId}`);
       const data = await res.json();
-      setSlips(Array.isArray(data) ? data : []);
-    } catch {
-      setSlips([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { loadSlips(); }, [date, shopId]);
-
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const tax = Math.floor(subtotal * 0.1);
-  const total = subtotal + tax;
-
-  const addItem = (menu: any) => {
-    const existing = items.find(i => i.menu_id === String(menu.id));
-    if (existing) {
-      setItems(items.map(i => i.menu_id === String(menu.id) ? { ...i, qty: i.qty + 1 } : i));
-    } else {
-      setItems([...items, { menu_id: String(menu.id), name: menu.name, price: menu.price, qty: 1 }]);
-    }
-    setMenuModalVisible(false);
-  };
-
-  const removeItem = (menu_id: string) => {
-    setItems(items.filter(i => i.menu_id !== menu_id));
-  };
-
-  const updateQty = (menu_id: string, qty: number) => {
-    if (qty <= 0) { removeItem(menu_id); return; }
-    setItems(items.map(i => i.menu_id === menu_id ? { ...i, qty } : i));
-  };
-
-  const handleSubmit = async () => {
-    if (items.length === 0) { Alert.alert('エラー', '品目を追加してください'); return; }
-    setSubmitting(true);
-    try {
-      const castEntries = selectedCast ? [{ cast_id: selectedCast.id, shimei_type: shimei }] : [];
-      const res = await fetch(`${API_BASE}/slips`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          shop_id: shopId, date, payment,
-          subtotal, tax, total,
-          items: items.map(i => ({ menu_id: i.menu_id, name: i.name, price: i.price, qty: i.qty, amount: i.price * i.qty })),
-          cast_entries: castEntries,
-          memo,
-        }),
+      const castList = Array.isArray(data) ? data : [];
+      setCasts(castList);
+      const init: Record<string, Record<string, string>> = {};
+      castList.forEach((c: any) => {
+        init[c.id] = { honshimei: '', baai: '', douhan: '', bottle: '', other: '' };
       });
-      if (res.ok) {
-        Alert.alert('保存しました');
-        setItems([]); setSelectedCast(null); setShimei('free'); setMemo(''); setPayment('cash');
-        loadSlips();
-      } else {
-        Alert.alert('エラー', '保存に失敗しました');
-      }
-    } catch {
-      Alert.alert('エラー', '通信エラーが発生しました');
-    } finally {
-      setSubmitting(false);
-    }
+      setCastSales(init);
+    } catch { } finally { setLoading(false); }
+  }, [shopId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const updateCastSale = (castId: string, type: string, value: string) => {
+    setCastSales(prev => ({ ...prev, [castId]: { ...prev[castId], [type]: value } }));
   };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const sales: any[] = [];
+      Object.entries(castSales).forEach(([castId, types]) => {
+        Object.entries(types).forEach(([type, amount]) => {
+          if (amount && Number(amount) > 0) {
+            sales.push({ shop_id: shopId, cast_id: castId, date, sales_type: type, amount: Number(amount) });
+          }
+        });
+      });
+
+      await Promise.all([
+        fetch(`${API_BASE}/slip`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            shop_id: shopId, date,
+            cash_sales: Number(cash) || 0,
+            card_sales: Number(card) || 0,
+            cost: Number(cost) || 0,
+            cast_sales: sales,
+          }),
+        }),
+      ]);
+
+      Alert.alert('保存しました');
+      setCash(''); setCard(''); setCost('');
+      const reset: Record<string, Record<string, string>> = {};
+      casts.forEach((c: any) => {
+        reset[c.id] = { honshimei: '', baai: '', douhan: '', bottle: '', other: '' };
+      });
+      setCastSales(reset);
+    } catch { Alert.alert('エラー', '保存に失敗しました'); } finally { setSaving(false); }
+  };
+
+  if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={styles.screenTitle}>伝票入力</Text>
+    <View>
+      <Text style={s.sectionTitle}>日付</Text>
+      <TextInput style={s.input} value={date} onChangeText={setDate} placeholder="2026-05-28" placeholderTextColor={Colors.text3} />
 
-        {/* 日付・支払方法 */}
-        <View style={styles.card}>
-          <View style={styles.row}>
-            <Text style={styles.label}>日付</Text>
-            <TextInput style={styles.dateInput} value={date} onChangeText={setDate}
-              placeholder="2026-05-25" placeholderTextColor={Colors.text3} />
+      <Text style={s.sectionTitle}>日次売上</Text>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flex: 1 }}>
+          <Text style={s.fieldLabel}>現金</Text>
+          <TextInput style={s.input} value={cash} onChangeText={setCash} placeholder="0" placeholderTextColor={Colors.text3} keyboardType="number-pad" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={s.fieldLabel}>カード</Text>
+          <TextInput style={s.input} value={card} onChangeText={setCard} placeholder="0" placeholderTextColor={Colors.text3} keyboardType="number-pad" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={s.fieldLabel}>コスト</Text>
+          <TextInput style={s.input} value={cost} onChangeText={setCost} placeholder="0" placeholderTextColor={Colors.text3} keyboardType="number-pad" />
+        </View>
+      </View>
+
+      <Text style={s.sectionTitle}>キャスト別売上</Text>
+      {casts.map((cast: any) => (
+        <View key={cast.id} style={s.castBlock}>
+          <View style={s.castBlockHeader}>
+            <View style={s.castAvatar}>
+              <Text style={s.castAvatarText}>{cast.name?.[0] || '?'}</Text>
+            </View>
+            <Text style={s.castName}>{cast.name}</Text>
           </View>
-          <View style={[styles.row, { marginTop: 12 }]}>
-            <Text style={styles.label}>支払方法</Text>
-            <View style={styles.segRow}>
-              {PAYMENT_TYPES.map(p => (
-                <TouchableOpacity key={p.key}
-                  style={[styles.seg, payment === p.key && styles.segActive]}
-                  onPress={() => setPayment(p.key)}>
-                  <Text style={[styles.segText, payment === p.key && styles.segTextActive]}>{p.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* キャスト選択 */}
-        <View style={styles.card}>
-          <Text style={styles.sectionLabel}>キャスト（任意）</Text>
-          <TouchableOpacity style={styles.selectBtn} onPress={() => setCastModalVisible(true)}>
-            <Ionicons name="person-outline" size={16} color={Colors.text3} />
-            <Text style={[styles.selectBtnText, selectedCast && { color: Colors.text }]}>
-              {selectedCast ? selectedCast.name : 'キャストを選択'}
-            </Text>
-            <Ionicons name="chevron-down" size={14} color={Colors.text3} />
-          </TouchableOpacity>
-          {selectedCast && (
-            <View style={[styles.segRow, { marginTop: 10 }]}>
-              {SHIMEI_TYPES.map(s => (
-                <TouchableOpacity key={s.key}
-                  style={[styles.seg, shimei === s.key && styles.segActive]}
-                  onPress={() => setShimei(s.key)}>
-                  <Text style={[styles.segText, shimei === s.key && styles.segTextActive]}>{s.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* 品目 */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.sectionLabel}>品目</Text>
-            <TouchableOpacity style={styles.addBtn} onPress={() => setMenuModalVisible(true)}>
-              <Ionicons name="add" size={16} color={Colors.gold} />
-              <Text style={styles.addBtnText}>追加</Text>
-            </TouchableOpacity>
-          </View>
-          {items.length === 0 ? (
-            <Text style={styles.emptyText}>品目を追加してください</Text>
-          ) : items.map(item => (
-            <View key={item.menu_id} style={styles.itemRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemPrice}>{fmtYen(item.price)} × {item.qty}</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {SALES_TYPES.map(type => (
+              <View key={type.key} style={{ width: '46%' }}>
+                <Text style={s.fieldLabel}>{type.label}</Text>
+                <TextInput
+                  style={s.input}
+                  value={castSales[cast.id]?.[type.key] || ''}
+                  onChangeText={v => updateCastSale(cast.id, type.key, v)}
+                  placeholder="0"
+                  placeholderTextColor={Colors.text3}
+                  keyboardType="number-pad"
+                />
               </View>
-              <View style={styles.qtyRow}>
-                <TouchableOpacity style={styles.qtyBtn} onPress={() => updateQty(item.menu_id, item.qty - 1)}>
-                  <Ionicons name="remove" size={14} color={Colors.text2} />
-                </TouchableOpacity>
-                <Text style={styles.qtyText}>{item.qty}</Text>
-                <TouchableOpacity style={styles.qtyBtn} onPress={() => updateQty(item.menu_id, item.qty + 1)}>
-                  <Ionicons name="add" size={14} color={Colors.text2} />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.itemTotal}>{fmtYen(item.price * item.qty)}</Text>
-            </View>
-          ))}
-          {items.length > 0 && (
-            <View style={styles.totalBlock}>
-              <View style={styles.totalRow}><Text style={styles.totalLabel}>小計</Text><Text style={styles.totalValue}>{fmtYen(subtotal)}</Text></View>
-              <View style={styles.totalRow}><Text style={styles.totalLabel}>消費税（10%）</Text><Text style={styles.totalValue}>{fmtYen(tax)}</Text></View>
-              <View style={[styles.totalRow, { borderTopWidth: 0.5, borderTopColor: Colors.border, paddingTop: 8, marginTop: 4 }]}>
-                <Text style={[styles.totalLabel, { color: Colors.text, fontWeight: '500' }]}>合計</Text>
-                <Text style={[styles.totalValue, { color: Colors.gold, fontSize: 16, fontWeight: '500' }]}>{fmtYen(total)}</Text>
-              </View>
-            </View>
-          )}
-        </View>
-
-        {/* メモ */}
-        <View style={styles.card}>
-          <Text style={styles.sectionLabel}>メモ（任意）</Text>
-          <TextInput style={styles.memoInput} value={memo} onChangeText={setMemo}
-            placeholder="備考を入力" placeholderTextColor={Colors.text3} multiline />
-        </View>
-
-        {/* 保存ボタン */}
-        <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={submitting} activeOpacity={0.85}>
-          {submitting ? <ActivityIndicator color="#1a1200" /> : <Text style={styles.submitText}>伝票を保存</Text>}
-        </TouchableOpacity>
-
-        {/* 本日の伝票一覧 */}
-        <Text style={styles.sectionTitle}>本日の伝票（{slips.length}件）</Text>
-        {loading ? <ActivityIndicator color={Colors.gold} /> : slips.length === 0 ? (
-          <Text style={styles.emptyText}>本日の伝票はありません</Text>
-        ) : slips.map((slip: any, i: number) => (
-          <View key={slip.id || i} style={styles.slipCard}>
-            <View style={styles.slipHeader}>
-              <Text style={styles.slipTotal}>{fmtYen(slip.total)}</Text>
-              <View style={[styles.payBadge, { backgroundColor: slip.payment === 'cash' ? Colors.goldDim : Colors.purpleDim }]}>
-                <Text style={[styles.payBadgeText, { color: slip.payment === 'cash' ? Colors.gold : Colors.purple }]}>
-                  {slip.payment === 'cash' ? '現金' : 'カード'}
-                </Text>
-              </View>
-            </View>
-            {slip.cast_entries?.length > 0 && (
-              <Text style={styles.slipCast}>
-                {slip.cast_entries.map((c: any) => c.cast_name || 'キャスト').join(', ')}
-              </Text>
-            )}
-            {slip.items?.map((item: any, j: number) => (
-              <Text key={j} style={styles.slipItem}>{item.name} × {item.qty}　{fmtYen(item.amount)}</Text>
             ))}
           </View>
+        </View>
+      ))}
+
+      <TouchableOpacity style={s.saveBtn} onPress={handleSave} disabled={saving}>
+        {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={s.saveBtnText}>保存する</Text>}
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+// ── 店舗売上 ──────────────────────────────────────────────────
+function ShopSales({ shopId }: { shopId: string }) {
+  const now = new Date();
+  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
+  const [dailySales, setDailySales] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/daily-sales?shop_id=${shopId}&month=${month}`);
+      const data = await res.json();
+      setDailySales(Array.isArray(data) ? data : []);
+    } catch { setDailySales([]); } finally { setLoading(false); }
+  }, [shopId, month]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const changeMonth = (delta: number) => {
+    const d = new Date(month + '-01');
+    d.setMonth(d.getMonth() + delta);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+
+  const total = dailySales.reduce((sum, d) => sum + (d.cash_sales || 0) + (d.card_sales || 0), 0);
+  const totalCost = dailySales.reduce((sum, d) => sum + (d.cost || 0), 0);
+
+  if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
+
+  return (
+    <View>
+      <View style={s.monthNav}>
+        <TouchableOpacity onPress={() => changeMonth(-1)} style={s.monthBtn}>
+          <Ionicons name="chevron-back" size={18} color={Colors.text2} />
+        </TouchableOpacity>
+        <Text style={s.monthLabel}>{month}</Text>
+        <TouchableOpacity onPress={() => changeMonth(1)} style={s.monthBtn}>
+          <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
+        </TouchableOpacity>
+      </View>
+
+      <View style={s.summaryRow}>
+        <SummaryCard label="月間売上" value={fmtYen(total)} color={Colors.gold} />
+        <SummaryCard label="コスト" value={fmtYen(totalCost)} color={Colors.red} />
+        <SummaryCard label="純利益" value={fmtYen(total - totalCost)} color={Colors.green} />
+      </View>
+
+      <Text style={s.sectionTitle}>日次一覧</Text>
+      {dailySales.length === 0 && <Text style={s.empty}>この月の売上データがありません</Text>}
+      {dailySales.sort((a, b) => b.date.localeCompare(a.date)).map((d: any) => (
+        <View key={d.id || d.date} style={s.dailyRow}>
+          <Text style={s.dailyDate}>{d.date.slice(5)}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={s.dailyTotal}>{fmtYen((d.cash_sales || 0) + (d.card_sales || 0))}</Text>
+            <Text style={s.dailySub}>現金 {fmtYen(d.cash_sales || 0)} / カード {fmtYen(d.card_sales || 0)}</Text>
+          </View>
+          <Text style={[s.dailyCost, { color: Colors.red }]}>-{fmtYen(d.cost || 0)}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function SummaryCard({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <View style={s.summaryCard}>
+      <Text style={s.summaryLabel}>{label}</Text>
+      <Text style={[s.summaryValue, { color }]}>{value}</Text>
+    </View>
+  );
+}
+
+// ── キャスト売上 ──────────────────────────────────────────────
+function CastSales({ shopId }: { shopId: string }) {
+  const now = new Date();
+  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
+  const [data, setData] = useState<any[]>([]);
+  const [casts, setCasts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const changeMonth = (delta: number) => {
+    const d = new Date(month + '-01');
+    d.setMonth(d.getMonth() + delta);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [salesRes, castRes] = await Promise.all([
+        fetch(`${API_BASE}/cast-sales?shop_id=${shopId}&month=${month}`),
+        fetch(`${API_BASE}/cast-wage?shop_id=${shopId}`),
+      ]);
+      const sales = await salesRes.json();
+      const castList = await castRes.json();
+      setData(Array.isArray(sales) ? sales : []);
+      setCasts(Array.isArray(castList) ? castList : []);
+    } catch { } finally { setLoading(false); }
+  }, [shopId, month]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const castTotals = casts.map((cast: any) => {
+    const castData = data.filter((d: any) => d.cast_id === cast.id);
+    const byType: Record<string, number> = {};
+    SALES_TYPES.forEach(t => {
+      byType[t.key] = castData.filter((d: any) => d.sales_type === t.key).reduce((sum: number, d: any) => sum + d.amount, 0);
+    });
+    const total = Object.values(byType).reduce((a, b) => a + b, 0);
+    return { ...cast, byType, total };
+  }).sort((a, b) => b.total - a.total);
+
+  if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
+
+  return (
+    <View>
+      <View style={s.monthNav}>
+        <TouchableOpacity onPress={() => changeMonth(-1)} style={s.monthBtn}>
+          <Ionicons name="chevron-back" size={18} color={Colors.text2} />
+        </TouchableOpacity>
+        <Text style={s.monthLabel}>{month}</Text>
+        <TouchableOpacity onPress={() => changeMonth(1)} style={s.monthBtn}>
+          <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
+        </TouchableOpacity>
+      </View>
+
+      {castTotals.map((cast: any, i: number) => (
+        <View key={cast.id} style={s.castSalesCard}>
+          <View style={s.castSalesHeader}>
+            <Text style={s.rankBadge}>#{i + 1}</Text>
+            <View style={s.castAvatar}>
+              <Text style={s.castAvatarText}>{cast.name?.[0] || '?'}</Text>
+            </View>
+            <Text style={s.castName}>{cast.name}</Text>
+            <Text style={s.castTotal}>{fmtYen(cast.total)}</Text>
+          </View>
+          <View style={s.castSalesTypes}>
+            {SALES_TYPES.map(type => cast.byType[type.key] > 0 && (
+              <View key={type.key} style={s.castSalesType}>
+                <Text style={s.castSalesTypeLabel}>{type.label}</Text>
+                <Text style={s.castSalesTypeValue}>{fmtYen(cast.byType[type.key])}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      ))}
+      {castTotals.length === 0 && <Text style={s.empty}>売上データがありません</Text>}
+    </View>
+  );
+}
+
+// ── メイン ──────────────────────────────────────────────────────
+export default function SlipScreen() {
+  const { shopId } = useAuthStore();
+  const [activeTab, setActiveTab] = useState<SlipTab>('input');
+
+  const TABS: { key: SlipTab; label: string; icon: string }[] = [
+    { key: 'input', label: '伝票入力',   icon: 'create-outline' },
+    { key: 'sales', label: '店舗売上',   icon: 'bar-chart-outline' },
+    { key: 'cast',  label: 'キャスト売上', icon: 'people-outline' },
+  ];
+
+  if (!shopId) return null;
+
+  return (
+    <SafeAreaView style={s.safe} edges={['top']}>
+      <Text style={s.screenTitle}>売上管理</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.tabScroll} contentContainerStyle={s.tabContent}>
+        {TABS.map(tab => (
+          <TouchableOpacity key={tab.key} style={[s.tab, activeTab === tab.key && s.tabActive]}
+            onPress={() => setActiveTab(tab.key)}>
+            <Ionicons name={tab.icon as any} size={14} color={activeTab === tab.key ? Colors.gold : Colors.text3} />
+            <Text style={[s.tabText, activeTab === tab.key && s.tabTextActive]}>{tab.label}</Text>
+          </TouchableOpacity>
         ))}
       </ScrollView>
-
-      {/* キャスト選択モーダル */}
-      <Modal visible={castModalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setCastModalVisible(false)}>
-        <View style={modal.container}>
-          <View style={modal.header}>
-            <TouchableOpacity onPress={() => setCastModalVisible(false)} style={modal.closeBtn}>
-              <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
-            <Text style={modal.title}>キャストを選択</Text>
-            <View style={{ width: 36 }} />
-          </View>
-          <ScrollView>
-            <TouchableOpacity style={modal.item} onPress={() => { setSelectedCast(null); setCastModalVisible(false); }}>
-              <Text style={modal.itemText}>なし（フリー）</Text>
-            </TouchableOpacity>
-            {casts.map((c: any) => (
-              <TouchableOpacity key={c.id} style={modal.item} onPress={() => { setSelectedCast(c); setCastModalVisible(false); }}>
-                <Text style={modal.itemText}>{c.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </Modal>
-
-      {/* 品名選択モーダル */}
-      <Modal visible={menuModalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setMenuModalVisible(false)}>
-        <View style={modal.container}>
-          <View style={modal.header}>
-            <TouchableOpacity onPress={() => setMenuModalVisible(false)} style={modal.closeBtn}>
-              <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
-            <Text style={modal.title}>品名を選択</Text>
-            <View style={{ width: 36 }} />
-          </View>
-          <ScrollView>
-            {menus.length === 0 ? (
-              <Text style={[styles.emptyText, { padding: 20 }]}>品名が登録されていません</Text>
-            ) : menus.map((m: any) => (
-              <TouchableOpacity key={m.id} style={modal.item} onPress={() => addItem(m)}>
-                <Text style={modal.itemText}>{m.name}</Text>
-                <Text style={modal.itemPrice}>{fmtYen(m.price)}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </Modal>
+      <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
+        {activeTab === 'input' && <SlipInput shopId={shopId} />}
+        {activeTab === 'sales' && <ShopSales shopId={shopId} />}
+        {activeTab === 'cast'  && <CastSales shopId={shopId} />}
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
-const modal = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
-  header:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  closeBtn:  { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  title:     { fontSize: 16, fontWeight: '500', color: Colors.text },
-  item:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  itemText:  { fontSize: 15, color: Colors.text },
-  itemPrice: { fontSize: 14, color: Colors.gold },
-});
-
-const styles = StyleSheet.create({
-  safe:        { flex: 1, backgroundColor: Colors.bg },
-  scroll:      { paddingHorizontal: 16, paddingBottom: 40 },
-  screenTitle: { fontSize: 20, fontWeight: '500', color: Colors.text, paddingVertical: 16 },
-  sectionTitle:{ fontSize: 15, fontWeight: '500', color: Colors.text, marginTop: 20, marginBottom: 10 },
-  card:        { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 14, marginBottom: 12 },
-  cardHeader:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  sectionLabel:{ fontSize: 11, color: Colors.text2, marginBottom: 8 },
-  label:       { fontSize: 13, color: Colors.text2, width: 70 },
-  row:         { flexDirection: 'row', alignItems: 'center' },
-  dateInput:   { flex: 1, backgroundColor: Colors.surface2, borderRadius: 8, borderWidth: 0.5, borderColor: Colors.border, padding: 8, color: Colors.text, fontSize: 14 },
-  segRow:      { flex: 1, flexDirection: 'row', gap: 6 },
-  seg:         { flex: 1, paddingVertical: 6, borderRadius: 8, borderWidth: 0.5, borderColor: Colors.border, alignItems: 'center', backgroundColor: Colors.surface2 },
-  segActive:   { backgroundColor: Colors.goldDim, borderColor: Colors.gold },
-  segText:     { fontSize: 12, color: Colors.text3 },
-  segTextActive:{ fontSize: 12, color: Colors.gold, fontWeight: '500' },
-  selectBtn:   { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.surface2, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, padding: 12 },
-  selectBtnText:{ flex: 1, fontSize: 14, color: Colors.text3 },
-  addBtn:      { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Colors.goldDim, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 0.5, borderColor: Colors.gold },
-  addBtnText:  { fontSize: 12, color: Colors.gold, fontWeight: '500' },
-  emptyText:   { fontSize: 12, color: Colors.text3, paddingVertical: 8 },
-  itemRow:     { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: Colors.border, gap: 8 },
-  itemName:    { fontSize: 13, color: Colors.text, fontWeight: '500' },
-  itemPrice:   { fontSize: 11, color: Colors.text3, marginTop: 2 },
-  itemTotal:   { fontSize: 13, color: Colors.text, fontWeight: '500', width: 70, textAlign: 'right' },
-  qtyRow:      { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  qtyBtn:      { width: 24, height: 24, borderRadius: 12, backgroundColor: Colors.surface2, justifyContent: 'center', alignItems: 'center' },
-  qtyText:     { fontSize: 14, color: Colors.text, width: 20, textAlign: 'center' },
-  totalBlock:  { marginTop: 12, paddingTop: 12, borderTopWidth: 0.5, borderTopColor: Colors.border },
-  totalRow:    { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  totalLabel:  { fontSize: 12, color: Colors.text2 },
-  totalValue:  { fontSize: 12, color: Colors.text },
-  memoInput:   { backgroundColor: Colors.surface2, borderRadius: 8, borderWidth: 0.5, borderColor: Colors.border, padding: 10, color: Colors.text, fontSize: 14, height: 72, textAlignVertical: 'top' },
-  submitBtn:   { backgroundColor: Colors.gold, borderRadius: 14, height: 52, justifyContent: 'center', alignItems: 'center', marginBottom: 24 },
-  submitText:  { color: '#1a1200', fontSize: 16, fontWeight: '600' },
-  slipCard:    { backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, padding: 12, marginBottom: 8 },
-  slipHeader:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  slipTotal:   { fontSize: 16, fontWeight: '500', color: Colors.gold },
-  payBadge:    { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 },
-  payBadgeText:{ fontSize: 11 },
-  slipCast:    { fontSize: 12, color: Colors.purple, marginBottom: 4 },
-  slipItem:    { fontSize: 11, color: Colors.text2, marginTop: 2 },
+const s = StyleSheet.create({
+  safe:            { flex: 1, backgroundColor: Colors.bg },
+  screenTitle:     { fontSize: 20, fontWeight: '500', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
+  scroll:          { paddingHorizontal: 16, paddingBottom: 40 },
+  tabScroll:       { maxHeight: 48, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  tabContent:      { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
+  tab:             { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: Colors.border },
+  tabActive:       { backgroundColor: Colors.goldDim, borderColor: Colors.gold },
+  tabText:         { fontSize: 12, color: Colors.text3 },
+  tabTextActive:   { fontSize: 12, color: Colors.gold, fontWeight: '500' },
+  sectionTitle:    { fontSize: 13, color: Colors.text2, fontWeight: '600', marginTop: 16, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  fieldLabel:      { fontSize: 12, color: Colors.text3, marginBottom: 4 },
+  input:           { backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, padding: 12, color: Colors.text, fontSize: 14, marginBottom: 8 },
+  saveBtn:         { backgroundColor: Colors.gold, borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 16, marginBottom: 8 },
+  saveBtnText:     { color: '#1a1200', fontSize: 15, fontWeight: '600' },
+  castBlock:       { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 12, marginBottom: 10 },
+  castBlockHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+  castAvatar:      { width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.purpleDim, justifyContent: 'center', alignItems: 'center' },
+  castAvatarText:  { fontSize: 12, fontWeight: '500', color: Colors.purple },
+  castName:        { fontSize: 14, fontWeight: '500', color: Colors.text, flex: 1 },
+  monthNav:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, paddingVertical: 12 },
+  monthBtn:        { padding: 6 },
+  monthLabel:      { fontSize: 15, color: Colors.text, fontWeight: '500', minWidth: 90, textAlign: 'center' },
+  summaryRow:      { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  summaryCard:     { flex: 1, backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 12, alignItems: 'center' },
+  summaryLabel:    { fontSize: 11, color: Colors.text3, marginBottom: 4 },
+  summaryValue:    { fontSize: 14, fontWeight: '600' },
+  dailyRow:        { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  dailyDate:       { fontSize: 13, color: Colors.text2, width: 36 },
+  dailyTotal:      { fontSize: 14, fontWeight: '500', color: Colors.text },
+  dailySub:        { fontSize: 11, color: Colors.text3, marginTop: 2 },
+  dailyCost:       { fontSize: 13, fontWeight: '500' },
+  castSalesCard:   { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 12, marginBottom: 10 },
+  castSalesHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  rankBadge:       { fontSize: 12, color: Colors.gold, fontWeight: '600', width: 24 },
+  castTotal:       { fontSize: 15, fontWeight: '600', color: Colors.gold },
+  castSalesTypes:  { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  castSalesType:   { backgroundColor: Colors.surface2, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
+  castSalesTypeLabel:{ fontSize: 10, color: Colors.text3 },
+  castSalesTypeValue:{ fontSize: 12, color: Colors.text, fontWeight: '500' },
+  empty:           { fontSize: 13, color: Colors.text3, paddingVertical: 20, textAlign: 'center' },
 });

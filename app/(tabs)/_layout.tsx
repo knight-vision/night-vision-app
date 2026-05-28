@@ -41,31 +41,49 @@ export default function TabLayout() {
       }} />
       {isOwner && (
         <Tabs.Screen name="slip" options={{
-          title: '伝票',
-          tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={22} color={color} />,
+          title: '売上',
+          tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} size={22} color={color} />,
+        }} />
+      )}
+      {isOwner && (
+        <Tabs.Screen name="salary" options={{
+          title: '給与',
+          tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'wallet' : 'wallet-outline'} size={22} color={color} />,
         }} />
       )}
       {isOwner && (
         <Tabs.Screen name="manage" options={{
-          title: '管理',
-          tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'settings' : 'settings-outline'} size={22} color={color} />,
+          title: 'キャスト',
+          tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'people' : 'people-outline'} size={22} color={color} />,
+        }} />
+      )}
+      {isOwner && (
+        <Tabs.Screen name="shopmanage" options={{
+          title: '店舗',
+          tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'storefront' : 'storefront-outline'} size={22} color={color} />,
+        }} />
+      )}
+      {isOwner && (
+        <Tabs.Screen name="jobs" options={{
+          title: '求人',
+          tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'briefcase' : 'briefcase-outline'} size={22} color={color} />,
         }} />
       )}
       <Tabs.Screen name="results" options={{
         title: '成績',
-        tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} size={22} color={color} />,
+        tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'trophy' : 'trophy-outline'} size={22} color={color} />,
       }} />
       <Tabs.Screen name="account" options={{
         title: 'アカウント',
         tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />,
       }} />
+
       {/* キャスト専用 - オーナーには非表示 */}
-      {!isOwner && (
-        <Tabs.Screen name="slip" options={{ href: null }} />
-      )}
-      {!isOwner && (
-        <Tabs.Screen name="manage" options={{ href: null }} />
-      )}
+      {!isOwner && <Tabs.Screen name="slip" options={{ href: null }} />}
+      {!isOwner && <Tabs.Screen name="salary" options={{ href: null }} />}
+      {!isOwner && <Tabs.Screen name="manage" options={{ href: null }} />}
+      {!isOwner && <Tabs.Screen name="shopmanage" options={{ href: null }} />}
+      {!isOwner && <Tabs.Screen name="jobs" options={{ href: null }} />}
     </Tabs>
   );
 }
