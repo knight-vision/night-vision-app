@@ -1,11 +1,10 @@
 import {
   ScrollView, View, Text, StyleSheet, ActivityIndicator,
-  TouchableOpacity, Modal, Alert, Platform,
+  TouchableOpacity, Modal, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
 import { Colors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
@@ -36,48 +35,34 @@ function fmtFull(ds: string) {
 function tLabel(h: number) { return h >= 24 ? `翌${h-24}時` : `${h}時`; }
 function getCastColor(index: number) { return CAST_COLORS[index % CAST_COLORS.length]; }
 
-// iOSネイティブPickerで時間選択
+// ドラムロール風時間選択（@react-native-picker/pickerを使わない）
 function TimeSelector({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [tempH, setTempH] = useState(20);
-  const [tempM, setTempM] = useState('00');
 
-  // "20:00" → HOURS配列の値（0-30）に変換
-  // DBは常に "HH:MM" 形式（24時台は24,25...で保存）
-  const parseHour = (v: string): number => {
-    const raw = parseInt(v.split(':')[0]) || 0;
-    // 0〜5時は翌0時〜翌5時（24〜29）として扱う可能性があるが
-    // DBの値をそのままHOURSの値として使う（0-30の範囲）
-    return Math.min(raw, 30);
+  // "20:00" "24:00" "01:00" → HOURS配列の値（0-30）に変換
+  const toHourIndex = (v: string): number => {
+    const raw = parseInt(v.split(':')[0], 10);
+    return isNaN(raw) ? 20 : Math.max(0, Math.min(raw, 30));
   };
-  const parseMin = (v: string): string => {
-    const raw = v.split(':')[1]?.slice(0, 2) || '00';
+  const toMin = (v: string): string => {
+    const raw = v.split(':')[1]?.slice(0, 2) ?? '00';
     return MINUTES.includes(raw) ? raw : '00';
   };
 
-  const currentH = parseHour(value);
-  const currentM = parseMin(value);
-  const displayLabel = `${tLabel(currentH)} ${currentM}分`;
+  const [tempH, setTempH] = useState(() => toHourIndex(value));
+  const [tempM, setTempM] = useState(() => toMin(value));
 
-  const openPicker = () => {
-    setTempH(currentH);
-    setTempM(currentM);
-    setModalVisible(true);
-  };
+  const currentH = toHourIndex(value);
+  const currentM = toMin(value);
 
-  const confirm = () => {
-    // tempHが24以上の場合はそのまま保存（翌1時=25→"25:00"）
-    // APIはstart_time/end_timeをそのまま受け取る
-    const hh = String(tempH).padStart(2, '0');
-    onChange(`${hh}:${tempM}`);
-    setModalVisible(false);
-  };
+  const open = () => { setTempH(currentH); setTempM(currentM); setModalVisible(true); };
+  const confirm = () => { onChange(`${String(tempH).padStart(2, '0')}:${tempM}`); setModalVisible(false); };
 
   return (
     <>
-      <TouchableOpacity onPress={openPicker} style={ts.btn}>
+      <TouchableOpacity onPress={open} style={ts.btn}>
         {label && <Text style={ts.btnLabel}>{label}</Text>}
-        <Text style={ts.btnValue}>{displayLabel}</Text>
+        <Text style={ts.btnValue}>{tLabel(currentH)} {currentM}分</Text>
         <Ionicons name="time-outline" size={14} color={Colors.gold} />
       </TouchableOpacity>
 
@@ -85,6 +70,7 @@ function TimeSelector({ value, onChange, label }: { value: string; onChange: (v:
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
           <TouchableOpacity style={ts.overlay} activeOpacity={1} onPress={() => setModalVisible(false)} />
           <View style={ts.sheet}>
+            {/* ヘッダー */}
             <View style={ts.sheetHeader}>
               <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 8 }}>
                 <Text style={ts.sheetCancel}>キャンセル</Text>
@@ -94,25 +80,39 @@ function TimeSelector({ value, onChange, label }: { value: string; onChange: (v:
                 <Text style={ts.sheetDone}>完了</Text>
               </TouchableOpacity>
             </View>
-            <View style={{ flexDirection: 'row', height: 216, backgroundColor: Colors.surface }}>
-              <Picker
-                selectedValue={tempH}
-                onValueChange={(v) => setTempH(Number(v))}
-                style={{ flex: 1, backgroundColor: Colors.surface }}
-                itemStyle={{ color: Colors.text, fontSize: 20, backgroundColor: Colors.surface }}>
-                {HOURS.map(hh => (
-                  <Picker.Item key={hh} label={tLabel(hh)} value={hh} color={Colors.text} />
-                ))}
-              </Picker>
-              <Picker
-                selectedValue={tempM}
-                onValueChange={(v) => setTempM(String(v))}
-                style={{ flex: 1, backgroundColor: Colors.surface }}
-                itemStyle={{ color: Colors.text, fontSize: 20, backgroundColor: Colors.surface }}>
-                {MINUTES.map(mm => (
-                  <Picker.Item key={mm} label={`${mm}分`} value={mm} color={Colors.text} />
-                ))}
-              </Picker>
+            {/* ドラムロール */}
+            <View style={ts.drumRow}>
+              {/* 時間列 */}
+              <View style={{ flex: 1 }}>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  style={ts.drumScroll}
+                  contentContainerStyle={{ paddingVertical: 80 }}
+                  nestedScrollEnabled>
+                  {HOURS.map(hh => (
+                    <TouchableOpacity key={hh} onPress={() => setTempH(hh)}
+                      style={[ts.drumItem, tempH === hh && ts.drumItemActive]}>
+                      <Text style={[ts.drumText, tempH === hh && ts.drumTextActive]}>{tLabel(hh)}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+              <Text style={ts.drumSep}>:</Text>
+              {/* 分列 */}
+              <View style={{ flex: 1 }}>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  style={ts.drumScroll}
+                  contentContainerStyle={{ paddingVertical: 80 }}
+                  nestedScrollEnabled>
+                  {MINUTES.map(mm => (
+                    <TouchableOpacity key={mm} onPress={() => setTempM(mm)}
+                      style={[ts.drumItem, tempM === mm && ts.drumItemActive]}>
+                      <Text style={[ts.drumText, tempM === mm && ts.drumTextActive]}>{mm}分</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
             </View>
           </View>
         </View>
@@ -610,15 +610,22 @@ export default function ShiftScreen() {
 }
 
 const ts = StyleSheet.create({
-  btn:         { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, paddingHorizontal: 12, paddingVertical: 10 },
-  btnLabel:    { fontSize: 11, color: Colors.text3, marginRight: 4 },
-  btnValue:    { fontSize: 14, color: Colors.gold, fontWeight: '600', flex: 1 },
-  overlay:     { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' },
-  sheet:       { backgroundColor: Colors.surface, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
-  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 0.5, borderBottomColor: Colors.border, backgroundColor: Colors.surface, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
-  sheetCancel: { fontSize: 15, color: Colors.text2 },
-  sheetTitle:  { fontSize: 15, fontWeight: '600', color: Colors.text },
-  sheetDone:   { fontSize: 15, color: Colors.gold, fontWeight: '700' },
+  btn:            { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, paddingHorizontal: 12, paddingVertical: 10 },
+  btnLabel:       { fontSize: 11, color: Colors.text3, marginRight: 4 },
+  btnValue:       { fontSize: 14, color: Colors.gold, fontWeight: '600', flex: 1 },
+  overlay:        { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.55)' },
+  sheet:          { backgroundColor: Colors.bg, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 34 },
+  sheetHeader:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  sheetCancel:    { fontSize: 15, color: Colors.text2 },
+  sheetTitle:     { fontSize: 15, fontWeight: '600', color: Colors.text },
+  sheetDone:      { fontSize: 15, color: Colors.gold, fontWeight: '700' },
+  drumRow:        { flexDirection: 'row', alignItems: 'center', height: 220, backgroundColor: Colors.bg },
+  drumScroll:     { flex: 1 },
+  drumItem:       { height: 44, justifyContent: 'center', alignItems: 'center' },
+  drumItemActive: { backgroundColor: Colors.goldDim, borderRadius: 10, marginHorizontal: 12 },
+  drumText:       { fontSize: 17, color: Colors.text3 },
+  drumTextActive: { fontSize: 18, color: Colors.gold, fontWeight: '700' },
+  drumSep:        { fontSize: 22, color: Colors.text2, fontWeight: '600', marginBottom: 4 },
 });
 
 const styles = StyleSheet.create({
