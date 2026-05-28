@@ -61,7 +61,7 @@ export default function TabLayout() {
         }} />
       )}
       <Tabs.Screen name="results" options={{
-        title: '成績',
+        title: '給与・実績',
         tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'trophy' : 'trophy-outline'} size={22} color={color} />,
         href: isOwner ? null : undefined,
       }} />

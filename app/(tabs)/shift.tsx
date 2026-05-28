@@ -478,6 +478,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
 // ── キャスト向けシフト希望提出 ──────────────────────────────────
 function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   const [shifts, setShifts] = useState<any[]>([]);
+  const [confirmedShifts, setConfirmedShifts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selDate, setSelDate] = useState(getDateStr(new Date()));
@@ -486,7 +487,6 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // カレンダー
   const now = new Date();
   const [calYear, setCalYear] = useState(now.getFullYear());
   const [calMonth, setCalMonth] = useState(now.getMonth() + 1);
@@ -494,11 +494,17 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/cast-shift-request?cast_id=${castId}&shop_id=${shopId}`);
-      const data = await res.json();
-      setShifts(Array.isArray(data) ? data : []);
-    } catch { setShifts([]); } finally { setLoading(false); }
-  }, [castId, shopId]);
+      const [reqRes, confRes] = await Promise.all([
+        fetch(`${API_BASE}/cast-shift-request?cast_id=${castId}&shop_id=${shopId}`),
+        fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${calYear}&month=${calMonth}`),
+      ]);
+      const reqData = await reqRes.json();
+      setShifts(Array.isArray(reqData) ? reqData : []);
+      const confData = await confRes.json();
+      const confirmed = Array.isArray(confData) ? confData : (confData?.confirmed || []);
+      setConfirmedShifts(confirmed.filter((s: any) => String(s.cast_id) === castId));
+    } catch { setShifts([]); setConfirmedShifts([]); } finally { setLoading(false); }
+  }, [castId, shopId, calYear, calMonth]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -522,6 +528,7 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   const startPad = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
   const calDays: (number | null)[] = [...Array(startPad).fill(null), ...Array.from({ length: lastDay.getDate() }, (_, i) => i + 1)];
   const shiftDates = shifts.map(s => s.date);
+  const confirmedDates = confirmedShifts.map(s => s.date);
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
 
@@ -538,6 +545,17 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
             <Ionicons name="chevron-forward" size={20} color={Colors.text2} />
           </TouchableOpacity>
         </View>
+        {/* 凡例 */}
+        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.green }} />
+            <Text style={{ fontSize: 10, color: Colors.text3 }}>確定</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.gold }} />
+            <Text style={{ fontSize: 10, color: Colors.text3 }}>提出中</Text>
+          </View>
+        </View>
         <View style={styles.calDayRow}>
           {CAL_DAYS.map(d => <Text key={d} style={styles.calDayLabel}>{d}</Text>)}
         </View>
@@ -545,12 +563,23 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
           {calDays.map((day, i) => {
             if (!day) return <View key={`pad-${i}`} style={styles.calCell} />;
             const dateStr = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-            const hasShift = shiftDates.includes(dateStr);
+            const isConfirmed = confirmedDates.includes(dateStr);
+            const hasRequest = shiftDates.includes(dateStr);
             const isToday = dateStr === getDateStr(new Date());
             return (
-              <TouchableOpacity key={dateStr} style={[styles.calCell, hasShift && styles.calCellShift, isToday && styles.calCellToday]}
+              <TouchableOpacity key={dateStr}
+                style={[styles.calCell,
+                  isConfirmed && { backgroundColor: 'rgba(78,203,138,0.2)', borderRadius: 8 },
+                  hasRequest && !isConfirmed && styles.calCellShift,
+                  isToday && styles.calCellToday,
+                ]}
                 onPress={() => { setSelDate(dateStr); setModalVisible(true); }}>
-                <Text style={[styles.calDayNum, hasShift && styles.calDayNumShift, isToday && styles.calDayNumToday]}>{day}</Text>
+                <Text style={[styles.calDayNum,
+                  isConfirmed && { color: Colors.green, fontWeight: '700' },
+                  hasRequest && !isConfirmed && styles.calDayNumShift,
+                  isToday && styles.calDayNumToday,
+                ]}>{day}</Text>
+                {isConfirmed && <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: Colors.green, marginTop: 1 }} />}
               </TouchableOpacity>
             );
           })}
@@ -562,22 +591,51 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
         <Text style={styles.addShiftBtnText}>シフト希望を追加</Text>
       </TouchableOpacity>
 
-      {/* 提出済みリスト */}
-      {shifts.sort((a, b) => a.date.localeCompare(b.date)).map((s: any) => (
-        <View key={s.id} style={styles.shiftItem}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.shiftDate}>{s.date}</Text>
-            <Text style={styles.shiftTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
-          </View>
-          <View style={[styles.statusBadge, {
-            backgroundColor: s.status === 'approved' ? 'rgba(78,203,138,0.15)' : s.status === 'rejected' ? 'rgba(224,92,106,0.15)' : 'rgba(201,168,76,0.15)',
-          }]}>
-            <Text style={[styles.statusText, {
-              color: s.status === 'approved' ? Colors.green : s.status === 'rejected' ? Colors.red : Colors.gold,
-            }]}>{s.status === 'approved' ? '承認済み' : s.status === 'rejected' ? '否認' : '審査中'}</Text>
-          </View>
+      {/* 確定シフト */}
+      {confirmedShifts.length > 0 && (
+        <View style={{ marginBottom: 12 }}>
+          <Text style={styles.listSectionTitle}>📌 確定シフト</Text>
+          {confirmedShifts.sort((a, b) => a.date.localeCompare(b.date)).map((s: any) => (
+            <View key={s.id} style={[styles.shiftItem, { borderLeftWidth: 3, borderLeftColor: Colors.green }]}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.shiftDate}>{s.date}</Text>
+                <Text style={styles.shiftTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
+              </View>
+              <View style={{ backgroundColor: 'rgba(78,203,138,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
+                <Text style={{ fontSize: 12, color: Colors.green, fontWeight: '600' }}>確定済み</Text>
+              </View>
+            </View>
+          ))}
         </View>
-      ))}
+      )}
+
+      {/* 提出中シフト */}
+      {shifts.length > 0 && (
+        <View style={{ marginBottom: 12 }}>
+          <Text style={styles.listSectionTitle}>📩 提出中のシフト希望</Text>
+          {shifts.sort((a, b) => a.date.localeCompare(b.date)).map((s: any) => (
+            <View key={s.id} style={[styles.shiftItem, { borderLeftWidth: 3, borderLeftColor: Colors.gold }]}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.shiftDate}>{s.date}</Text>
+                <Text style={styles.shiftTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
+              </View>
+              <View style={[styles.statusBadge, {
+                backgroundColor: s.status === 'approved' ? 'rgba(78,203,138,0.15)' : s.status === 'rejected' ? 'rgba(224,92,106,0.15)' : 'rgba(201,168,76,0.15)',
+              }]}>
+                <Text style={[styles.statusText, {
+                  color: s.status === 'approved' ? Colors.green : s.status === 'rejected' ? Colors.red : Colors.gold,
+                }]}>{s.status === 'approved' ? '承認済み' : s.status === 'rejected' ? '否認' : '審査中'}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {confirmedShifts.length === 0 && shifts.length === 0 && (
+        <Text style={{ fontSize: 13, color: Colors.text3, textAlign: 'center', paddingVertical: 20 }}>
+          この月のシフトはありません
+        </Text>
+      )}
 
       {/* 希望提出モーダル */}
       <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
@@ -742,6 +800,7 @@ const styles = StyleSheet.create({
   calDayNumToday:    { color: Colors.purple, fontWeight: '600' },
   addShiftBtn:       { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.goldDim, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.gold, padding: 14, marginBottom: 16 },
   addShiftBtnText:   { fontSize: 14, color: Colors.gold, fontWeight: '500' },
+  listSectionTitle:  { fontSize: 12, color: Colors.text2, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, marginTop: 4 },
   shiftItem:         { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
   shiftDate:         { fontSize: 14, fontWeight: '500', color: Colors.text },
   shiftTime:         { fontSize: 12, color: Colors.text2, marginTop: 2 },
