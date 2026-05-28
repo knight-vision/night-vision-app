@@ -39,11 +39,21 @@ function getCastColor(index: number) { return CAST_COLORS[index % CAST_COLORS.le
 // iOSネイティブPickerで時間選択
 function TimeSelector({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const parts = value.split(':');
-  const h = parseInt(parts[0]) || 0;
-  const m = parts[1] || '00';
-  const [tempH, setTempH] = useState(h);
-  const [tempM, setTempM] = useState(m);
+  const [tempH, setTempH] = useState(0);
+  const [tempM, setTempM] = useState('00');
+
+  // valueから時・分を取得（24時=翌0時などを考慮）
+  const parseValue = (v: string) => {
+    const parts = v.split(':');
+    const hour = parseInt(parts[0]) || 0;
+    const min = parts[1]?.slice(0, 2) || '00';
+    // HOURS配列のindex（0-30）に変換
+    const idx = HOURS.findIndex(hh => hh % 24 === hour % 24 && (hour >= 24 ? hh >= 24 : hh < 24));
+    return { h: idx >= 0 ? HOURS[idx] : hour, m: min };
+  };
+
+  const { h, m } = parseValue(value);
+  const displayLabel = `${tLabel(h)}${m}分`;
 
   const openPicker = () => {
     setTempH(h);
@@ -52,7 +62,8 @@ function TimeSelector({ value, onChange, label }: { value: string; onChange: (v:
   };
 
   const confirm = () => {
-    onChange(`${String(tempH % 24).padStart(2,'0')}:${tempM}`);
+    const hh = String(tempH % 24).padStart(2, '0');
+    onChange(`${hh}:${tempM}`);
     setModalVisible(false);
   };
 
@@ -60,41 +71,43 @@ function TimeSelector({ value, onChange, label }: { value: string; onChange: (v:
     <>
       <TouchableOpacity onPress={openPicker} style={ts.btn}>
         {label && <Text style={ts.btnLabel}>{label}</Text>}
-        <Text style={ts.btnValue}>{tLabel(h)} {m}分</Text>
-        <Ionicons name="chevron-down" size={14} color={Colors.text3} />
+        <Text style={ts.btnValue}>{displayLabel}</Text>
+        <Ionicons name="time-outline" size={14} color={Colors.gold} />
       </TouchableOpacity>
 
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
-        <TouchableOpacity style={ts.overlay} activeOpacity={1} onPress={() => setModalVisible(false)} />
-        <View style={ts.sheet}>
-          <View style={ts.sheetHeader}>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Text style={ts.sheetCancel}>キャンセル</Text>
-            </TouchableOpacity>
-            <Text style={ts.sheetTitle}>{label || '時間を選択'}</Text>
-            <TouchableOpacity onPress={confirm}>
-              <Text style={ts.sheetDone}>完了</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{ flexDirection: 'row' }}>
-            <Picker
-              selectedValue={tempH}
-              onValueChange={setTempH}
-              style={{ flex: 1 }}
-              itemStyle={{ color: Colors.text, fontSize: 18 }}>
-              {HOURS.map(hh => (
-                <Picker.Item key={hh} label={tLabel(hh)} value={hh} />
-              ))}
-            </Picker>
-            <Picker
-              selectedValue={tempM}
-              onValueChange={setTempM}
-              style={{ flex: 1 }}
-              itemStyle={{ color: Colors.text, fontSize: 18 }}>
-              {MINUTES.map(mm => (
-                <Picker.Item key={mm} label={`${mm}分`} value={mm} />
-              ))}
-            </Picker>
+        <View style={{ flex: 1 }}>
+          <TouchableOpacity style={ts.overlay} activeOpacity={1} onPress={() => setModalVisible(false)} />
+          <View style={ts.sheet}>
+            <View style={ts.sheetHeader}>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 4 }}>
+                <Text style={ts.sheetCancel}>キャンセル</Text>
+              </TouchableOpacity>
+              <Text style={ts.sheetTitle}>{label || '時間を選択'}</Text>
+              <TouchableOpacity onPress={confirm} style={{ padding: 4 }}>
+                <Text style={ts.sheetDone}>完了</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', height: 200 }}>
+              <Picker
+                selectedValue={tempH}
+                onValueChange={(v) => setTempH(Number(v))}
+                style={{ flex: 1 }}
+                itemStyle={{ color: '#000', fontSize: 20 }}>
+                {HOURS.map(hh => (
+                  <Picker.Item key={hh} label={tLabel(hh)} value={hh} />
+                ))}
+              </Picker>
+              <Picker
+                selectedValue={tempM}
+                onValueChange={(v) => setTempM(String(v))}
+                style={{ flex: 1 }}
+                itemStyle={{ color: '#000', fontSize: 20 }}>
+                {MINUTES.map(mm => (
+                  <Picker.Item key={mm} label={`${mm}分`} value={mm} />
+                ))}
+              </Picker>
+            </View>
           </View>
         </View>
       </Modal>
@@ -336,9 +349,8 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                   return (
                     <View key={entry.cast_id} style={[styles.timeSetBlock, { backgroundColor: color + '11', borderColor: color + '44' }]}>
                       <Text style={[styles.timeSetName, { color }]}>{cast?.name}</Text>
-                      <View style={styles.timeSetRow}>
+                      <View style={{ gap: 8 }}>
                         <TimeSelector value={entry.start_time} onChange={v => updateDraftTime(date, entry.cast_id, 'start_time', v)} label="開始" />
-                        <Text style={styles.timeSetSep}>〜</Text>
                         <TimeSelector value={entry.end_time} onChange={v => updateDraftTime(date, entry.cast_id, 'end_time', v)} label="終了" />
                       </View>
                     </View>

@@ -16,8 +16,12 @@ type ManageTab = 'casts' | 'salary' | 'results';
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function CastManagement({ shopId }: { shopId: string }) {
   const [casts, setCasts] = useState<any[]>([]);
+  const [todayShifts, setTodayShifts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [accountModalCast, setAccountModalCast] = useState<any>(null);
+  const [accountEmail, setAccountEmail] = useState('');
+  const [issuingAccount, setIssuingAccount] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
@@ -27,12 +31,21 @@ function CastManagement({ shopId }: { shopId: string }) {
   const [instagram, setInstagram] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/casts?shop_id=${shopId}`);
-      const data = await res.json();
-      setCasts(Array.isArray(data) ? data : []);
+      const [castRes, shiftRes] = await Promise.all([
+        fetch(`${API_BASE}/casts?shop_id=${shopId}`),
+        fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${today.getFullYear()}&month=${today.getMonth()+1}`),
+      ]);
+      const castData = await castRes.json();
+      setCasts(Array.isArray(castData) ? castData : []);
+      const shiftData = await shiftRes.json();
+      const confirmed = Array.isArray(shiftData) ? shiftData : (shiftData?.confirmed || []);
+      setTodayShifts(confirmed.filter((s: any) => s.date === todayStr));
     } catch { setCasts([]); } finally { setLoading(false); }
   }, [shopId]);
 
@@ -59,18 +72,9 @@ function CastManagement({ shopId }: { shopId: string }) {
     if (!name) { Alert.alert('エラー', '名前を入力してください'); return; }
     setSaving(true);
     try {
-      const body = {
-        shop_id: shopId,
-        name,
-        age: Number(age) || null,
-        birthplace,
-        hourly_wage: Number(hourlyWage) || 0,
-        comment,
-        instagram,
-      };
+      const body = { shop_id: shopId, name, age: Number(age) || null, birthplace, hourly_wage: Number(hourlyWage) || 0, comment, instagram };
       const method = editTarget ? 'PATCH' : 'POST';
-      const url = editTarget ? `${API_BASE}/casts` : `${API_BASE}/casts`;
-      await fetch(url, {
+      await fetch(`${API_BASE}/casts`, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editTarget ? { ...body, id: editTarget.id } : body),
@@ -86,54 +90,105 @@ function CastManagement({ shopId }: { shopId: string }) {
       { text: 'キャンセル', style: 'cancel' },
       { text: '削除', style: 'destructive', onPress: async () => {
         try {
-          await fetch(`${API_BASE}/casts`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id }),
-          });
+          await fetch(`${API_BASE}/casts`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
           load();
         } catch { Alert.alert('エラー', '削除に失敗しました'); }
       }},
     ]);
   };
 
+  const handleIssueAccount = async () => {
+    if (!accountEmail || !accountModalCast) return;
+    setIssuingAccount(true);
+    try {
+      const res = await fetch(`${API_BASE}/issue-cast-account`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cast_id: accountModalCast.id, email: accountEmail, shop_name: 'NIGHT VISION' }),
+      });
+      if (res.ok) {
+        Alert.alert('完了', `${accountModalCast.name}にアカウントを発行しました。\nメール: ${accountEmail}`);
+        setAccountModalCast(null);
+        setAccountEmail('');
+      } else {
+        const err = await res.json();
+        Alert.alert('エラー', err.error || '発行に失敗しました');
+      }
+    } catch { Alert.alert('エラー', '発行に失敗しました'); } finally { setIssuingAccount(false); }
+  };
+
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
+
+  const todayOnCastIds = todayShifts.map((s: any) => String(s.cast_id));
 
   return (
     <View>
+      {/* 本日出勤 */}
+      {todayShifts.length > 0 && (
+        <View style={styles.todayBlock}>
+          <Text style={styles.todayTitle}>📅 本日出勤（{todayShifts.length}名）</Text>
+          {todayShifts.map((s: any) => {
+            const cast = casts.find((c: any) => String(c.id) === String(s.cast_id));
+            return (
+              <View key={s.id} style={styles.todayRow}>
+                <View style={styles.castAvatar}>
+                  <Text style={styles.castAvatarText}>{cast?.name?.[0] || '?'}</Text>
+                </View>
+                <Text style={styles.todayCastName}>{cast?.name || '?'}</Text>
+                <Text style={styles.todayTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
+              </View>
+            );
+          })}
+        </View>
+      )}
+
       <TouchableOpacity style={styles.addBtn} onPress={openAdd}>
         <Ionicons name="person-add-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>キャストを追加</Text>
       </TouchableOpacity>
 
-      {casts.length === 0 && (
-        <Text style={styles.empty}>キャストが登録されていません</Text>
-      )}
+      {casts.length === 0 && <Text style={styles.empty}>キャストが登録されていません</Text>}
 
-      {casts.map((c: any) => (
-        <View key={c.id} style={styles.castCard}>
-          <View style={styles.castAvatar}>
-            <Text style={styles.castAvatarText}>{c.name?.[0] || '?'}</Text>
+      {casts.map((c: any) => {
+        const isToday = todayOnCastIds.includes(String(c.id));
+        const todayShift = todayShifts.find((s: any) => String(s.cast_id) === String(c.id));
+        return (
+          <View key={c.id} style={[styles.castCard, isToday && { borderColor: Colors.green, borderWidth: 1 }]}>
+            <View style={[styles.castAvatar, isToday && { backgroundColor: 'rgba(78,203,138,0.2)' }]}>
+              <Text style={[styles.castAvatarText, isToday && { color: Colors.green }]}>{c.name?.[0] || '?'}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={styles.castName}>{c.name}</Text>
+                {isToday && <View style={styles.ondutyBadge}><Text style={styles.ondutyBadgeText}>出勤中</Text></View>}
+              </View>
+              <Text style={styles.castSub}>
+                {c.age ? `${c.age}歳` : ''}{c.birthplace ? `　${c.birthplace}出身` : ''}
+              </Text>
+              <Text style={styles.castWage}>時給 {fmtYen(c.hourly_wage || 0)}</Text>
+              {isToday && todayShift && (
+                <Text style={{ fontSize: 11, color: Colors.green, marginTop: 2 }}>
+                  {todayShift.start_time?.slice(0,5)}〜{todayShift.end_time?.slice(0,5)}
+                </Text>
+              )}
+              {c.comment ? <Text style={styles.castComment}>{c.comment}</Text> : null}
+            </View>
+            <View style={{ gap: 6 }}>
+              <TouchableOpacity onPress={() => openEdit(c)} style={styles.iconBtn}>
+                <Ionicons name="create-outline" size={18} color={Colors.text2} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => { setAccountModalCast(c); setAccountEmail(''); }} style={styles.iconBtn}>
+                <Ionicons name="mail-outline" size={18} color={Colors.purple} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleDelete(c.id, c.name)} style={styles.iconBtn}>
+                <Ionicons name="trash-outline" size={18} color={Colors.red} />
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.castName}>{c.name}</Text>
-            <Text style={styles.castSub}>
-              {c.age ? `${c.age}歳` : ''}{c.birthplace ? `　${c.birthplace}出身` : ''}
-            </Text>
-            <Text style={styles.castWage}>時給 {fmtYen(c.hourly_wage || 0)}</Text>
-            {c.comment ? <Text style={styles.castComment}>{c.comment}</Text> : null}
-          </View>
-          <View style={{ gap: 6 }}>
-            <TouchableOpacity onPress={() => openEdit(c)} style={styles.iconBtn}>
-              <Ionicons name="create-outline" size={18} color={Colors.text2} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleDelete(c.id, c.name)} style={styles.iconBtn}>
-              <Ionicons name="trash-outline" size={18} color={Colors.red} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      ))}
+        );
+      })}
 
+      {/* キャスト追加・編集モーダル */}
       <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
         <View style={modal.container}>
           <View style={modal.header}>
@@ -161,6 +216,31 @@ function CastManagement({ shopId }: { shopId: string }) {
             </TouchableOpacity>
             <View style={{ height: 40 }} />
           </ScrollView>
+        </View>
+      </Modal>
+
+      {/* アカウント発行モーダル */}
+      <Modal visible={!!accountModalCast} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setAccountModalCast(null)}>
+        <View style={modal.container}>
+          <View style={modal.header}>
+            <TouchableOpacity onPress={() => setAccountModalCast(null)} style={modal.closeBtn}>
+              <Ionicons name="close" size={22} color={Colors.text2} />
+            </TouchableOpacity>
+            <Text style={modal.title}>{accountModalCast?.name}のアカウント発行</Text>
+            <View style={{ width: 36 }} />
+          </View>
+          <View style={{ padding: 20 }}>
+            <Text style={modal.label}>メールアドレス *</Text>
+            <TextInput style={modal.input} value={accountEmail} onChangeText={setAccountEmail}
+              placeholder="例: sakura@example.com" placeholderTextColor={Colors.text3}
+              keyboardType="email-address" autoCapitalize="none" />
+            <Text style={{ fontSize: 12, color: Colors.text3, marginBottom: 16, lineHeight: 18 }}>
+              パスワードは自動生成されてメールで送信されます。
+            </Text>
+            <TouchableOpacity style={modal.submitBtn} onPress={handleIssueAccount} disabled={issuingAccount || !accountEmail}>
+              {issuingAccount ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>アカウントを発行する</Text>}
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </View>
@@ -255,8 +335,9 @@ function SalarySummary({ shopId, month }: { shopId: string; month: string }) {
         }, 0);
         const basePay = Math.round(totalHours * (cast.hourly_wage || 0));
         const castAllows = allowances.filter((a: any) => a.cast_id === cast.id);
-        const allowTotal = castAllows.filter((a: any) => a.sign === '+').reduce((s: number, a: any) => s + a.amount, 0);
-        const deductTotal = castAllows.filter((a: any) => a.sign === '-').reduce((s: number, a: any) => s + a.amount, 0);
+        // amountが正→手当、負→控除（signフィールドは使わない）
+        const allowTotal = castAllows.filter((a: any) => a.amount > 0).reduce((s: number, a: any) => s + a.amount, 0);
+        const deductTotal = castAllows.filter((a: any) => a.amount < 0).reduce((s: number, a: any) => s + Math.abs(a.amount), 0);
         const total = basePay + allowTotal - deductTotal;
         return (
           <View key={cast.id} style={styles.salaryCard}>
@@ -327,7 +408,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
       await fetch(`${API_BASE}/cast-allowances`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shop_id: shopId, cast_id: castId, date, label, sign, amount: Number(amount) }),
+        body: JSON.stringify({ shop_id: shopId, cast_id: castId, date, label, amount: sign === '-' ? -Number(amount) : Number(amount) }),
       });
       setModalVisible(false);
       load();
@@ -360,8 +441,8 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
               <Text style={styles.castName}>{a.label}</Text>
               <Text style={styles.castSub}>{cast?.name || ''} · {a.date}</Text>
             </View>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: a.sign === '+' ? Colors.green : Colors.red }}>
-              {a.sign === '+' ? '+' : '-'}{fmtYen(a.amount)}
+            <Text style={{ fontSize: 14, fontWeight: '600', color: a.amount >= 0 ? Colors.green : Colors.red }}>
+              {a.amount >= 0 ? '+' : ''}{fmtYen(a.amount)}
             </Text>
             <TouchableOpacity onPress={() => handleDelete(a.id)} style={styles.iconBtn}>
               <Ionicons name="trash-outline" size={16} color={Colors.red} />
@@ -704,4 +785,11 @@ const styles = StyleSheet.create({
   monthBtn:       { padding: 6 },
   monthLabel:     { fontSize: 15, color: Colors.text, fontWeight: '500', minWidth: 90, textAlign: 'center' },
   empty:          { fontSize: 13, color: Colors.text3, paddingVertical: 20, textAlign: 'center' },
+  todayBlock:     { backgroundColor: 'rgba(78,203,138,0.08)', borderRadius: 12, borderWidth: 0.5, borderColor: Colors.green, padding: 12, marginBottom: 12 },
+  todayTitle:     { fontSize: 13, fontWeight: '600', color: Colors.green, marginBottom: 8 },
+  todayRow:       { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
+  todayCastName:  { fontSize: 13, fontWeight: '600', color: Colors.text, flex: 1 },
+  todayTime:      { fontSize: 12, color: Colors.green },
+  ondutyBadge:    { backgroundColor: 'rgba(78,203,138,0.2)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  ondutyBadgeText:{ fontSize: 10, color: Colors.green, fontWeight: '700' },
 });
