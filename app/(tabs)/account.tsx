@@ -138,7 +138,7 @@ export default function AccountScreen() {
   const handleLogout = () => {
     Alert.alert('ログアウト', 'ログアウトしますか？', [
       { text: 'キャンセル', style: 'cancel' },
-      { text: 'ログアウト', style: 'destructive', onPress: () => { logout(); router.dismissAll(); router.replace('/'); } },
+      { text: 'ログアウト', style: 'destructive', onPress: () => { logout(); setTimeout(() => router.replace('/'), 100); } },
     ]);
   };
 

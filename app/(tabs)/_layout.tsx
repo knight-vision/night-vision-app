@@ -8,7 +8,9 @@ export default function TabLayout() {
   const { role } = useAuthStore();
 
   useEffect(() => {
-    if (!role) router.replace('/');
+    if (!role) {
+      setTimeout(() => router.replace('/'), 50);
+    }
   }, [role]);
 
   if (!role) return null;
