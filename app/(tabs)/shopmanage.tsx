@@ -1,8 +1,9 @@
 import {
   ScrollView, View, Text, StyleSheet, TouchableOpacity,
-  TextInput, Alert, ActivityIndicator, Switch, Linking,
+  TextInput, Alert, ActivityIndicator, Switch, Linking, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, fmtYen } from '../../constants/theme';
@@ -85,6 +86,42 @@ function ShopInfo({ shopId }: { shopId: string }) {
     setWeeklyHours(prev => ({ ...prev, [day]: { ...(prev[day] || {}), [field]: value } }));
   };
 
+  const [shopImages, setShopImages] = useState<string[]>([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const loadImages = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/shop-image?shop_id=${shopId}`);
+      const data = await res.json();
+      setShopImages(Array.isArray(data) ? data.map((d: any) => d.url || d.image_url || d) : []);
+    } catch { }
+  }, [shopId]);
+
+  useEffect(() => { if (shopId) loadImages(); }, [loadImages]);
+
+  const handlePickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('権限が必要です', 'フォトライブラリへのアクセスを許可してください');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+    });
+    if (result.canceled || !result.assets[0]) return;
+    setUploadingImage(true);
+    try {
+      const asset = result.assets[0];
+      const formData = new FormData();
+      formData.append('shop_id', shopId);
+      formData.append('image', { uri: asset.uri, type: 'image/jpeg', name: 'shop_image.jpg' } as any);
+      const res = await fetch(`${API_BASE}/shop-image`, { method: 'POST', body: formData });
+      if (res.ok) { Alert.alert('アップロードしました'); loadImages(); }
+      else { Alert.alert('エラー', 'アップロードに失敗しました'); }
+    } catch { Alert.alert('エラー', 'アップロードに失敗しました'); } finally { setUploadingImage(false); }
+  };
+
   const openWebsite = () => {
     const url = shopSlug
       ? `https://www.night-vision.jp/shops/${shopSlug}`
@@ -102,6 +139,23 @@ function ShopInfo({ shopId }: { shopId: string }) {
         <Text style={styles.webLinkText}>Webサイトで店舗ページを確認</Text>
         <Ionicons name="open-outline" size={16} color={Colors.gold} />
       </TouchableOpacity>
+
+      {/* 店舗画像 */}
+      <Text style={styles.sectionTitle}>店舗画像</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+        {shopImages.map((url, i) => (
+          <Image key={i} source={{ uri: url }} style={{ width: 120, height: 90, borderRadius: 10, marginRight: 8 }} />
+        ))}
+        <TouchableOpacity onPress={handlePickImage} disabled={uploadingImage}
+          style={{ width: 120, height: 90, borderRadius: 10, borderWidth: 1, borderColor: Colors.gold, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', marginRight: 8 }}>
+          {uploadingImage ? <ActivityIndicator color={Colors.gold} /> : (
+            <>
+              <Ionicons name="camera-outline" size={24} color={Colors.gold} />
+              <Text style={{ fontSize: 11, color: Colors.gold, marginTop: 4 }}>画像を追加</Text>
+            </>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
 
       <Text style={styles.sectionTitle}>基本情報</Text>
       <Field label="店舗名" value={shopName} onChange={setShopName} placeholder="例: Club NIGHT" />

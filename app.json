@@ -51,6 +51,12 @@
           "icon": "./assets/images/icon.png",
           "color": "#0a0a0f"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "店舗画像のアップロードに使用します"
+        }
       ]
     ],
     "experiments": {

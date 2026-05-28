@@ -1,403 +1,623 @@
-import { ScrollView, View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
+import {
+  ScrollView, View, Text, StyleSheet, ActivityIndicator,
+  TouchableOpacity, Modal, Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
-import { SectionCard } from '../../components/SectionCard';
 
-const STATUS_MAP: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  pending:  { label: '審査中',   color: Colors.gold,  bg: 'rgba(201,168,76,0.1)',  border: 'rgba(201,168,76,0.3)' },
-  approved: { label: '承認済み', color: Colors.green, bg: 'rgba(78,203,138,0.1)',  border: 'rgba(78,203,138,0.3)' },
-  rejected: { label: '否認',     color: Colors.red,   bg: 'rgba(224,92,106,0.1)',  border: 'rgba(224,92,106,0.3)' },
-};
+const CAST_COLORS = ['#ff6b9d','#00d4ff','#ffd700','#a855f7','#00e5a0','#ff9500','#00c7be','#ff3b30','#34aadc','#4cd964'];
+const HOURS = Array.from({ length: 31 }, (_, i) => i); // 0〜30（翌6時まで）
+const MINUTES = ['00', '10', '20', '30', '40', '50'];
+const CAL_DAYS = ['月', '火', '水', '木', '金', '土', '日'];
 
-const CAL_DAYS = ['月','火','水','木','金','土','日'];
+function getDateStr(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getWeekDates(base: string): string[] {
+  const b = new Date(base + 'T00:00:00');
+  const day = b.getDay();
+  const monday = new Date(b);
+  monday.setDate(b.getDate() - (day === 0 ? 6 : day - 1));
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return getDateStr(d);
+  });
+}
+function fmtFull(ds: string) {
+  const d = new Date(ds + 'T00:00:00');
+  return `${d.getMonth()+1}月${d.getDate()}日(${CAL_DAYS[d.getDay() === 0 ? 6 : d.getDay()-1]})`;
+}
+function tLabel(h: number) { return h >= 24 ? `翌${h-24}時` : `${h}時`; }
+function getCastColor(index: number) { return CAST_COLORS[index % CAST_COLORS.length]; }
 
-// シフト希望提出モーダル
-function ShiftRequestModal({ visible, onClose, onSubmit }: {
-  visible: boolean;
-  onClose: () => void;
-  onSubmit: (data: any) => Promise<void>;
-}) {
-  const [date, setDate] = useState('');
-  const [startTime, setStartTime] = useState('20:00');
-  const [endTime, setEndTime] = useState('03:00');
-  const [note, setNote] = useState('');
-  const [isOff, setIsOff] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleSubmit = async () => {
-    if (!date) { Alert.alert('エラー', '日付を入力してください（例: 2026-06-01）'); return; }
-    setSubmitting(true);
-    await onSubmit({ date, start_time: isOff ? null : startTime, end_time: isOff ? null : endTime, note, is_off: isOff });
-    setSubmitting(false);
-    setDate(''); setStartTime('20:00'); setEndTime('03:00'); setNote(''); setIsOff(false);
-    onClose();
-  };
-
+// 時間セレクター
+function TimeSelector({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const parts = value.split(':');
+  const h = parseInt(parts[0]) || 0;
+  const m = parts[1] || '00';
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={modal.container}>
-        <View style={modal.header}>
-          <TouchableOpacity onPress={onClose} style={modal.closeBtn}>
-            <Ionicons name="close" size={22} color={Colors.text2} />
+    <View style={ts.wrap}>
+      <ScrollView style={ts.scroll} showsVerticalScrollIndicator={false} nestedScrollEnabled>
+        {HOURS.map(hh => (
+          <TouchableOpacity key={hh} onPress={() => onChange(`${String(hh % 24).padStart(2,'0')}:${m}`)}
+            style={[ts.item, h === hh && ts.active]}>
+            <Text style={[ts.text, h === hh && ts.textActive]}>{tLabel(hh)}</Text>
           </TouchableOpacity>
-          <Text style={modal.title}>シフト希望を提出</Text>
-          <View style={{ width: 36 }} />
-        </View>
-        <View style={modal.body}>
-          <Text style={modal.label}>日付</Text>
-          <TextInput style={modal.input} placeholder="例: 2026-06-01" placeholderTextColor={Colors.text3}
-            value={date} onChangeText={setDate} keyboardType="numbers-and-punctuation" />
-
-          <TouchableOpacity style={[modal.toggleRow, isOff && { borderColor: Colors.gold }]} onPress={() => setIsOff(!isOff)}>
-            <Ionicons name={isOff ? 'checkbox' : 'square-outline'} size={20} color={isOff ? Colors.gold : Colors.text3} />
-            <Text style={[modal.toggleText, isOff && { color: Colors.gold }]}>休日希望</Text>
+        ))}
+      </ScrollView>
+      <Text style={ts.colon}>:</Text>
+      <ScrollView style={[ts.scroll, { width: 44 }]} showsVerticalScrollIndicator={false} nestedScrollEnabled>
+        {MINUTES.map(mm => (
+          <TouchableOpacity key={mm} onPress={() => onChange(`${String(h % 24).padStart(2,'0')}:${mm}`)}
+            style={[ts.item, m === mm && ts.active]}>
+            <Text style={[ts.text, m === mm && ts.textActive]}>{mm}分</Text>
           </TouchableOpacity>
-
-          {!isOff && (
-            <>
-              <Text style={modal.label}>出勤時間</Text>
-              <TextInput style={modal.input} placeholder="20:00" placeholderTextColor={Colors.text3}
-                value={startTime} onChangeText={setStartTime} keyboardType="numbers-and-punctuation" />
-              <Text style={modal.label}>退勤時間</Text>
-              <TextInput style={modal.input} placeholder="03:00" placeholderTextColor={Colors.text3}
-                value={endTime} onChangeText={setEndTime} keyboardType="numbers-and-punctuation" />
-            </>
-          )}
-
-          <Text style={modal.label}>メモ（任意）</Text>
-          <TextInput style={[modal.input, { height: 80, textAlignVertical: 'top' }]}
-            placeholder="備考があれば入力してください" placeholderTextColor={Colors.text3}
-            value={note} onChangeText={setNote} multiline />
-
-          <TouchableOpacity style={modal.submitBtn} onPress={handleSubmit} disabled={submitting} activeOpacity={0.85}>
-            {submitting ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>提出する</Text>}
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
-// オーナー向けシフト画面
+// ── オーナー向けシフト管理 ──────────────────────────────────────
 function OwnerShiftView({ shopId }: { shopId: string }) {
-  const [requests, setRequests] = useState<any[]>([]);
+  const [weekBase, setWeekBase] = useState(getDateStr(new Date()));
   const [confirmed, setConfirmed] = useState<any[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const now = new Date();
+  const [saving, setSaving] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Record<string, { cast_id: string; start_time: string; end_time: string }[]>>({});
 
-  const load = async () => {
+  const dates = getWeekDates(weekBase);
+
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [reqRes, confRes] = await Promise.all([
-        fetch(`${API_BASE}/shift-request?shop_id=${shopId}`),
-        fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${now.getFullYear()}&month=${now.getMonth() + 1}`),
+      const wb = new Date(weekBase + 'T00:00:00');
+      const wy = wb.getFullYear(), wm = wb.getMonth() + 1;
+      const [r1, castRes] = await Promise.all([
+        fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${wy}&month=${wm}`),
+        fetch(`${API_BASE}/cast-wage?shop_id=${shopId}`),
       ]);
-      const req = await reqRes.json();
-      const conf = await confRes.json();
-      setRequests(Array.isArray(req) ? req : []);
-      setConfirmed(Array.isArray(conf) ? conf : []);
-    } catch (e) {
-      console.log('Load error:', e);
-    } finally {
-      setLoading(false);
-    }
+      const d1 = await r1.json();
+      setConfirmed(Array.isArray(d1.confirmed) ? d1.confirmed : Array.isArray(d1) ? d1 : []);
+      setRequests(Array.isArray(d1.requests) ? d1.requests : []);
+      const castData = await castRes.json();
+      setCasts(Array.isArray(castData) ? castData : []);
+    } catch { } finally { setLoading(false); }
+  }, [shopId, weekBase]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const confirmedOnDate = (date: string) => confirmed.filter((s: any) => s.date === date);
+  const pendingOnDate = (date: string) => requests.filter((s: any) => s.date === date && s.status === 'pending');
+  const isInDraft = (date: string, castId: string) => (draft[date] || []).some(e => e.cast_id === castId);
+
+  const addToDraft = (date: string, castId: string) => {
+    const req = requests.find((r: any) => String(r.cast_id) === castId && r.date === date);
+    setDraft(prev => ({
+      ...prev,
+      [date]: [...(prev[date] || []).filter(e => e.cast_id !== castId), {
+        cast_id: castId,
+        start_time: req?.start_time?.slice(0, 5) || '20:00',
+        end_time: req?.end_time?.slice(0, 5) || '24:00',
+      }],
+    }));
   };
 
-  useEffect(() => { load(); }, [shopId]);
-
-  const handleApprove = async (requestId: string, castId: string, date: string, startTime: string, endTime: string) => {
-    Alert.alert('シフトを承認', 'このシフトを承認しますか？', [
-      { text: 'キャンセル', style: 'cancel' },
-      { text: '承認', onPress: async () => {
-        try {
-          // シフト希望をapprovedに更新
-          await fetch(`${API_BASE}/shift-request`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: requestId, status: 'approved', shop_id: shopId }),
-          });
-          // 確定シフトに追加
-          await fetch(`${API_BASE}/confirm-shift`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ shop_id: shopId, cast_id: castId, date, start_time: startTime, end_time: endTime }),
-          });
-          Alert.alert('承認しました');
-          load();
-        } catch {
-          Alert.alert('エラー', '処理に失敗しました');
-        }
-      }},
-    ]);
+  const removeFromDraft = (date: string, castId: string) => {
+    setDraft(prev => {
+      const n = { ...prev };
+      n[date] = (n[date] || []).filter(e => e.cast_id !== castId);
+      if (!n[date].length) delete n[date];
+      return n;
+    });
   };
 
-  const handleReject = async (requestId: string) => {
-    Alert.alert('シフトを否認', 'このシフトを否認しますか？', [
-      { text: 'キャンセル', style: 'cancel' },
-      { text: '否認', style: 'destructive', onPress: async () => {
-        try {
-          await fetch(`${API_BASE}/shift-request`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: requestId, status: 'rejected', shop_id: shopId }),
-          });
-          Alert.alert('否認しました');
-          load();
-        } catch {
-          Alert.alert('エラー', '処理に失敗しました');
-        }
-      }},
-    ]);
+  const updateDraftTime = (date: string, castId: string, field: 'start_time' | 'end_time', val: string) => {
+    setDraft(prev => ({
+      ...prev,
+      [date]: (prev[date] || []).map(e => e.cast_id === castId ? { ...e, [field]: val } : e),
+    }));
+  };
+
+  const totalDraft = Object.values(draft).flat().length;
+
+  const handleConfirm = async () => {
+    const shifts = Object.entries(draft).flatMap(([date, entries]) =>
+      entries.map(e => ({ cast_id: e.cast_id, date, start_time: e.start_time, end_time: e.end_time }))
+    );
+    if (!shifts.length) { Alert.alert('確定するシフトがありません'); return; }
+    setSaving(true);
+    try {
+      const res = await fetch(`${API_BASE}/confirm-shift`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shop_id: shopId, shifts }),
+      });
+      if (res.ok) {
+        Alert.alert(`${shifts.length}件のシフトを確定しました`);
+        setDraft({});
+        load();
+      } else { Alert.alert('エラー', '確定に失敗しました'); }
+    } catch { Alert.alert('エラー', '確定に失敗しました'); } finally { setSaving(false); }
+  };
+
+  const handleDeleteConfirmed = async (castId: string, date: string) => {
+    try {
+      await fetch(`${API_BASE}/confirm-shift`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cast_id: castId, date }),
+      });
+      load();
+    } catch { Alert.alert('エラー', '削除に失敗しました'); }
+  };
+
+  const handleDeleteRequest = async (id: string) => {
+    try {
+      await fetch(`${API_BASE}/cast-shift-request`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      load();
+    } catch { }
   };
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
 
-  const pending = requests.filter(r => r.status === 'pending');
-  const approved = requests.filter(r => r.status === 'approved');
-
   return (
-    <>
-      {/* 承認待ち */}
-      <SectionCard title={`承認待ち（${pending.length}件）`}>
-        {pending.length === 0 ? (
-          <Text style={styles.emptyText}>承認待ちのシフトはありません</Text>
-        ) : pending.map((r: any, i: number) => (
-          <View key={r.id || i} style={[styles.shiftRow, i === pending.length - 1 && { borderBottomWidth: 0 }]}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.shiftDay}>{r.casts?.name || r.cast_name || 'キャスト'}</Text>
-              <Text style={styles.shiftTime}>
-                {r.date}　{r.start_time && r.end_time ? `${r.start_time}〜${r.end_time}` : '休日希望'}
-              </Text>
-              {r.note ? <Text style={styles.shiftNote}>{r.note}</Text> : null}
-            </View>
-            <View style={{ flexDirection: 'row', gap: 6 }}>
-              <TouchableOpacity
-                style={[styles.actionBtn, { borderColor: Colors.green }]}
-                onPress={() => handleApprove(r.id, r.cast_id, r.date, r.start_time, r.end_time)}
-              >
-                <Text style={[styles.actionBtnText, { color: Colors.green }]}>承認</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionBtn, { borderColor: Colors.red }]}
-                onPress={() => handleReject(r.id)}
-              >
-                <Text style={[styles.actionBtnText, { color: Colors.red }]}>否認</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </SectionCard>
+    <View>
+      {/* 週ナビ */}
+      <View style={styles.weekNav}>
+        <TouchableOpacity onPress={() => { const d = new Date(weekBase + 'T00:00:00'); d.setDate(d.getDate()-7); setWeekBase(getDateStr(d)); }} style={styles.weekBtn}>
+          <Ionicons name="chevron-back" size={18} color={Colors.text2} />
+          <Text style={styles.weekBtnText}>前週</Text>
+        </TouchableOpacity>
+        <Text style={styles.weekLabel}>{dates[0].slice(5).replace('-','/')} 〜 {dates[6].slice(5).replace('-','/')}</Text>
+        <TouchableOpacity onPress={() => { const d = new Date(weekBase + 'T00:00:00'); d.setDate(d.getDate()+7); setWeekBase(getDateStr(d)); }} style={styles.weekBtn}>
+          <Text style={styles.weekBtnText}>次週</Text>
+          <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity onPress={() => setWeekBase(getDateStr(new Date()))} style={styles.todayBtn}>
+        <Text style={styles.todayBtnText}>今週</Text>
+      </TouchableOpacity>
 
-      {/* 今月の確定シフト */}
-      <SectionCard title={`今月の確定シフト（${confirmed.length}件）`}>
-        {confirmed.length === 0 ? (
-          <Text style={styles.emptyText}>確定シフトはありません</Text>
-        ) : confirmed.map((c: any, i: number) => (
-          <View key={i} style={[styles.shiftRow, i === confirmed.length - 1 && { borderBottomWidth: 0 }]}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.shiftDay}>{c.casts?.name || c.cast_name || 'キャスト'}</Text>
-              <Text style={styles.shiftTime}>{c.date}　{c.start_time}〜{c.end_time}</Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: 'rgba(78,203,138,0.1)', borderColor: 'rgba(78,203,138,0.3)' }]}>
-              <Text style={[styles.badgeText, { color: Colors.green }]}>確定</Text>
-            </View>
-          </View>
-        ))}
-      </SectionCard>
-
-      {/* 承認済み希望 */}
-      {approved.length > 0 && (
-        <SectionCard title={`承認済み（${approved.length}件）`}>
-          {approved.map((r: any, i: number) => (
-            <View key={i} style={[styles.shiftRow, i === approved.length - 1 && { borderBottomWidth: 0 }]}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.shiftDay}>{r.casts?.name || r.cast_name || 'キャスト'}</Text>
-                <Text style={styles.shiftTime}>{r.date}　{r.start_time && r.end_time ? `${r.start_time}〜${r.end_time}` : '休日希望'}</Text>
-              </View>
-              <View style={[styles.badge, { backgroundColor: 'rgba(78,203,138,0.1)', borderColor: 'rgba(78,203,138,0.3)' }]}>
-                <Text style={[styles.badgeText, { color: Colors.green }]}>承認済み</Text>
-              </View>
-            </View>
-          ))}
-        </SectionCard>
+      {/* 確定ボタン */}
+      {totalDraft > 0 && (
+        <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm} disabled={saving}>
+          {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={styles.confirmBtnText}>📲 {totalDraft}件のシフトを確定</Text>}
+        </TouchableOpacity>
       )}
-    </>
+
+      {/* 日別リスト */}
+      {dates.map(date => {
+        const conf = confirmedOnDate(date);
+        const pend = pendingOnDate(date);
+        const draftEntries = draft[date] || [];
+        const isSelected = selectedDate === date;
+        const today = date === getDateStr(new Date());
+
+        return (
+          <View key={date} style={styles.dateBlock}>
+            {/* 日付行 */}
+            <TouchableOpacity style={[styles.dateRow, today && styles.dateRowToday, isSelected && styles.dateRowSelected]}
+              onPress={() => setSelectedDate(isSelected ? null : date)}>
+              <Text style={[styles.dateLabel, today && { color: Colors.gold }]}>{fmtFull(date)}</Text>
+              {today && <View style={styles.todayBadge}><Text style={styles.todayBadgeText}>今日</Text></View>}
+              {pend.length > 0 && <Text style={styles.pendingBadge}>希望{pend.length}件</Text>}
+              <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginLeft: 4 }}>
+                {conf.map((s: any) => {
+                  const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
+                  const color = getCastColor(ci);
+                  return (
+                    <View key={s.id} style={[styles.castChip, { backgroundColor: color + '22', borderColor: color + '55' }]}>
+                      <Text style={[styles.castChipText, { color }]}>{s.casts?.name} {s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
+                    </View>
+                  );
+                })}
+                {draftEntries.map(e => {
+                  const cast = casts.find((c: any) => String(c.id) === e.cast_id);
+                  const ci = casts.findIndex((c: any) => String(c.id) === e.cast_id);
+                  const color = getCastColor(ci);
+                  return (
+                    <View key={e.cast_id} style={[styles.castChip, { backgroundColor: color + '33', borderColor: color, borderStyle: 'dashed' }]}>
+                      <Text style={[styles.castChipText, { color }]}>{cast?.name} {e.start_time}〜{e.end_time}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+              <Ionicons name={isSelected ? 'chevron-up' : 'chevron-down'} size={16} color={Colors.text3} />
+            </TouchableOpacity>
+
+            {/* 展開パネル */}
+            {isSelected && (
+              <View style={styles.datePanel}>
+                {/* 希望シフト */}
+                {pend.length > 0 && (
+                  <View style={styles.panelSection}>
+                    <Text style={styles.panelSectionTitle}>📩 希望シフト</Text>
+                    {pend.map((req: any) => {
+                      const ci = casts.findIndex((c: any) => String(c.id) === String(req.cast_id));
+                      const color = getCastColor(ci);
+                      return (
+                        <View key={req.id} style={[styles.reqRow, { backgroundColor: color + '11', borderColor: color + '33' }]}>
+                          <Text style={[styles.reqCastName, { color }]}>{req.casts?.name}</Text>
+                          <Text style={styles.reqTime}>{req.start_time?.slice(0,5)}〜{req.end_time?.slice(0,5)}</Text>
+                          {req.note ? <Text style={styles.reqNote}>📝{req.note}</Text> : null}
+                          <TouchableOpacity style={styles.approveBtn} onPress={() => addToDraft(date, String(req.cast_id))}>
+                            <Text style={styles.approveBtnText}>確定へ</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => handleDeleteRequest(req.id)} style={styles.deleteReqBtn}>
+                            <Ionicons name="trash-outline" size={14} color={Colors.red} />
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+
+                {/* キャスト選択 */}
+                <View style={styles.panelSection}>
+                  <Text style={styles.panelSectionTitle}>出勤キャストを選択</Text>
+                  <View style={styles.castSelectRow}>
+                    {casts.map((cast: any, ci: number) => {
+                      const selected = isInDraft(date, String(cast.id));
+                      const hasReq = requests.some((r: any) => String(r.cast_id) === String(cast.id) && r.date === date);
+                      const color = getCastColor(ci);
+                      return (
+                        <TouchableOpacity key={cast.id}
+                          onPress={() => selected ? removeFromDraft(date, String(cast.id)) : addToDraft(date, String(cast.id))}
+                          style={[styles.castSelectBtn, {
+                            backgroundColor: selected ? color : Colors.surface2,
+                            borderColor: selected ? color : hasReq ? color + '88' : Colors.border,
+                          }]}>
+                          <Text style={[styles.castSelectBtnText, { color: selected ? '#fff' : hasReq ? color : Colors.text2 }]}>
+                            {selected ? '✓ ' : ''}{cast.name}{hasReq && !selected ? ' 📩' : ''}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </View>
+
+                {/* 時間設定 */}
+                {(draft[date] || []).map(entry => {
+                  const cast = casts.find((c: any) => String(c.id) === entry.cast_id);
+                  const ci = casts.findIndex((c: any) => String(c.id) === entry.cast_id);
+                  const color = getCastColor(ci);
+                  return (
+                    <View key={entry.cast_id} style={[styles.timeSetBlock, { backgroundColor: color + '11', borderColor: color + '44' }]}>
+                      <Text style={[styles.timeSetName, { color }]}>{cast?.name}</Text>
+                      <View style={styles.timeSetRow}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.timeSetLabel}>開始</Text>
+                          <TimeSelector value={entry.start_time} onChange={v => updateDraftTime(date, entry.cast_id, 'start_time', v)} />
+                        </View>
+                        <Text style={styles.timeSetSep}>〜</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.timeSetLabel}>終了</Text>
+                          <TimeSelector value={entry.end_time} onChange={v => updateDraftTime(date, entry.cast_id, 'end_time', v)} />
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })}
+
+                {/* 確定済み */}
+                {conf.length > 0 && (
+                  <View style={styles.panelSection}>
+                    <Text style={styles.panelSectionTitle}>📌 確定済み</Text>
+                    {conf.map((s: any) => {
+                      const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
+                      const color = getCastColor(ci);
+                      return (
+                        <View key={s.id} style={styles.confirmedRow}>
+                          <Text style={[styles.confirmedName, { color }]}>{s.casts?.name}</Text>
+                          <Text style={styles.confirmedTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
+                          <TouchableOpacity style={styles.changeTimeBtn} onPress={() => addToDraft(date, String(s.cast_id))}>
+                            <Text style={styles.changeTimeBtnText}>時間変更</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => Alert.alert('削除確認', `${s.casts?.name}のシフトを削除しますか？`, [
+                            { text: 'キャンセル', style: 'cancel' },
+                            { text: '削除', style: 'destructive', onPress: () => handleDeleteConfirmed(String(s.cast_id), date) },
+                          ])} style={styles.deleteConfBtn}>
+                            <Ionicons name="trash-outline" size={14} color={Colors.red} />
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
+        );
+      })}
+
+      {totalDraft > 0 && (
+        <TouchableOpacity style={[styles.confirmBtn, { marginTop: 16 }]} onPress={handleConfirm} disabled={saving}>
+          {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={styles.confirmBtnText}>📲 {totalDraft}件のシフトを確定</Text>}
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
-// キャスト向けシフト画面
+// ── キャスト向けシフト希望提出 ──────────────────────────────────
 function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
-  const [data, setData] = useState<any>(null);
+  const [shifts, setShifts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selDate, setSelDate] = useState(getDateStr(new Date()));
+  const [startTime, setStartTime] = useState('20:00');
+  const [endTime, setEndTime] = useState('24:00');
+  const [note, setNote] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const load = () => {
-    fetch(`${API_BASE}/cast/performance-summary?cast_id=${castId}&shop_id=${shopId}`)
-      .then(r => r.json())
-      .then(d => { setData(d); setLoading(false); })
-      .catch(() => setLoading(false));
-  };
+  // カレンダー
+  const now = new Date();
+  const [calYear, setCalYear] = useState(now.getFullYear());
+  const [calMonth, setCalMonth] = useState(now.getMonth() + 1);
 
-  useEffect(() => { load(); }, [castId, shopId]);
-
-  const handleSubmit = async (formData: any) => {
+  const load = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/shift-request`, {
+      const res = await fetch(`${API_BASE}/cast-shift-request?cast_id=${castId}&shop_id=${shopId}`);
+      const data = await res.json();
+      setShifts(Array.isArray(data) ? data : []);
+    } catch { setShifts([]); } finally { setLoading(false); }
+  }, [castId, shopId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      await fetch(`${API_BASE}/cast-shift-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cast_id: castId, shop_id: shopId,
-          date: formData.date,
-          start_time: formData.is_off ? null : formData.start_time,
-          end_time: formData.is_off ? null : formData.end_time,
-          note: formData.is_off ? '休日希望' : formData.note,
-          status: 'pending',
-        }),
+        body: JSON.stringify({ cast_id: castId, shop_id: shopId, date: selDate, start_time: startTime, end_time: endTime, note }),
       });
-      if (res.ok) {
-        Alert.alert('提出しました', 'オーナーの承認をお待ちください');
-        load();
-      } else {
-        Alert.alert('エラー', '提出に失敗しました');
-      }
-    } catch {
-      Alert.alert('エラー', '通信エラーが発生しました');
-    }
+      Alert.alert('提出しました');
+      setModalVisible(false);
+      load();
+    } catch { Alert.alert('エラー', '提出に失敗しました'); } finally { setSubmitting(false); }
   };
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const offset = (firstDay + 6) % 7;
-  const calCells: (number | null)[] = Array(offset).fill(null);
-  for (let d = 1; d <= daysInMonth; d++) calCells.push(d);
-  const confirmedDates = new Set((data?.confirmed_shifts || []).map((s: any) => new Date(s.date).getDate()));
-  const today = now.getDate();
+  // カレンダー生成
+  const firstDay = new Date(calYear, calMonth - 1, 1);
+  const lastDay = new Date(calYear, calMonth, 0);
+  const startPad = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+  const calDays: (number | null)[] = [...Array(startPad).fill(null), ...Array.from({ length: lastDay.getDate() }, (_, i) => i + 1)];
+  const shiftDates = shifts.map(s => s.date);
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
 
   return (
-    <>
-      <ShiftRequestModal visible={modalVisible} onClose={() => setModalVisible(false)} onSubmit={handleSubmit} />
-
-      <SectionCard title={`${year}年${month + 1}月`}>
+    <View>
+      {/* カレンダー */}
+      <View style={styles.calCard}>
         <View style={styles.calHeader}>
+          <TouchableOpacity onPress={() => { const d = new Date(calYear, calMonth-2, 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()+1); }}>
+            <Ionicons name="chevron-back" size={20} color={Colors.text2} />
+          </TouchableOpacity>
+          <Text style={styles.calTitle}>{calYear}年{calMonth}月</Text>
+          <TouchableOpacity onPress={() => { const d = new Date(calYear, calMonth, 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()+1); }}>
+            <Ionicons name="chevron-forward" size={20} color={Colors.text2} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.calDayRow}>
           {CAL_DAYS.map(d => <Text key={d} style={styles.calDayLabel}>{d}</Text>)}
         </View>
         <View style={styles.calGrid}>
-          {calCells.map((day, i) => (
-            <View key={i} style={[
-              styles.calCell,
-              day && confirmedDates.has(day) && styles.calShift,
-              day === today && styles.calToday,
-              !day && { backgroundColor: 'transparent' },
-            ]}>
-              <Text style={[
-                styles.calNum,
-                day && confirmedDates.has(day) && { color: Colors.gold },
-                day === today && { color: Colors.purple },
-                !day && { color: 'transparent' },
-              ]}>{day ?? 0}</Text>
-            </View>
-          ))}
-        </View>
-      </SectionCard>
-
-      <SectionCard title="シフト希望" actionLabel="＋ 追加" onAction={() => setModalVisible(true)}>
-        {(data?.shift_requests || []).length === 0 ? (
-          <Text style={styles.emptyText}>シフト希望はありません</Text>
-        ) : (data.shift_requests || []).map((s: any, i: number) => {
-          const st = STATUS_MAP[s.status] || STATUS_MAP.pending;
-          return (
-            <View key={i} style={[styles.shiftRow, i === data.shift_requests.length - 1 && { borderBottomWidth: 0 }]}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.shiftDay}>{s.date}</Text>
-                <Text style={styles.shiftTime}>
-                  {s.start_time && s.end_time ? `${s.start_time}〜${s.end_time}` : s.note || '休日希望'}
-                </Text>
-              </View>
-              <View style={[styles.badge, { backgroundColor: st.bg, borderColor: st.border }]}>
-                <Text style={[styles.badgeText, { color: st.color }]}>{st.label}</Text>
-              </View>
-            </View>
-          );
-        })}
-      </SectionCard>
-
-      <View style={styles.legend}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: Colors.goldDim, borderColor: 'rgba(201,168,76,0.3)' }]} />
-          <Text style={styles.legendText}>出勤日</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: Colors.purpleDim, borderColor: 'rgba(155,127,232,0.4)' }]} />
-          <Text style={styles.legendText}>今日</Text>
+          {calDays.map((day, i) => {
+            if (!day) return <View key={`pad-${i}`} style={styles.calCell} />;
+            const dateStr = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const hasShift = shiftDates.includes(dateStr);
+            const isToday = dateStr === getDateStr(new Date());
+            return (
+              <TouchableOpacity key={dateStr} style={[styles.calCell, hasShift && styles.calCellShift, isToday && styles.calCellToday]}
+                onPress={() => { setSelDate(dateStr); setModalVisible(true); }}>
+                <Text style={[styles.calDayNum, hasShift && styles.calDayNumShift, isToday && styles.calDayNumToday]}>{day}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
-    </>
+
+      <TouchableOpacity style={styles.addShiftBtn} onPress={() => setModalVisible(true)}>
+        <Ionicons name="add-circle-outline" size={18} color={Colors.gold} />
+        <Text style={styles.addShiftBtnText}>シフト希望を追加</Text>
+      </TouchableOpacity>
+
+      {/* 提出済みリスト */}
+      {shifts.sort((a, b) => a.date.localeCompare(b.date)).map((s: any) => (
+        <View key={s.id} style={styles.shiftItem}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.shiftDate}>{s.date}</Text>
+            <Text style={styles.shiftTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
+          </View>
+          <View style={[styles.statusBadge, {
+            backgroundColor: s.status === 'approved' ? 'rgba(78,203,138,0.15)' : s.status === 'rejected' ? 'rgba(224,92,106,0.15)' : 'rgba(201,168,76,0.15)',
+          }]}>
+            <Text style={[styles.statusText, {
+              color: s.status === 'approved' ? Colors.green : s.status === 'rejected' ? Colors.red : Colors.gold,
+            }]}>{s.status === 'approved' ? '承認済み' : s.status === 'rejected' ? '否認' : '審査中'}</Text>
+          </View>
+        </View>
+      ))}
+
+      {/* 希望提出モーダル */}
+      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalClose}>
+              <Ionicons name="close" size={22} color={Colors.text2} />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>シフト希望を提出</Text>
+            <View style={{ width: 36 }} />
+          </View>
+          <ScrollView style={{ padding: 20 }}>
+            <Text style={styles.modalLabel}>日付</Text>
+            {/* 簡易カレンダー選択 */}
+            <View style={styles.miniCalWrap}>
+              <View style={styles.calHeader}>
+                <TouchableOpacity onPress={() => { const d = new Date(calYear, calMonth-2, 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()+1); }}>
+                  <Ionicons name="chevron-back" size={18} color={Colors.text2} />
+                </TouchableOpacity>
+                <Text style={styles.calTitle}>{calYear}年{calMonth}月</Text>
+                <TouchableOpacity onPress={() => { const d = new Date(calYear, calMonth, 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()+1); }}>
+                  <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.calDayRow}>
+                {CAL_DAYS.map(d => <Text key={d} style={styles.calDayLabel}>{d}</Text>)}
+              </View>
+              <View style={styles.calGrid}>
+                {calDays.map((day, i) => {
+                  if (!day) return <View key={`pad2-${i}`} style={styles.calCell} />;
+                  const dateStr = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                  const isSelected = dateStr === selDate;
+                  return (
+                    <TouchableOpacity key={dateStr} onPress={() => setSelDate(dateStr)}
+                      style={[styles.calCell, isSelected && styles.calCellSelected]}>
+                      <Text style={[styles.calDayNum, isSelected && { color: '#1a1200', fontWeight: '700' }]}>{day}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+            <Text style={[styles.modalLabel, { marginTop: 16 }]}>選択日: <Text style={{ color: Colors.gold }}>{selDate}</Text></Text>
+
+            <Text style={[styles.modalLabel, { marginTop: 16 }]}>開始時間</Text>
+            <TimeSelector value={startTime} onChange={setStartTime} />
+
+            <Text style={[styles.modalLabel, { marginTop: 16 }]}>終了時間</Text>
+            <TimeSelector value={endTime} onChange={setEndTime} />
+
+            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={submitting}>
+              {submitting ? <ActivityIndicator color="#1a1200" /> : <Text style={styles.submitBtnText}>提出する</Text>}
+            </TouchableOpacity>
+            <View style={{ height: 40 }} />
+          </ScrollView>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
+// ── メイン ──────────────────────────────────────────────────────
 export default function ShiftScreen() {
   const { role, shopId, castId } = useAuthStore();
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
+      <Text style={styles.screenTitle}>シフト管理</Text>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={styles.screenTitle}>シフト</Text>
         {role === 'owner' && shopId
           ? <OwnerShiftView shopId={shopId} />
-          : role === 'cast' && castId && shopId
+          : castId && shopId
           ? <CastShiftView castId={castId} shopId={shopId} />
-          : <Text style={styles.emptyText}>データを取得できませんでした</Text>
+          : null
         }
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const modal = StyleSheet.create({
-  container:  { flex: 1, backgroundColor: Colors.bg },
-  header:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  closeBtn:   { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  title:      { fontSize: 16, fontWeight: '500', color: Colors.text },
-  body:       { padding: 20, gap: 10 },
-  label:      { fontSize: 12, color: Colors.text2, marginTop: 4 },
-  input:      { backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, padding: 12, color: Colors.text, fontSize: 14 },
-  toggleRow:  { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, padding: 12 },
-  toggleText: { fontSize: 14, color: Colors.text2 },
-  submitBtn:  { backgroundColor: Colors.gold, borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 8 },
-  submitText: { color: '#1a1200', fontSize: 15, fontWeight: '600' },
+const ts = StyleSheet.create({
+  wrap:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  scroll:    { width: 50, height: 100, backgroundColor: Colors.surface, borderRadius: 8, borderWidth: 0.5, borderColor: Colors.border },
+  item:      { padding: 6, alignItems: 'center' },
+  active:    { backgroundColor: Colors.goldDim },
+  text:      { fontSize: 12, color: Colors.text3 },
+  textActive:{ color: Colors.gold, fontWeight: '600' },
+  colon:     { color: Colors.text2, fontSize: 16 },
 });
 
 const styles = StyleSheet.create({
-  safe:        { flex: 1, backgroundColor: Colors.bg },
-  scroll:      { paddingHorizontal: 16, paddingBottom: 32 },
-  screenTitle: { fontSize: 20, fontWeight: '500', color: Colors.text, paddingVertical: 16 },
-  emptyText:   { color: Colors.text3, fontSize: 12, paddingVertical: 8 },
-  calHeader:   { flexDirection: 'row', marginBottom: 6 },
-  calDayLabel: { flex: 1, textAlign: 'center', fontSize: 9, color: Colors.text3 },
-  calGrid:     { flexDirection: 'row', flexWrap: 'wrap' },
-  calCell:     { width: '14.28%', aspectRatio: 1, borderRadius: 4, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.surface2, marginBottom: 3 },
-  calShift:    { backgroundColor: Colors.goldDim, borderWidth: 0.5, borderColor: 'rgba(201,168,76,0.3)' },
-  calToday:    { backgroundColor: Colors.purpleDim, borderWidth: 0.5, borderColor: 'rgba(155,127,232,0.4)' },
-  calNum:      { fontSize: 10, color: Colors.text3 },
-  shiftRow:    { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: Colors.border, gap: 8 },
-  shiftDay:    { fontSize: 12, fontWeight: '500', color: Colors.text },
-  shiftTime:   { fontSize: 10, color: Colors.text2, marginTop: 2 },
-  shiftNote:   { fontSize: 10, color: Colors.text3, marginTop: 1 },
-  badge:       { borderRadius: 10, borderWidth: 0.5, paddingHorizontal: 8, paddingVertical: 3 },
-  badgeText:   { fontSize: 10 },
-  actionBtn:   { borderRadius: 8, borderWidth: 0.5, paddingHorizontal: 10, paddingVertical: 5 },
-  actionBtnText: { fontSize: 11, fontWeight: '500' },
-  legend:      { flexDirection: 'row', gap: 16, paddingHorizontal: 4 },
-  legendItem:  { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  legendDot:   { width: 10, height: 10, borderRadius: 2, borderWidth: 0.5 },
-  legendText:  { fontSize: 11, color: Colors.text3 },
+  safe:              { flex: 1, backgroundColor: Colors.bg },
+  screenTitle:       { fontSize: 20, fontWeight: '500', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
+  scroll:            { paddingHorizontal: 16, paddingBottom: 40 },
+  weekNav:           { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  weekBtn:           { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
+  weekBtnText:       { fontSize: 13, color: Colors.text2 },
+  weekLabel:         { fontSize: 14, fontWeight: '600', color: Colors.text },
+  todayBtn:          { alignSelf: 'flex-end', backgroundColor: Colors.surface2, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, marginBottom: 12 },
+  todayBtnText:      { fontSize: 12, color: Colors.text2 },
+  confirmBtn:        { backgroundColor: Colors.gold, borderRadius: 12, height: 48, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+  confirmBtnText:    { color: '#1a1200', fontSize: 15, fontWeight: '700' },
+  dateBlock:         { borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  dateRow:           { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, padding: 12 },
+  dateRowToday:      { backgroundColor: 'rgba(201,168,76,0.05)' },
+  dateRowSelected:   { backgroundColor: 'rgba(155,127,232,0.08)' },
+  dateLabel:         { fontSize: 14, fontWeight: '600', color: Colors.text, minWidth: 100 },
+  todayBadge:        { backgroundColor: Colors.goldDim, borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 },
+  todayBadgeText:    { fontSize: 10, color: Colors.gold, fontWeight: '600' },
+  pendingBadge:      { backgroundColor: 'rgba(155,127,232,0.2)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, fontSize: 11, color: Colors.purple } as any,
+  castChip:          { borderRadius: 8, borderWidth: 0.5, paddingHorizontal: 8, paddingVertical: 3 },
+  castChipText:      { fontSize: 11, fontWeight: '600' },
+  datePanel:         { backgroundColor: Colors.surface, padding: 14, gap: 12 },
+  panelSection:      { gap: 8 },
+  panelSectionTitle: { fontSize: 11, fontWeight: '700', color: Colors.text3, textTransform: 'uppercase', letterSpacing: 0.5 },
+  reqRow:            { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, borderRadius: 10, borderWidth: 0.5, flexWrap: 'wrap' },
+  reqCastName:       { fontSize: 13, fontWeight: '700', minWidth: 48 },
+  reqTime:           { fontSize: 12, color: Colors.text2 },
+  reqNote:           { fontSize: 11, color: Colors.text3, flex: 1 },
+  approveBtn:        { backgroundColor: 'rgba(78,203,138,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 0.5, borderColor: Colors.green },
+  approveBtnText:    { fontSize: 12, color: Colors.green, fontWeight: '600' },
+  deleteReqBtn:      { padding: 4 },
+  castSelectRow:     { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  castSelectBtn:     { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5 },
+  castSelectBtnText: { fontSize: 13, fontWeight: '600' },
+  timeSetBlock:      { borderRadius: 12, borderWidth: 0.5, padding: 12, gap: 8 },
+  timeSetName:       { fontSize: 14, fontWeight: '700' },
+  timeSetRow:        { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  timeSetLabel:      { fontSize: 11, color: Colors.text3, marginBottom: 4 },
+  timeSetSep:        { color: Colors.text3, fontSize: 16, marginTop: 16 },
+  confirmedRow:      { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 },
+  confirmedName:     { fontSize: 13, fontWeight: '700', minWidth: 48 },
+  confirmedTime:     { fontSize: 12, color: Colors.text2, flex: 1 },
+  changeTimeBtn:     { backgroundColor: Colors.goldDim, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 0.5, borderColor: Colors.gold },
+  changeTimeBtnText: { fontSize: 12, color: Colors.gold },
+  deleteConfBtn:     { padding: 4 },
+  // キャスト向けカレンダー
+  calCard:           { backgroundColor: Colors.surface, borderRadius: 14, borderWidth: 0.5, borderColor: Colors.border, padding: 14, marginBottom: 16 },
+  calHeader:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  calTitle:          { fontSize: 15, fontWeight: '600', color: Colors.text },
+  calDayRow:         { flexDirection: 'row', marginBottom: 8 },
+  calDayLabel:       { flex: 1, textAlign: 'center', fontSize: 11, color: Colors.text3, fontWeight: '600' },
+  calGrid:           { flexDirection: 'row', flexWrap: 'wrap' },
+  calCell:           { width: '14.28%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 8 },
+  calCellShift:      { backgroundColor: Colors.goldDim },
+  calCellToday:      { backgroundColor: Colors.purpleDim },
+  calCellSelected:   { backgroundColor: Colors.gold },
+  calDayNum:         { fontSize: 13, color: Colors.text },
+  calDayNumShift:    { color: Colors.gold, fontWeight: '600' },
+  calDayNumToday:    { color: Colors.purple, fontWeight: '600' },
+  addShiftBtn:       { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.goldDim, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.gold, padding: 14, marginBottom: 16 },
+  addShiftBtnText:   { fontSize: 14, color: Colors.gold, fontWeight: '500' },
+  shiftItem:         { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  shiftDate:         { fontSize: 14, fontWeight: '500', color: Colors.text },
+  shiftTime:         { fontSize: 12, color: Colors.text2, marginTop: 2 },
+  statusBadge:       { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 },
+  statusText:        { fontSize: 12, fontWeight: '600' },
+  // モーダル
+  modalContainer:    { flex: 1, backgroundColor: Colors.bg },
+  modalHeader:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  modalClose:        { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
+  modalTitle:        { fontSize: 16, fontWeight: '500', color: Colors.text },
+  modalLabel:        { fontSize: 12, color: Colors.text2, marginBottom: 8 },
+  miniCalWrap:       { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 12 },
+  submitBtn:         { backgroundColor: Colors.gold, borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 20 },
+  submitBtnText:     { color: '#1a1200', fontSize: 15, fontWeight: '600' },
 });
