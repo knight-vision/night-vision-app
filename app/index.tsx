@@ -132,21 +132,14 @@ function LoginModal({ type, visible, onClose }: {
 
 export default function LoginScreen() {
   const [modalType, setModalType] = useState<LoginType>(null);
-  const { role, loggedOut, clearLoggedOut } = useAuthStore();
+  const { role } = useAuthStore();
 
-  // ログイン済みならタブへ自動遷移
+  // ログイン済みならタブへ（初回起動時のみ）
   useEffect(() => {
     if (role) {
       router.replace('/(tabs)');
     }
   }, []);
-
-  // ログアウト後にこの画面が表示されたらフラグをクリア
-  useEffect(() => {
-    if (loggedOut) {
-      clearLoggedOut();
-    }
-  }, [loggedOut]);
 
   return (
     <View style={styles.container}>

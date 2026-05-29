@@ -1,18 +1,17 @@
-import { Tabs, router } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect } from 'react';
 import { useAuthStore } from '../../store/auth';
 import { Colors } from '../../constants/theme';
+import LoginScreen from '../index';
 
 export default function TabLayout() {
-  const { role, loggedOut } = useAuthStore();
+  const { role } = useAuthStore();
   const isOwner = role === 'owner';
 
-  useEffect(() => {
-    if (loggedOut || !role) {
-      router.replace('/');
-    }
-  }, [loggedOut, role]);
+  // roleがなければログイン画面を直接レンダリング（ナビゲーション不要）
+  if (!role) {
+    return <LoginScreen />;
+  }
 
   return (
     <Tabs
@@ -20,7 +19,7 @@ export default function TabLayout() {
         headerShown: false,
         sceneStyle: { backgroundColor: Colors.bg },
         tabBarStyle: {
-          backgroundColor: 'rgba(13,13,24,0.92)',
+          backgroundColor: 'rgba(13,13,24,0.95)',
           borderTopColor: Colors.border,
           borderTopWidth: 0.5,
           height: 88,

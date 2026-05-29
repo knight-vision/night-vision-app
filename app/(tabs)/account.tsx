@@ -138,15 +138,7 @@ export default function AccountScreen() {
   const handleLogout = () => {
     Alert.alert('ログアウト', 'ログアウトしますか？', [
       { text: 'キャンセル', style: 'cancel' },
-      {
-        text: 'ログアウト', style: 'destructive', onPress: () => {
-          logout();
-          // stateの更新を待ってからナビゲート
-          setTimeout(() => {
-            router.replace('/');
-          }, 50);
-        }
-      },
+      { text: 'ログアウト', style: 'destructive', onPress: () => logout() },
     ]);
   };
 
