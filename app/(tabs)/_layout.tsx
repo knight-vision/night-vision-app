@@ -2,15 +2,15 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/auth';
 import { Colors } from '../../constants/theme';
-import LoginScreen from '../index';
+import { LoginScreenContent } from '../index';
 
 export default function TabLayout() {
   const { role } = useAuthStore();
   const isOwner = role === 'owner';
 
-  // roleがなければログイン画面を直接レンダリング（ナビゲーション不要）
+  // roleがなければログイン画面を条件レンダリング（router不要）
   if (!role) {
-    return <LoginScreen />;
+    return <LoginScreenContent />;
   }
 
   return (

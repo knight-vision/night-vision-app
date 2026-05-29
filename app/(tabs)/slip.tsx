@@ -268,7 +268,7 @@ function SlipInput({ shopId }: { shopId: string }) {
           {menus.length > 0 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
               {menus.map((m: any) => (
-                <TouchableOpacity key={m.id} onPress={() => updateItem(i, 'name', m.name) || updateItem(i, 'price', m.price)}
+                <TouchableOpacity key={m.id} onPress={() => { updateItem(i, 'name', m.name); updateItem(i, 'price', m.price); }}
                   style={s.presetChip}>
                   <Text style={s.presetChipText}>{m.name}</Text>
                 </TouchableOpacity>
