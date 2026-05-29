@@ -14,7 +14,7 @@ export function SectionCard({ title, actionLabel, onAction, children }: Props) {
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
         {actionLabel && (
-          <TouchableOpacity onPress={onAction}>
+          <TouchableOpacity onPress={onAction} style={styles.actionBtn}>
             <Text style={styles.action}>{actionLabel}</Text>
           </TouchableOpacity>
         )}
@@ -27,18 +27,19 @@ export function SectionCard({ title, actionLabel, onAction, children }: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 18,
     borderWidth: 0.5,
     borderColor: Colors.border,
-    padding: 13,
-    marginBottom: 10,
+    padding: 16,
+    marginBottom: 12,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  title:  { fontSize: 11, fontWeight: '500', color: Colors.text2 },
-  action: { fontSize: 10, color: Colors.purple },
+  title:     { fontSize: 12, fontWeight: '600', color: Colors.text2, letterSpacing: 0.5, textTransform: 'uppercase' },
+  actionBtn: { backgroundColor: Colors.purpleDim, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
+  action:    { fontSize: 11, color: Colors.purple, fontWeight: '600' },
 });

@@ -23,12 +23,12 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 0.5,
-    borderColor: Colors.border,
-    padding: 12,
+    borderColor: Colors.borderGlow,
+    padding: 14,
   },
-  label: { fontSize: 10, color: Colors.text3, marginBottom: 5 },
-  value: { fontSize: 18, fontWeight: '500' },
-  sub:   { fontSize: 10, marginTop: 2 },
+  label: { fontSize: 11, color: Colors.text3, marginBottom: 6, fontWeight: '500', letterSpacing: 0.3 },
+  value: { fontSize: 20, fontWeight: '600', letterSpacing: -0.3 },
+  sub:   { fontSize: 11, marginTop: 3 },
 });
