@@ -1,31 +1,12 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useRef } from 'react';
 import { useAuthStore } from '../../store/auth';
 import { Colors } from '../../constants/theme';
 
 export default function TabLayout() {
   const { role } = useAuthStore();
-  const router = useRouter();
-  const redirecting = useRef(false);
-
-  useEffect(() => {
-    if (!role && !redirecting.current) {
-      redirecting.current = true;
-      // 2フレーム待ってからリダイレクト（アンマウント中のイベントを回避）
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          router.replace('/');
-        });
-      });
-    }
-    if (role) redirecting.current = false;
-  }, [role]);
-
   const isOwner = role === 'owner';
 
-  // role === null でも即アンマウントせずタブを維持したままリダイレクト
   return (
     <Tabs
       screenOptions={{
@@ -42,7 +23,6 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors.gold,
         tabBarInactiveTintColor: Colors.text3,
         tabBarLabelStyle: { fontSize: 11, marginTop: 3, fontWeight: '500' },
-        tabBarIconStyle: { marginBottom: 0 },
       }}
     >
       <Tabs.Screen name="index" options={{
@@ -77,8 +57,8 @@ export default function TabLayout() {
         title: 'アカウント',
         tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />,
       }} />
-      <Tabs.Screen name="salary"     options={{ href: null }} />
-      <Tabs.Screen name="jobs"       options={{ href: null }} />
+      <Tabs.Screen name="salary"  options={{ href: null }} />
+      <Tabs.Screen name="jobs"    options={{ href: null }} />
     </Tabs>
   );
 }
