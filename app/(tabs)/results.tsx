@@ -180,9 +180,15 @@ function CastPayTab({ castId, shopId }: { castId: string; shopId: string }) {
 
     const hourlyWage = castInfo?.hourly_wage || 0;
     const totalHours = targetShifts.reduce((sum: number, s: any) => {
-      const [sh, sm] = (s.start_time || '20:00').split(':').map(Number);
-      const [eh, em] = (s.end_time || '24:00').split(':').map(Number);
-      return sum + Math.max(0, (eh * 60 + em - sh * 60 - sm) / 60);
+      const parseTime = (t: string) => {
+        const parts = (t || '00:00').split(':').map(Number);
+        return parts[0] * 60 + (parts[1] || 0);
+      };
+      const startMin = parseTime(s.start_time);
+      const endMin   = parseTime(s.end_time);
+      // 終了が開始より小さい場合は翌日扱い（例：20:00〜02:00 → +24h）
+      const diff = endMin >= startMin ? endMin - startMin : endMin + 24 * 60 - startMin;
+      return sum + Math.max(0, diff / 60);
     }, 0);
     const basePay = Math.round(totalHours * hourlyWage);
     const allowTotal = targetAllows.filter((a: any) => a.amount > 0).reduce((s: number, a: any) => s + a.amount, 0);
@@ -283,9 +289,9 @@ function CastPayTab({ castId, shopId }: { castId: string; shopId: string }) {
           {targetShifts.length > 0 && (
             <SectionCard title="シフト明細">
               {targetShifts.sort((a, b) => a.date.localeCompare(b.date)).map((s: any) => {
-                const [sh, sm] = (s.start_time || '20:00').split(':').map(Number);
-                const [eh, em] = (s.end_time || '24:00').split(':').map(Number);
-                const hrs = Math.max(0, (eh * 60 + em - sh * 60 - sm) / 60);
+                const pt = (t: string) => { const p = (t||'00:00').split(':').map(Number); return p[0]*60+(p[1]||0); };
+                const sm2 = pt(s.start_time), em2 = pt(s.end_time);
+                const hrs = Math.max(0, (em2 >= sm2 ? em2 - sm2 : em2 + 1440 - sm2) / 60);
                 return (
                   <View key={s.id} style={styles.shiftDetailRow}>
                     <Text style={styles.shiftDetailDate}>{s.date}</Text>
