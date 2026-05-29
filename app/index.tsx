@@ -1,7 +1,7 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, KeyboardAvoidingView, Platform, ActivityIndicator, Modal } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Colors } from '../constants/theme';
 import { API_BASE } from '../constants/api';
 import { useAuthStore } from '../store/auth';
@@ -132,6 +132,21 @@ function LoginModal({ type, visible, onClose }: {
 
 export default function LoginScreen() {
   const [modalType, setModalType] = useState<LoginType>(null);
+  const { role, loggedOut, clearLoggedOut } = useAuthStore();
+
+  // ログイン済みならタブへ自動遷移
+  useEffect(() => {
+    if (role) {
+      router.replace('/(tabs)');
+    }
+  }, []);
+
+  // ログアウト後にこの画面が表示されたらフラグをクリア
+  useEffect(() => {
+    if (loggedOut) {
+      clearLoggedOut();
+    }
+  }, [loggedOut]);
 
   return (
     <View style={styles.container}>

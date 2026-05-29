@@ -1,11 +1,18 @@
-import { Tabs } from 'expo-router';
+import { Tabs, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect } from 'react';
 import { useAuthStore } from '../../store/auth';
 import { Colors } from '../../constants/theme';
 
 export default function TabLayout() {
-  const { role } = useAuthStore();
+  const { role, loggedOut } = useAuthStore();
   const isOwner = role === 'owner';
+
+  useEffect(() => {
+    if (loggedOut || !role) {
+      router.replace('/');
+    }
+  }, [loggedOut, role]);
 
   return (
     <Tabs
