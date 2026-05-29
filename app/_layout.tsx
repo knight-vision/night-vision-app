@@ -1,30 +1,30 @@
-import { Stack, router, useSegments } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/auth';
 
-function AuthGate() {
+export default function RootLayout() {
   const { role } = useAuthStore();
-  const segments = useSegments();
+  const prevRole = useRef(role);
+  const mounted = useRef(false);
 
   useEffect(() => {
-    const inTabs = segments[0] === '(tabs)';
-    if (!role && inTabs) {
-      // ログアウトしたらログイン画面へ
+    mounted.current = true;
+  }, []);
+
+  useEffect(() => {
+    // 初回マウント時はスキップ（index.tsxが自分でナビゲートする）
+    if (!mounted.current) return;
+
+    // roleがある値からnullに変わった = ログアウト
+    if (prevRole.current !== null && role === null) {
       router.replace('/');
-    } else if (role && !inTabs) {
-      // ログイン済みなのにログイン画面にいたらタブへ
-      router.replace('/(tabs)');
     }
-  }, [role, segments]);
+    prevRole.current = role;
+  }, [role]);
 
-  return null;
-}
-
-export default function RootLayout() {
   return (
     <>
-      <AuthGate />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#0d0d18' } }}>
         <Stack.Screen name="index" options={{ animation: 'none' }} />
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
