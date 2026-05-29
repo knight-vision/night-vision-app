@@ -153,7 +153,9 @@ function CastPayTab({ castId, shopId }: { castId: string; shopId: string }) {
       setCastInfo(me);
       const sd = await shiftRes.json();
       const confirmed = Array.isArray(sd) ? sd : (sd?.confirmed || []);
-      setShifts(confirmed.filter((s: any) => String(s.cast_id) === castId));
+      const myShifts = confirmed.filter((s: any) => String(s.cast_id) === castId);
+      console.log('[給与デバッグ] castId:', castId, 'confirmed count:', confirmed.length, 'myShifts:', JSON.stringify(myShifts.slice(0,2)));
+      setShifts(myShifts);
       const ad = await allowRes.json();
       setAllowances(Array.isArray(ad) ? ad.filter((a: any) => String(a.cast_id) === castId) : []);
     } catch { } finally { setLoading(false); }
