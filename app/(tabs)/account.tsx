@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { Colors } from '../../constants/theme';
 import { useAuthStore } from '../../store/auth';
 import { API_BASE } from '../../constants/api';
+import { PunyTouchable, haptic } from '../../components/PunyTouchable';
 
 // ── パスワード変更モーダル ─────────────────────────────────────
 function ChangePasswordModal({ visible, onClose, userId, role }: {
@@ -60,9 +61,9 @@ function ChangePasswordModal({ visible, onClose, userId, role }: {
           <Text style={modal.label}>新しいパスワード（確認）</Text>
           <TextInput style={modal.input} secureTextEntry placeholder="もう一度入力"
             placeholderTextColor={Colors.text3} value={confirm} onChangeText={setConfirm} />
-          <TouchableOpacity style={modal.submitBtn} onPress={handleSubmit} disabled={loading}>
+          <PunyTouchable style={modal.submitBtn} onPress={handleSubmit} disabled={loading} haptic="success">
             {loading ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>変更する</Text>}
-          </TouchableOpacity>
+          </PunyTouchable>
         </View>
       </View>
     </Modal>
@@ -116,9 +117,9 @@ function ChangeEmailModal({ visible, onClose, userId, role, currentEmail }: {
           <Text style={modal.label}>現在のパスワード（確認）</Text>
           <TextInput style={modal.input} secureTextEntry placeholder="パスワードを入力"
             placeholderTextColor={Colors.text3} value={password} onChangeText={setPassword} />
-          <TouchableOpacity style={modal.submitBtn} onPress={handleSubmit} disabled={loading}>
+          <PunyTouchable style={modal.submitBtn} onPress={handleSubmit} disabled={loading} haptic="success">
             {loading ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>変更する</Text>}
-          </TouchableOpacity>
+          </PunyTouchable>
         </View>
       </View>
     </Modal>
@@ -190,14 +191,14 @@ export default function AccountScreen() {
             </View>
             <Ionicons name="chevron-forward" size={14} color={Colors.text3} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => setShowEmailModal(true)}>
+          <PunyTouchable scaleTo={0.97} haptic="light" style={styles.menuItem} onPress={() => setShowEmailModal(true)}>
             <View style={styles.menuIconWrap}><Ionicons name="mail-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1 }}>
               <Text style={styles.menuLabel}>メールアドレス変更</Text>
               <Text style={styles.menuSub}>{email || 'メールアドレスを設定'}</Text>
             </View>
             <Ionicons name="chevron-forward" size={14} color={Colors.text3} />
-          </TouchableOpacity>
+          </PunyTouchable>
         </View>
 
         {/* 通知設定 */}
@@ -250,10 +251,10 @@ export default function AccountScreen() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
+        <PunyTouchable style={styles.logoutBtn} onPress={handleLogout} haptic="warning">
           <Ionicons name="log-out-outline" size={16} color={Colors.red} />
           <Text style={styles.logoutText}>ログアウト</Text>
-        </TouchableOpacity>
+        </PunyTouchable>
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,4 +1,5 @@
 import { ScrollView, View, Text, StyleSheet, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { PunyTouchable } from '../../components/PunyTouchable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -43,24 +44,24 @@ export default function HomeScreen() {
           <>
             <View style={styles.statGrid}>
               {/* 今月売上 → タップで売上タブへ */}
-              <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push('/(tabs)/slip')}>
+              <PunyTouchable style={{ flex: 1 }} scaleTo={0.96} haptic="light" onPress={() => router.push('/(tabs)/slip')}>
                 <StatCard label="今月売上" value={fmtYen(data.monthly_sales)}
                   sub={data.sales_growth !== null ? `${data.sales_growth >= 0 ? '↑' : '↓'} 前月比 ${data.sales_growth > 0 ? '+' : ''}${data.sales_growth}%` : ''}
                   subColor={(data.sales_growth ?? 0) >= 0 ? Colors.green : Colors.red}
                   valueColor={Colors.gold} />
-              </TouchableOpacity>
+              </PunyTouchable>
               {/* 本日出勤 → タップでシフトタブへ */}
-              <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push('/(tabs)/shift')}>
+              <PunyTouchable style={{ flex: 1 }} scaleTo={0.96} haptic="light" onPress={() => router.push('/(tabs)/shift')}>
                 <StatCard label="本日出勤" value={`${data.today_staff_count}名`} sub="確定シフト確認 →" subColor={Colors.gold} />
-              </TouchableOpacity>
+              </PunyTouchable>
             </View>
             <View style={[styles.statGrid, { marginTop: 8, marginBottom: 16 }]}>
               {/* 承認待ち → タップでシフトタブへ */}
-              <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push('/(tabs)/shift')}>
+              <PunyTouchable style={{ flex: 1 }} scaleTo={0.96} haptic="light" onPress={() => router.push('/(tabs)/shift')}>
                 <StatCard label="シフト承認待ち" value={`${data.pending_shift_count}件`}
                   sub={data.pending_shift_count > 0 ? '要対応 →' : ''}
                   valueColor={data.pending_shift_count > 0 ? Colors.gold : Colors.text} />
-              </TouchableOpacity>
+              </PunyTouchable>
             </View>
 
             {data.cast_ranking.length > 0 && (

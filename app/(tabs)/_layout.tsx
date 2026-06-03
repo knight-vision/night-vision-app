@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/auth';
 import { Colors } from '../../constants/theme';
 import { LoginScreenContent } from '../index';
+import * as Haptics from 'expo-haptics';
 
 export default function TabLayout() {
   const { role } = useAuthStore();
@@ -13,8 +14,15 @@ export default function TabLayout() {
     return <LoginScreenContent />;
   }
 
+  const tabPressHaptic = () => {
+    Haptics.selectionAsync().catch(() => {});
+  };
+
   return (
     <Tabs
+      screenListeners={{
+        tabPress: () => tabPressHaptic(),
+      }}
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: Colors.bg },

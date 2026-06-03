@@ -9,6 +9,7 @@ import { Colors } from '../constants/theme';
 import { API_BASE } from '../constants/api';
 import { useAuthStore } from '../store/auth';
 import { registerPushToken } from '../lib/notifications';
+import { PunyTouchable } from '../components/PunyTouchable';
 
 type LoginType = 'owner' | 'cast' | null;
 
@@ -89,14 +90,14 @@ function LoginModal({ type, visible, onClose }: {
               </TouchableOpacity>
             </View>
             {error ? <Text style={modal.errorText}>{error}</Text> : null}
-            <TouchableOpacity
+            <PunyTouchable
               style={[modal.loginBtn, { backgroundColor: isOwner ? Colors.gold : Colors.purple }]}
-              onPress={handleLogin} disabled={loading} activeOpacity={0.85}>
+              onPress={handleLogin} disabled={loading} haptic="success">
               {loading
                 ? <ActivityIndicator color={isOwner ? '#1a1200' : '#fff'} />
                 : <Text style={[modal.loginBtnText, { color: isOwner ? '#1a1200' : '#fff' }]}>ログイン</Text>
               }
-            </TouchableOpacity>
+            </PunyTouchable>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -115,14 +116,14 @@ export function LoginScreenContent() {
           <Text style={styles.logoText}>NIGHT VISION</Text>
         </View>
         <View style={styles.btnGroup}>
-          <TouchableOpacity style={styles.ownerBtn} onPress={() => setModalType('owner')} activeOpacity={0.85}>
+          <PunyTouchable style={styles.ownerBtn} onPress={() => setModalType('owner')} haptic="medium">
             <Ionicons name="business-outline" size={20} color="#1a1200" />
             <Text style={styles.ownerBtnText}>店舗管理者としてログイン</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.castBtn} onPress={() => setModalType('cast')} activeOpacity={0.85}>
+          </PunyTouchable>
+          <PunyTouchable style={styles.castBtn} onPress={() => setModalType('cast')} haptic="medium">
             <Ionicons name="person-outline" size={20} color="#fff" />
             <Text style={styles.castBtnText}>キャストとしてログイン</Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         </View>
       </View>
       <LoginModal type={modalType} visible={modalType !== null} onClose={() => setModalType(null)} />

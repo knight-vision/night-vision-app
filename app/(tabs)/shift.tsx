@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
+import { PunyTouchable } from '../../components/PunyTouchable';
 
 const CAST_COLORS = ['#ff6b9d','#00d4ff','#ffd700','#a855f7','#00e5a0','#ff9500','#00c7be','#ff3b30','#34aadc','#4cd964'];
 const HOURS = Array.from({ length: 31 }, (_, i) => i);
@@ -337,9 +338,9 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
 
       {/* 確定ボタン */}
       {totalDraft > 0 && (
-        <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm} disabled={saving}>
+        <PunyTouchable haptic="success" style={styles.confirmBtn} onPress={handleConfirm} disabled={saving}>
           {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={styles.confirmBtnText}>📲 {totalDraft}件のシフトを確定</Text>}
-        </TouchableOpacity>
+        </PunyTouchable>
       )}
 
       {/* 日別リスト */}
@@ -612,10 +613,10 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.addShiftBtn} onPress={() => setModalVisible(true)}>
+      <PunyTouchable haptic="medium" style={styles.addShiftBtn} onPress={() => setModalVisible(true)}>
         <Ionicons name="add-circle-outline" size={18} color={Colors.gold} />
         <Text style={styles.addShiftBtnText}>シフト希望を追加</Text>
-      </TouchableOpacity>
+      </PunyTouchable>
 
       {/* 確定シフト */}
       {confirmedShifts.length > 0 && (
