@@ -508,12 +508,14 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      const url = `${API_BASE}/cast-shift-request?cast_id=${castId}&shop_id=${shopId}`;
+      console.log('[シフトGET] URL:', url);
       const [reqRes, confRes] = await Promise.all([
-        fetch(`${API_BASE}/cast-shift-request?cast_id=${castId}&shop_id=${shopId}`),
+        fetch(url),
         fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${calYear}&month=${calMonth}`),
       ]);
       const reqData = await reqRes.json();
-      // GETは { requests: [], shop: null } 形式で返る
+      console.log('[シフトGET] response:', reqRes.status, JSON.stringify(reqData).slice(0, 300));
       const reqArray = Array.isArray(reqData) ? reqData : (reqData?.requests || []);
       setShifts(reqArray);
       const confData = await confRes.json();
@@ -527,19 +529,30 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      await fetch(`${API_BASE}/cast-shift-request`, {
+      const body = {
+        cast_id: castId,
+        shop_id: shopId,
+        requests: [{ date: selDate, start_time: startTime, end_time: endTime, note }],
+      };
+      console.log('[シフト提出] body:', JSON.stringify(body));
+      const res = await fetch(`${API_BASE}/cast-shift-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cast_id: castId,
-          shop_id: shopId,
-          requests: [{ date: selDate, start_time: startTime, end_time: endTime, note }],
-        }),
+        body: JSON.stringify(body),
       });
+      const data = await res.json();
+      console.log('[シフト提出] response:', res.status, JSON.stringify(data));
+      if (!res.ok) {
+        Alert.alert('エラー', data.error || '提出に失敗しました');
+        return;
+      }
       Alert.alert('提出しました');
       setModalVisible(false);
       load();
-    } catch { Alert.alert('エラー', '提出に失敗しました'); } finally { setSubmitting(false); }
+    } catch (e: any) {
+      console.log('[シフト提出] error:', e?.message);
+      Alert.alert('エラー', '提出に失敗しました');
+    } finally { setSubmitting(false); }
   };
 
   // カレンダー生成
