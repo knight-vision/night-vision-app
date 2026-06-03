@@ -187,15 +187,29 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
     try {
       const wb = new Date(weekBase + 'T00:00:00');
       const wy = wb.getFullYear(), wm = wb.getMonth() + 1;
-      const [r1, castRes] = await Promise.all([
-        fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${wy}&month=${wm}`),
+      // 前月・当月・翌月の3ヶ月分を並列取得してマージ
+      const months = [
+        { y: wm === 1 ? wy - 1 : wy, m: wm === 1 ? 12 : wm - 1 },
+        { y: wy, m: wm },
+        { y: wm === 12 ? wy + 1 : wy, m: wm === 12 ? 1 : wm + 1 },
+      ];
+      const [castRes, ...shiftResults] = await Promise.all([
         fetch(`${API_BASE}/casts?shop_id=${shopId}`),
+        ...months.map(({ y, m }) =>
+          fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${y}&month=${m}`)
+        ),
       ]);
-      const d1 = await r1.json();
-      setConfirmed(Array.isArray(d1.confirmed) ? d1.confirmed : Array.isArray(d1) ? d1 : []);
-      setRequests(Array.isArray(d1.requests) ? d1.requests : []);
       const castData = await castRes.json();
       setCasts(Array.isArray(castData) ? castData : []);
+      const allConfirmed: any[] = [];
+      const allRequests: any[] = [];
+      for (const res of shiftResults) {
+        const d = await res.json();
+        if (Array.isArray(d.confirmed)) allConfirmed.push(...d.confirmed);
+        if (Array.isArray(d.requests)) allRequests.push(...d.requests);
+      }
+      setConfirmed(allConfirmed);
+      setRequests(allRequests);
     } catch { } finally { setLoading(false); }
   }, [shopId, weekBase]);
 
@@ -499,7 +513,9 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
         fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${calYear}&month=${calMonth}`),
       ]);
       const reqData = await reqRes.json();
-      setShifts(Array.isArray(reqData) ? reqData : []);
+      // GETは { requests: [], shop: null } 形式で返る
+      const reqArray = Array.isArray(reqData) ? reqData : (reqData?.requests || []);
+      setShifts(reqArray);
       const confData = await confRes.json();
       const confirmed = Array.isArray(confData) ? confData : (confData?.confirmed || []);
       setConfirmedShifts(confirmed.filter((s: any) => String(s.cast_id) === castId));
@@ -514,7 +530,11 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
       await fetch(`${API_BASE}/cast-shift-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cast_id: castId, shop_id: shopId, date: selDate, start_time: startTime, end_time: endTime, note }),
+        body: JSON.stringify({
+          cast_id: castId,
+          shop_id: shopId,
+          requests: [{ date: selDate, start_time: startTime, end_time: endTime, note }],
+        }),
       });
       Alert.alert('提出しました');
       setModalVisible(false);

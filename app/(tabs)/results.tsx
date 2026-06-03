@@ -202,9 +202,9 @@ function CastPayTab({ castId, shopId }: { castId: string; shopId: string }) {
   const { targetShifts, targetAllows, totalHours, basePay, allowTotal, deductTotal, total } = calcPay();
 
   const PERIODS: { key: PayPeriod; label: string }[] = [
-    { key: 'daily', label: '日払い' },
-    { key: 'weekly', label: '週払い' },
-    { key: 'monthly', label: '月払い' },
+    { key: 'daily', label: '日' },
+    { key: 'weekly', label: '週' },
+    { key: 'monthly', label: '月' },
   ];
 
   const weekDates = period === 'weekly' ? getWeekDates(refDate) : [];
