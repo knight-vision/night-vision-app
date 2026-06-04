@@ -525,6 +525,11 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   useEffect(() => { load(); }, [load]);
 
   const handleSubmit = async () => {
+    // 確定シフトと重複する日はブロック
+    if (confirmedShifts.some((s: any) => s.date === selDate)) {
+      Alert.alert('提出できません', 'この日はすでに確定シフトがあります');
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch(`${API_BASE}/cast-shift-request`, {
@@ -600,7 +605,13 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
                   hasRequest && !isConfirmed && styles.calCellShift,
                   isToday && styles.calCellToday,
                 ]}
-                onPress={() => { setSelDate(dateStr); setModalVisible(true); }}>
+                onPress={() => {
+                  if (isConfirmed) {
+                    Alert.alert('確定済み', 'この日はすでに確定シフトがあります');
+                    return;
+                  }
+                  setSelDate(dateStr); setModalVisible(true);
+                }}>
                 <Text style={[styles.calDayNum,
                   isConfirmed && { color: Colors.green, fontWeight: '700' },
                   hasRequest && !isConfirmed && styles.calDayNumShift,
