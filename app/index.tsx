@@ -134,13 +134,28 @@ export function LoginScreenContent() {
 // ── ルートのindex（初回起動・ログアウト後） ──────────────────
 export default function LoginScreen() {
   const { role } = useAuthStore();
+  const [hydrated, setHydrated] = useState(false);
+
+  // zustand persistの復元を待つ
+  useEffect(() => {
+    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
+    if (useAuthStore.persist.hasHydrated()) setHydrated(true);
+    return unsub;
+  }, []);
 
   // ログイン済みなら即タブへ
   useEffect(() => {
-    if (role) router.replace('/(tabs)');
-  }, [role]);
+    if (hydrated && role) router.replace('/(tabs)');
+  }, [hydrated, role]);
 
-  if (role) return null; // 遷移中は何も表示しない
+  // 復元完了前 or 遷移中
+  if (!hydrated || role) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator color={Colors.gold} />
+      </View>
+    );
+  }
 
   return <LoginScreenContent />;
 }

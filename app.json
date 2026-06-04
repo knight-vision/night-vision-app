@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "app.nightvision",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "appleTeamId": "HCF97943N8",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
