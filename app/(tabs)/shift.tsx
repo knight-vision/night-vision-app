@@ -173,22 +173,22 @@ function TimeSelector({ value, onChange, label }: { value: string; onChange: (v:
 
 // ── オーナー向けシフト管理 ──────────────────────────────────────
 function OwnerShiftView({ shopId }: { shopId: string }) {
-  const [weekBase, setWeekBase] = useState(getDateStr(new Date()));
+  const now = new Date();
+  const [calYear, setCalYear] = useState(now.getFullYear());
+  const [calMonth, setCalMonth] = useState(now.getMonth()); // 0-indexed
   const [confirmed, setConfirmed] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>(getDateStr(now));
   const [draft, setDraft] = useState<Record<string, { cast_id: string; start_time: string; end_time: string }[]>>({});
-
-  const dates = getWeekDates(weekBase);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const wb = new Date(weekBase + 'T00:00:00');
-      const wy = wb.getFullYear(), wm = wb.getMonth() + 1;
+      const wy = calYear;
+      const wm = calMonth + 1;
       // 前月・当月・翌月の3ヶ月分を並列取得してマージ
       const months = [
         { y: wm === 1 ? wy - 1 : wy, m: wm === 1 ? 12 : wm - 1 },
@@ -213,7 +213,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
       setConfirmed(allConfirmed);
       setRequests(allRequests);
     } catch { } finally { setLoading(false); }
-  }, [shopId, weekBase]);
+  }, [shopId, calYear, calMonth]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -298,9 +298,24 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
   const todayStr = getDateStr(new Date());
   const todayConfirmed = confirmed.filter((s: any) => s.date === todayStr);
   const pendingCount = requests.filter((r: any) => r.status === 'pending').length;
-  const weekConfirmed = dates.flatMap(date =>
-    confirmed.filter((s: any) => s.date === date).map((s: any) => ({ ...s, date }))
-  );
+
+  // カレンダーのイベントドット生成
+  const calendarEvents: { date: string; color: string }[] = [];
+  const allDates = new Set([
+    ...confirmed.map((s: any) => s.date),
+    ...requests.filter((r: any) => r.status === 'pending').map((r: any) => r.date),
+  ]);
+  allDates.forEach(date => {
+    const conf = confirmed.filter((s: any) => s.date === date);
+    const pend = requests.filter((r: any) => r.date === date && r.status === 'pending');
+    if (conf.length > 0) calendarEvents.push({ date, color: Colors.green });
+    if (pend.length > 0) calendarEvents.push({ date, color: Colors.gold });
+  });
+
+  const conf = confirmedOnDate(selectedDate);
+  const pend = pendingOnDate(selectedDate);
+  const draftEntries = draft[selectedDate] || [];
+  const isToday = selectedDate === todayStr;
 
   return (
     <View>
@@ -317,170 +332,139 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
         <View style={[styles.summaryCard, { flex: 1 }]}>
           <Text style={styles.summaryLabel}>承認待ち</Text>
           <Text style={[styles.summaryValue, { color: pendingCount > 0 ? Colors.gold : Colors.text2 }]}>{pendingCount}件</Text>
-          {pendingCount > 0 && <Text style={styles.summaryDetail}>↓ 下のカレンダーで確認</Text>}
+          {pendingCount > 0 && <Text style={styles.summaryDetail}>↓ カレンダーで確認</Text>}
         </View>
       </View>
 
-      {/* 週ナビ */}
-      <View style={styles.weekNav}>
-        <TouchableOpacity onPress={() => { const d = new Date(weekBase + 'T00:00:00'); d.setDate(d.getDate()-7); setWeekBase(getDateStr(d)); }} style={styles.weekBtn}>
-          <Ionicons name="chevron-back" size={18} color={Colors.text2} />
-          <Text style={styles.weekBtnText}>前週</Text>
-        </TouchableOpacity>
-        <Text style={styles.weekLabel}>{dates[0].slice(5).replace('-','/')} 〜 {dates[6].slice(5).replace('-','/')}</Text>
-        <TouchableOpacity onPress={() => { const d = new Date(weekBase + 'T00:00:00'); d.setDate(d.getDate()+7); setWeekBase(getDateStr(d)); }} style={styles.weekBtn}>
-          <Text style={styles.weekBtnText}>次週</Text>
-          <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
-        </TouchableOpacity>
+      {/* 凡例 */}
+      <View style={{ flexDirection: 'row', gap: 14, marginBottom: 8, paddingHorizontal: 4 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.green }} />
+          <Text style={{ fontSize: 11, color: Colors.text3 }}>確定あり</Text>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.gold }} />
+          <Text style={{ fontSize: 11, color: Colors.text3 }}>希望あり</Text>
+        </View>
       </View>
-      <TouchableOpacity onPress={() => setWeekBase(getDateStr(new Date()))} style={styles.todayBtn}>
-        <Text style={styles.todayBtnText}>今週</Text>
-      </TouchableOpacity>
+
+      {/* 月カレンダー */}
+      <MonthCalendar
+        events={calendarEvents}
+        year={calYear}
+        month={calMonth}
+        onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m); }}
+        onDayPress={(d) => setSelectedDate(getDateStr(d))}
+        initialSelected={new Date(selectedDate + 'T00:00:00')}
+      />
 
       {/* 確定ボタン */}
       {totalDraft > 0 && (
-        <PunyTouchable haptic="success" style={styles.confirmBtn} onPress={handleConfirm} disabled={saving}>
+        <PunyTouchable haptic="success" style={[styles.confirmBtn, { marginBottom: 12 }]} onPress={handleConfirm} disabled={saving}>
           {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={styles.confirmBtnText}>📲 {totalDraft}件のシフトを確定</Text>}
         </PunyTouchable>
       )}
 
-      {/* 日別リスト */}
-      {dates.map(date => {
-        const conf = confirmedOnDate(date);
-        const pend = pendingOnDate(date);
-        const draftEntries = draft[date] || [];
-        const isSelected = selectedDate === date;
-        const today = date === getDateStr(new Date());
+      {/* 選択日の詳細 */}
+      <View style={styles.dateBlock}>
+        <View style={[styles.dateRow, isToday && styles.dateRowToday, styles.dateRowSelected]}>
+          <Text style={[styles.dateLabel, isToday && { color: Colors.gold }]}>{fmtFull(selectedDate)}</Text>
+          {isToday && <View style={styles.todayBadge}><Text style={styles.todayBadgeText}>今日</Text></View>}
+          {pend.length > 0 && <Text style={styles.pendingBadge}>希望{pend.length}件</Text>}
+        </View>
 
-        return (
-          <View key={date} style={styles.dateBlock}>
-            {/* 日付行 */}
-            <TouchableOpacity style={[styles.dateRow, today && styles.dateRowToday, isSelected && styles.dateRowSelected]}
-              onPress={() => setSelectedDate(isSelected ? null : date)}>
-              <Text style={[styles.dateLabel, today && { color: Colors.gold }]}>{fmtFull(date)}</Text>
-              {today && <View style={styles.todayBadge}><Text style={styles.todayBadgeText}>今日</Text></View>}
-              {pend.length > 0 && <Text style={styles.pendingBadge}>希望{pend.length}件</Text>}
-              <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginLeft: 4 }}>
-                {conf.map((s: any) => {
-                  const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
-                  const color = getCastColor(ci);
-                  return (
-                    <View key={s.id} style={[styles.castChip, { backgroundColor: color + '33', borderColor: color }]}>
-                      <Text style={[styles.castChipText, { color }]}>{s.casts?.name} {s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
-                    </View>
-                  );
-                })}
-                {draftEntries.map(e => {
-                  const cast = casts.find((c: any) => String(c.id) === e.cast_id);
-                  const ci = casts.findIndex((c: any) => String(c.id) === e.cast_id);
-                  const color = getCastColor(ci);
-                  return (
-                    <View key={e.cast_id} style={[styles.castChip, { backgroundColor: color + '33', borderColor: color, borderStyle: 'dashed' }]}>
-                      <Text style={[styles.castChipText, { color }]}>{cast?.name} {e.start_time}〜{e.end_time}</Text>
-                    </View>
-                  );
-                })}
-              </View>
-              <Ionicons name={isSelected ? 'chevron-up' : 'chevron-down'} size={16} color={Colors.text3} />
-            </TouchableOpacity>
-
-            {/* 展開パネル */}
-            {isSelected && (
-              <View style={styles.datePanel}>
-                {/* 希望シフト */}
-                {pend.length > 0 && (
-                  <View style={styles.panelSection}>
-                    <Text style={styles.panelSectionTitle}>📩 希望シフト</Text>
-                    {pend.map((req: any) => {
-                      const ci = casts.findIndex((c: any) => String(c.id) === String(req.cast_id));
-                      const color = getCastColor(ci);
-                      return (
-                        <View key={req.id} style={[styles.reqRow, { backgroundColor: color + '11', borderColor: color + '33' }]}>
-                          <Text style={[styles.reqCastName, { color }]}>{req.casts?.name}</Text>
-                          <Text style={styles.reqTime}>{req.start_time?.slice(0,5)}〜{req.end_time?.slice(0,5)}</Text>
-                          {req.note ? <Text style={styles.reqNote}>📝{req.note}</Text> : null}
-                          <TouchableOpacity style={styles.approveBtn} onPress={() => addToDraft(date, String(req.cast_id))}>
-                            <Text style={styles.approveBtnText}>確定へ</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity onPress={() => handleDeleteRequest(req.id)} style={styles.deleteReqBtn}>
-                            <Ionicons name="trash-outline" size={14} color={Colors.red} />
-                          </TouchableOpacity>
-                        </View>
-                      );
-                    })}
+        <View style={styles.datePanel}>
+          {/* 希望シフト */}
+          {pend.length > 0 && (
+            <View style={styles.panelSection}>
+              <Text style={styles.panelSectionTitle}>📩 希望シフト</Text>
+              {pend.map((req: any) => {
+                const ci = casts.findIndex((c: any) => String(c.id) === String(req.cast_id));
+                const color = getCastColor(ci);
+                return (
+                  <View key={req.id} style={[styles.reqRow, { backgroundColor: color + '11', borderColor: color + '33' }]}>
+                    <Text style={[styles.reqCastName, { color }]}>{req.casts?.name}</Text>
+                    <Text style={styles.reqTime}>{req.start_time?.slice(0,5)}〜{req.end_time?.slice(0,5)}</Text>
+                    {req.note ? <Text style={styles.reqNote}>📝{req.note}</Text> : null}
+                    <TouchableOpacity style={styles.approveBtn} onPress={() => addToDraft(selectedDate, String(req.cast_id))}>
+                      <Text style={styles.approveBtnText}>確定へ</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleDeleteRequest(req.id)} style={styles.deleteReqBtn}>
+                      <Ionicons name="trash-outline" size={14} color={Colors.red} />
+                    </TouchableOpacity>
                   </View>
-                )}
+                );
+              })}
+            </View>
+          )}
 
-                {/* キャスト選択 */}
-                <View style={styles.panelSection}>
-                  <Text style={styles.panelSectionTitle}>出勤キャストを選択</Text>
-                  <View style={styles.castSelectRow}>
-                    {casts.map((cast: any, ci: number) => {
-                      const selected = isInDraft(date, String(cast.id));
-                      const hasReq = requests.some((r: any) => String(r.cast_id) === String(cast.id) && r.date === date);
-                      const color = getCastColor(ci);
-                      return (
-                        <TouchableOpacity key={cast.id}
-                          onPress={() => selected ? removeFromDraft(date, String(cast.id)) : addToDraft(date, String(cast.id))}
-                          style={[styles.castSelectBtn, {
-                            backgroundColor: selected ? color : Colors.surface2,
-                            borderColor: selected ? color : hasReq ? color + '88' : Colors.border,
-                          }]}>
-                          <Text style={[styles.castSelectBtnText, { color: selected ? '#fff' : hasReq ? color : Colors.text2 }]}>
-                            {selected ? '✓ ' : ''}{cast.name}{hasReq && !selected ? ' 📩' : ''}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                </View>
-
-                {/* 時間設定 */}
-                {(draft[date] || []).map(entry => {
-                  const cast = casts.find((c: any) => String(c.id) === entry.cast_id);
-                  const ci = casts.findIndex((c: any) => String(c.id) === entry.cast_id);
-                  const color = getCastColor(ci);
-                  return (
-                    <View key={entry.cast_id} style={[styles.timeSetBlock, { backgroundColor: color + '11', borderColor: color + '44' }]}>
-                      <Text style={[styles.timeSetName, { color }]}>{cast?.name}</Text>
-                      <View style={{ gap: 8 }}>
-                        <TimeSelector value={entry.start_time} onChange={v => updateDraftTime(date, entry.cast_id, 'start_time', v)} label="開始" />
-                        <TimeSelector value={entry.end_time} onChange={v => updateDraftTime(date, entry.cast_id, 'end_time', v)} label="終了" />
-                      </View>
-                    </View>
-                  );
-                })}
-
-                {/* 確定済み */}
-                {conf.length > 0 && (
-                  <View style={styles.panelSection}>
-                    <Text style={styles.panelSectionTitle}>📌 確定済み</Text>
-                    {conf.map((s: any) => {
-                      const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
-                      const color = getCastColor(ci);
-                      return (
-                        <View key={s.id} style={styles.confirmedRow}>
-                          <Text style={[styles.confirmedName, { color }]}>{s.casts?.name}</Text>
-                          <Text style={styles.confirmedTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
-                          <TouchableOpacity style={styles.changeTimeBtn} onPress={() => addToDraft(date, String(s.cast_id))}>
-                            <Text style={styles.changeTimeBtnText}>時間変更</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity onPress={() => Alert.alert('削除確認', `${s.casts?.name}のシフトを削除しますか？`, [
-                            { text: 'キャンセル', style: 'cancel' },
-                            { text: '削除', style: 'destructive', onPress: () => handleDeleteConfirmed(String(s.cast_id), date) },
-                          ])} style={styles.deleteConfBtn}>
-                            <Ionicons name="trash-outline" size={14} color={Colors.red} />
-                          </TouchableOpacity>
-                        </View>
-                      );
-                    })}
-                  </View>
-                )}
-              </View>
-            )}
+          {/* キャスト選択 */}
+          <View style={styles.panelSection}>
+            <Text style={styles.panelSectionTitle}>出勤キャストを選択</Text>
+            <View style={styles.castSelectRow}>
+              {casts.map((cast: any, ci: number) => {
+                const selected = isInDraft(selectedDate, String(cast.id));
+                const hasReq = requests.some((r: any) => String(r.cast_id) === String(cast.id) && r.date === selectedDate);
+                const color = getCastColor(ci);
+                return (
+                  <TouchableOpacity key={cast.id}
+                    onPress={() => selected ? removeFromDraft(selectedDate, String(cast.id)) : addToDraft(selectedDate, String(cast.id))}
+                    style={[styles.castSelectBtn, {
+                      backgroundColor: selected ? color : Colors.surface2,
+                      borderColor: selected ? color : hasReq ? color + '88' : Colors.border,
+                    }]}>
+                    <Text style={[styles.castSelectBtnText, { color: selected ? '#fff' : hasReq ? color : Colors.text2 }]}>
+                      {selected ? '✓ ' : ''}{cast.name}{hasReq && !selected ? ' 📩' : ''}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
-        );
-      })}
+
+          {/* 時間設定 */}
+          {draftEntries.map(entry => {
+            const cast = casts.find((c: any) => String(c.id) === entry.cast_id);
+            const ci = casts.findIndex((c: any) => String(c.id) === entry.cast_id);
+            const color = getCastColor(ci);
+            return (
+              <View key={entry.cast_id} style={[styles.timeSetBlock, { backgroundColor: color + '11', borderColor: color + '44' }]}>
+                <Text style={[styles.timeSetName, { color }]}>{cast?.name}</Text>
+                <View style={{ gap: 8 }}>
+                  <TimeSelector value={entry.start_time} onChange={v => updateDraftTime(selectedDate, entry.cast_id, 'start_time', v)} label="開始" />
+                  <TimeSelector value={entry.end_time} onChange={v => updateDraftTime(selectedDate, entry.cast_id, 'end_time', v)} label="終了" />
+                </View>
+              </View>
+            );
+          })}
+
+          {/* 確定済み */}
+          {conf.length > 0 && (
+            <View style={styles.panelSection}>
+              <Text style={styles.panelSectionTitle}>📌 確定済み</Text>
+              {conf.map((s: any) => {
+                const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
+                const color = getCastColor(ci);
+                return (
+                  <View key={s.id} style={styles.confirmedRow}>
+                    <Text style={[styles.confirmedName, { color }]}>{s.casts?.name}</Text>
+                    <Text style={styles.confirmedTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
+                    <TouchableOpacity style={styles.changeTimeBtn} onPress={() => addToDraft(selectedDate, String(s.cast_id))}>
+                      <Text style={styles.changeTimeBtnText}>時間変更</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => Alert.alert('削除確認', `${s.casts?.name}のシフトを削除しますか？`, [
+                      { text: 'キャンセル', style: 'cancel' },
+                      { text: '削除', style: 'destructive', onPress: () => handleDeleteConfirmed(String(s.cast_id), selectedDate) },
+                    ])} style={styles.deleteConfBtn}>
+                      <Ionicons name="trash-outline" size={14} color={Colors.red} />
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+        </View>
+      </View>
 
       {totalDraft > 0 && (
         <TouchableOpacity style={[styles.confirmBtn, { marginTop: 16 }]} onPress={handleConfirm} disabled={saving}>
