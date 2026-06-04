@@ -3,12 +3,13 @@ import {
   TouchableOpacity, Modal, Alert, FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 import { PunyTouchable } from '../../components/PunyTouchable';
+import { MonthCalendar } from '../../components/MonthCalendar';
 
 const CAST_COLORS = ['#ff6b9d','#00d4ff','#ffd700','#a855f7','#00e5a0','#ff9500','#00c7be','#ff3b30','#34aadc','#4cd964'];
 const HOURS = Array.from({ length: 31 }, (_, i) => i);
@@ -554,75 +555,51 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
     } finally { setSubmitting(false); }
   };
 
-  // カレンダー生成
-  const firstDay = new Date(calYear, calMonth - 1, 1);
-  const lastDay = new Date(calYear, calMonth, 0);
-  const startPad = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-  const calDays: (number | null)[] = [...Array(startPad).fill(null), ...Array.from({ length: lastDay.getDate() }, (_, i) => i + 1)];
-  const shiftDates = shifts.map(s => s.date);
+  // カレンダー用イベント生成
+  const calendarEvents = useMemo(() => {
+    const evts: { date: string; color: string }[] = [];
+    confirmedShifts.forEach(s => evts.push({ date: s.date, color: Colors.green }));
+    shifts.forEach(s => {
+      if (!confirmedShifts.some(c => c.date === s.date)) {
+        evts.push({ date: s.date, color: Colors.gold });
+      }
+    });
+    return evts;
+  }, [confirmedShifts, shifts]);
   const confirmedDates = confirmedShifts.map(s => s.date);
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
 
   return (
     <View>
-      {/* カレンダー */}
-      <View style={styles.calCard}>
-        <View style={styles.calHeader}>
-          <TouchableOpacity onPress={() => { const d = new Date(calYear, calMonth-2, 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()+1); }}>
-            <Ionicons name="chevron-back" size={20} color={Colors.text2} />
-          </TouchableOpacity>
-          <Text style={styles.calTitle}>{calYear}年{calMonth}月</Text>
-          <TouchableOpacity onPress={() => { const d = new Date(calYear, calMonth, 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()+1); }}>
-            <Ionicons name="chevron-forward" size={20} color={Colors.text2} />
-          </TouchableOpacity>
+      {/* 凡例 */}
+      <View style={{ flexDirection: 'row', gap: 14, marginBottom: 8, paddingHorizontal: 4 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.green }} />
+          <Text style={{ fontSize: 11, color: Colors.text3 }}>確定</Text>
         </View>
-        {/* 凡例 */}
-        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 8 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.green }} />
-            <Text style={{ fontSize: 10, color: Colors.text3 }}>確定</Text>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.gold }} />
-            <Text style={{ fontSize: 10, color: Colors.text3 }}>提出中</Text>
-          </View>
-        </View>
-        <View style={styles.calDayRow}>
-          {CAL_DAYS.map(d => <Text key={d} style={styles.calDayLabel}>{d}</Text>)}
-        </View>
-        <View style={styles.calGrid}>
-          {calDays.map((day, i) => {
-            if (!day) return <View key={`pad-${i}`} style={styles.calCell} />;
-            const dateStr = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-            const isConfirmed = confirmedDates.includes(dateStr);
-            const hasRequest = shiftDates.includes(dateStr);
-            const isToday = dateStr === getDateStr(new Date());
-            return (
-              <TouchableOpacity key={dateStr}
-                style={[styles.calCell,
-                  isConfirmed && { backgroundColor: 'rgba(78,203,138,0.2)', borderRadius: 8 },
-                  hasRequest && !isConfirmed && styles.calCellShift,
-                  isToday && styles.calCellToday,
-                ]}
-                onPress={() => {
-                  if (isConfirmed) {
-                    Alert.alert('確定済み', 'この日はすでに確定シフトがあります');
-                    return;
-                  }
-                  setSelDate(dateStr); setModalVisible(true);
-                }}>
-                <Text style={[styles.calDayNum,
-                  isConfirmed && { color: Colors.green, fontWeight: '700' },
-                  hasRequest && !isConfirmed && styles.calDayNumShift,
-                  isToday && styles.calDayNumToday,
-                ]}>{day}</Text>
-                {isConfirmed && <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: Colors.green, marginTop: 1 }} />}
-              </TouchableOpacity>
-            );
-          })}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.gold }} />
+          <Text style={{ fontSize: 11, color: Colors.text3 }}>提出中</Text>
         </View>
       </View>
+
+      {/* 月カレンダー */}
+      <MonthCalendar
+        events={calendarEvents}
+        year={calYear}
+        month={calMonth - 1}
+        onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m + 1); }}
+        onDayPress={(d) => {
+          const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+          if (confirmedDates.includes(dateStr)) {
+            Alert.alert('確定済み', 'この日はすでに確定シフトがあります');
+            return;
+          }
+          setSelDate(dateStr);
+          setModalVisible(true);
+        }}
+      />
 
       <PunyTouchable haptic="medium" style={styles.addShiftBtn} onPress={() => setModalVisible(true)}>
         <Ionicons name="add-circle-outline" size={18} color={Colors.gold} />
