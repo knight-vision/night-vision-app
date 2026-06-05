@@ -1,4 +1,6 @@
 import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
+import { GlassView } from 'expo-glass-effect';
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect } from 'react';
 import { useAuthStore } from '../../store/auth';
