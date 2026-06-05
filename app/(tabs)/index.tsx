@@ -50,7 +50,6 @@ const DAY_COL_WIDTH = 88;
 const DAY_COL_GAP = 6;
 
 function WeeklyShiftTable({
-  const Colors = useColors();
   weekDates, allConfirmed, casts, highlightCastId, onDayPress, isPending,
 }: {
   weekDates: string[];
@@ -60,6 +59,7 @@ function WeeklyShiftTable({
   onDayPress?: (date: string) => void;
   isPending?: boolean;  // 希望シフト表示モード（破線枠・薄色）
 }) {
+  const Colors = useColors();
   const todayStr = getDateStr(new Date());
   return (
     <ScrollView

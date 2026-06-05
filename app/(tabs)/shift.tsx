@@ -203,8 +203,8 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
 }
 
 // ── オーナー向けシフト管理 ──────────────────────────────────────
-function OwnerShiftView({
-  const Colors = useColors(); shopId }: { shopId: string }) {
+function OwnerShiftView({ shopId }: { shopId: string }) {
+  const Colors = useColors();
   const now = new Date();
   const [calYear, setCalYear] = useState(now.getFullYear());
   const [calMonth, setCalMonth] = useState(now.getMonth()); // 0-indexed
@@ -516,8 +516,8 @@ function OwnerShiftView({
 }
 
 // ── キャスト向けシフト希望提出 ──────────────────────────────────
-function CastShiftView({
-  const Colors = useColors(); castId, shopId }: { castId: string; shopId: string }) {
+function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
+  const Colors = useColors();
   const router = useRouter();
   const [view, setView] = useState<'me' | 'shop'>('me'); // タブ切り替え
   const [shifts, setShifts] = useState<any[]>([]);
@@ -789,6 +789,7 @@ function ShopShiftView({ allConfirmed, casts, calYear, calMonth, onMonthChange }
   calMonth: number;
   onMonthChange: (y: number, m: number) => void;
 }) {
+  const Colors = useColors();
   const [selDate, setSelDate] = useState(getDateStr(new Date()));
 
   // 各キャストに固定の色
