@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, fmtYen } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
+import { MonthCalendar } from '../../components/MonthCalendar';
 
 type SlipTab = 'input' | 'sales' | 'menus';
 
@@ -24,43 +25,24 @@ function fmtDateLabel(ds: string) {
   return `${d.getMonth()+1}/${d.getDate()}(${CAL_DAYS[d.getDay() === 0 ? 6 : d.getDay()-1]})`;
 }
 
-// ── ミニカレンダー ──────────────────────────────────────────────
+// ── ミニカレンダー（MonthCalendarラッパー） ─────────────────
 function DatePicker({ value, onChange }: { value: string; onChange: (d: string) => void }) {
-  const [calYear, setCalYear] = useState(new Date(value + 'T00:00:00').getFullYear());
-  const [calMonth, setCalMonth] = useState(new Date(value + 'T00:00:00').getMonth() + 1);
-  const firstDay = new Date(calYear, calMonth - 1, 1);
-  const lastDay = new Date(calYear, calMonth, 0);
-  const startPad = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-  const days: (number | null)[] = [...Array(startPad).fill(null), ...Array.from({ length: lastDay.getDate() }, (_, i) => i + 1)];
+  const initDate = new Date(value + 'T00:00:00');
+  const [year, setYear] = useState(initDate.getFullYear());
+  const [month, setMonth] = useState(initDate.getMonth());
+
   return (
-    <View style={cal.wrap}>
-      <View style={cal.header}>
-        <TouchableOpacity onPress={() => { const d = new Date(calYear, calMonth-2, 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()+1); }}>
-          <Ionicons name="chevron-back" size={18} color={Colors.text2} />
-        </TouchableOpacity>
-        <Text style={cal.title}>{calYear}年{calMonth}月</Text>
-        <TouchableOpacity onPress={() => { const d = new Date(calYear, calMonth, 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()+1); }}>
-          <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
-        </TouchableOpacity>
-      </View>
-      <View style={cal.dayRow}>
-        {CAL_DAYS.map(d => <Text key={d} style={cal.dayLabel}>{d}</Text>)}
-      </View>
-      <View style={cal.grid}>
-        {days.map((day, i) => {
-          if (!day) return <View key={`p${i}`} style={cal.cell} />;
-          const dateStr = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-          const isSelected = dateStr === value;
-          const isToday = dateStr === getDateStr(new Date());
-          return (
-            <TouchableOpacity key={dateStr} onPress={() => onChange(dateStr)}
-              style={[cal.cell, isSelected && cal.cellSelected, isToday && !isSelected && cal.cellToday]}>
-              <Text style={[cal.dayNum, isSelected && cal.dayNumSelected, isToday && !isSelected && cal.dayNumToday]}>{day}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </View>
+    <MonthCalendar
+      year={year}
+      month={month}
+      onMonthChange={(y, m) => { setYear(y); setMonth(m); }}
+      onDayPress={(d) => {
+        const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        onChange(ds);
+      }}
+      initialSelected={initDate}
+      events={[{ date: value, color: Colors.gold }]}
+    />
   );
 }
 

@@ -216,7 +216,8 @@ export function MonthCalendar({
   );
 }
 
-const CELL_W = (SCREEN_W - 16) / 7;
+// 親に paddingHorizontal: 16, 自身に paddingHorizontal: 8 → 8x2=16, 16x2=32 で48px減
+const CELL_W = (SCREEN_W - 48) / 7;
 
 const styles = StyleSheet.create({
   container:           { paddingHorizontal: 8, paddingBottom: 8, backgroundColor: Colors.surface, borderRadius: 16, borderWidth: 0.5, borderColor: Colors.border, marginBottom: 12 },
