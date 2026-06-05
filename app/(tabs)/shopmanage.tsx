@@ -1,3 +1,4 @@
+import { GlassCard } from '../../components/GlassCard';
 import { PunyTouchable } from '../../components/PunyTouchable';
 import {
   ScrollView, View, Text, StyleSheet,
@@ -94,7 +95,7 @@ function ShopInfo({ shopId }: { shopId: string }) {
   const openWebsite = () => {
     const slug = shopSlug || authShopSlug;
     const url = slug
-      ? `https://www.night-vision.jp/shops/${slug}`
+      ? `https://www.night-vision.jp/shop/${slug}`
       : 'https://www.night-vision.jp';
     Linking.openURL(url);
   };
@@ -376,31 +377,31 @@ const modal = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
-  safe:          { flex: 1, backgroundColor: Colors.bg },
-  screenTitle:   { fontSize: 20, fontWeight: '500', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
+  safe:          { flex: 1, backgroundColor: '#0c0c1a' },
+  screenTitle:   { fontSize: 20, fontWeight: '500', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
   scroll:        { paddingHorizontal: 16, paddingBottom: 108 },
   segmentWrap:       { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: 3, marginHorizontal: 16, marginBottom: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.15)' },
   segmentBtn:        { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 9, borderRadius: 11 },
-  segmentBtnActive:  { backgroundColor: Colors.goldDim, borderWidth: 0.5, borderColor: Colors.gold },
-  segmentText:       { fontSize: 13, color: Colors.text3, fontWeight: '500' },
-  segmentTextActive: { fontSize: 13, color: Colors.gold, fontWeight: '700' },
-  webLinkBtn:    { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: Colors.goldDim, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.gold, padding: 14, marginTop: 12, marginBottom: 4 },
-  webLinkText:   { flex: 1, fontSize: 14, color: Colors.gold, fontWeight: '500' },
-  sectionTitle:  { fontSize: 13, color: Colors.text2, fontWeight: '600', marginTop: 20, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
-  fieldLabel:    { fontSize: 12, color: Colors.text2, marginBottom: 5 },
-  input:         { backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, padding: 12, color: Colors.text, fontSize: 14 },
-  dayRow:        { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  dayLabel:      { fontSize: 14, color: Colors.text, width: 20 },
-  saveBtn:       { backgroundColor: Colors.gold, borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 8 },
+  segmentBtnActive:  { backgroundColor: 'rgba(255,136,204,0.15)', borderWidth: 0.5, borderColor: '#ff88cc' },
+  segmentText:       { fontSize: 13, color: '#eeeeff'3, fontWeight: '500' },
+  segmentTextActive: { fontSize: 13, color: '#ff88cc', fontWeight: '700' },
+  webLinkBtn:    { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 12, borderWidth: 0.5, borderColor: '#ff88cc', padding: 14, marginTop: 12, marginBottom: 4 },
+  webLinkText:   { flex: 1, fontSize: 14, color: '#ff88cc', fontWeight: '500' },
+  sectionTitle:  { fontSize: 13, color: '#eeeeff'2, fontWeight: '600', marginTop: 20, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
+  fieldLabel:    { fontSize: 12, color: '#eeeeff'2, marginBottom: 5 },
+  input:         { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, color: '#eeeeff', fontSize: 14 },
+  dayRow:        { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
+  dayLabel:      { fontSize: 14, color: '#eeeeff', width: 20 },
+  saveBtn:       { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 8 },
   saveBtnText:   { color: '#1a1200', fontWeight: '600', fontSize: 15 },
-  addBtn:        { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.goldDim, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.gold, padding: 12, marginTop: 12, marginBottom: 8 },
-  addBtnText:    { fontSize: 14, color: Colors.gold, fontWeight: '500' },
-  empty:         { fontSize: 13, color: Colors.text3, paddingVertical: 20, textAlign: 'center' },
-  jobCard:       { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 12, marginBottom: 8 },
-  jobTitle:      { fontSize: 14, fontWeight: '500', color: Colors.text },
-  jobInfo:       { fontSize: 12, color: Colors.text2, marginBottom: 4 },
+  addBtn:        { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 10, borderWidth: 0.5, borderColor: '#ff88cc', padding: 12, marginTop: 12, marginBottom: 8 },
+  addBtnText:    { fontSize: 14, color: '#ff88cc', fontWeight: '500' },
+  empty:         { fontSize: 13, color: '#eeeeff'3, paddingVertical: 20, textAlign: 'center' },
+  jobCard:       { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 8 },
+  jobTitle:      { fontSize: 14, fontWeight: '500', color: '#eeeeff' },
+  jobInfo:       { fontSize: 12, color: '#eeeeff'2, marginBottom: 4 },
   publicBadge:   { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  jobActions:    { flexDirection: 'row', gap: 6, marginTop: 8, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: Colors.border },
-  actionBtn:     { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 5, paddingHorizontal: 8, borderRadius: 6, backgroundColor: Colors.surface2 },
-  actionBtnText: { fontSize: 12, color: Colors.text2 },
+  jobActions:    { flexDirection: 'row', gap: 6, marginTop: 8, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: 'rgba(200,180,255,0.18)' },
+  actionBtn:     { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 5, paddingHorizontal: 8, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.05)'2 },
+  actionBtnText: { fontSize: 12, color: '#eeeeff'2 },
 });

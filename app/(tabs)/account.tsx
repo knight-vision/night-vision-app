@@ -169,7 +169,7 @@ export default function AccountScreen() {
         />
 
         {/* プロフィール */}
-        <View style={[styles.profileCard, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
+        <GlassCard style={styles.profileCard}>
           <View style={[styles.profileAvatar, { borderColor: roleColor, backgroundColor: roleBg }]}>
             <Text style={[styles.profileAvatarText, { color: roleColor }]}>{name?.[0] || '?'}</Text>
           </View>
@@ -181,10 +181,10 @@ export default function AccountScreen() {
               <Text style={[styles.roleBadgeText, { color: roleColor }]}>{roleLabel}</Text>
             </View>
           </View>
-        </View>
+        </GlassCard>
 
         {/* アカウント設定 */}
-        <View style={[styles.menuGroup, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
+        <GlassCard style={styles.menuGroup}>
           <PunyTouchable style={[styles.menuItem, { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}
             onPress={() => setShowPasswordModal(true)} scaleTo={0.98} haptic="light">
             <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="lock-closed-outline" size={18} color={Colors.purple} /></View>
@@ -202,10 +202,10 @@ export default function AccountScreen() {
             </View>
             <Ionicons name="chevron-forward" size={14} color={Colors.text3} />
           </PunyTouchable>
-        </View>
+        </GlassCard>
 
         {/* 通知設定 */}
-        <View style={[styles.menuGroup, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
+        <GlassCard style={styles.menuGroup}>
           <View style={[styles.menuItem, { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}>
             <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="notifications-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1 }}>
@@ -237,7 +237,7 @@ export default function AccountScreen() {
         </View>
 
         {/* その他 */}
-        <View style={[styles.menuGroup, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
+        <GlassCard style={styles.menuGroup}>
           <PunyTouchable style={[styles.menuItem, { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}
             onPress={() => Alert.alert('お問い合わせ', 'kushiro.night.vision@gmail.com\nまでご連絡ください')}>
             <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="help-circle-outline" size={18} color={Colors.purple} /></View>
