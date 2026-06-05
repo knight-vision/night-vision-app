@@ -176,7 +176,7 @@ function SlipInput({ shopId }: { shopId: string }) {
           <Text style={s.editBannerText}>✏️ 伝票を編集中</Text>
           <PunyTouchable onPress={resetForm} style={s.editCancelBtn} scaleTo={0.95} haptic="light">
             <Text style={{ fontSize: 12, color: Colors.gold }}>キャンセル</Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         </View>
       )}
 
@@ -192,7 +192,7 @@ function SlipInput({ shopId }: { shopId: string }) {
           <PunyTouchable key={p} onPress={() => setPayment(p)} scaleTo={0.94} haptic="light"
             style={[s.payBtn, payment === p && s.payBtnActive]}>
             <Text style={[s.payBtnText, payment === p && s.payBtnTextActive]}>{p}</Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         ))}
       </View>
 
@@ -207,12 +207,12 @@ function SlipInput({ shopId }: { shopId: string }) {
                 <PunyTouchable style={[s.pickerOption, c.cast_id === '' && s.pickerOptionActive]} scaleTo={0.94} haptic="light"
                   onPress={() => updateCastEntry(i, 'cast_id', '')}>
                   <Text style={[s.pickerOptionText, c.cast_id === '' && s.pickerOptionTextActive]}>選択なし</Text>
-                </TouchableOpacity>
+                </PunyTouchable>
                 {casts.map((cast: any) => (
                   <PunyTouchable key={cast.id} onPress={() => updateCastEntry(i, 'cast_id', String(cast.id))} scaleTo={0.94} haptic="light"
                     style={[s.pickerOption, c.cast_id === String(cast.id) && s.pickerOptionActive]}>
                     <Text style={[s.pickerOptionText, c.cast_id === String(cast.id) && s.pickerOptionTextActive]}>{cast.name}</Text>
-                  </TouchableOpacity>
+                  </PunyTouchable>
                 ))}
               </ScrollView>
             </View>
@@ -225,7 +225,7 @@ function SlipInput({ shopId }: { shopId: string }) {
                   <PunyTouchable key={t} onPress={() => updateCastEntry(i, 'type', t)} scaleTo={0.94} haptic="light"
                     style={[s.pickerOption, c.type === t && s.pickerOptionActive]}>
                     <Text style={[s.pickerOptionText, c.type === t && s.pickerOptionTextActive]}>{t}</Text>
-                  </TouchableOpacity>
+                  </PunyTouchable>
                 ))}
               </ScrollView>
             </View>
@@ -233,14 +233,14 @@ function SlipInput({ shopId }: { shopId: string }) {
           {slipCasts.length > 1 && (
             <PunyTouchable onPress={() => setSlipCasts(prev => prev.filter((_, idx) => idx !== i))} style={{ padding: 8, marginTop: 16 }} scaleTo={0.88} haptic="medium">
               <Ionicons name="close-circle" size={20} color={Colors.red} />
-            </TouchableOpacity>
+            </PunyTouchable>
           )}
         </View>
       ))}
-      <TouchableOpacity style={s.addRowBtn} onPress={() => setSlipCasts(prev => [...prev, { cast_id: '', type: 'フリー' }])}>
+      <PunyTouchable style={s.addRowBtn} onPress={() = scaleTo={0.95} haptic="light"> setSlipCasts(prev => [...prev, { cast_id: '', type: 'フリー' }])}>
         <Ionicons name="add" size={16} color={Colors.purple} />
         <Text style={[s.addRowBtnText, { color: Colors.purple }]}>キャストを追加</Text>
-      </TouchableOpacity>
+      </PunyTouchable>
 
       {/* 品目 */}
       <Text style={s.sectionTitle}>注文品目</Text>
@@ -250,10 +250,10 @@ function SlipInput({ shopId }: { shopId: string }) {
           {menus.length > 0 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
               {menus.map((m: any) => (
-                <TouchableOpacity key={m.id} onPress={() => { updateItem(i, 'name', m.name); updateItem(i, 'price', m.price); }}
+                <PunyTouchable key={m.id} onPress={() = scaleTo={0.95} haptic="light"> { updateItem(i, 'name', m.name); updateItem(i, 'price', m.price); }}
                   style={s.presetChip}>
                   <Text style={s.presetChipText}>{m.name}</Text>
-                </TouchableOpacity>
+                </PunyTouchable>
               ))}
             </ScrollView>
           )}
@@ -278,17 +278,17 @@ function SlipInput({ shopId }: { shopId: string }) {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
             <Text style={[s.fieldLabel, { color: Colors.gold }]}>小計: {fmtYen(item.qty * item.price)}</Text>
             {slipItems.length > 1 && (
-              <TouchableOpacity onPress={() => setSlipItems(prev => prev.filter((_, idx) => idx !== i))}>
+              <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setSlipItems(prev => prev.filter((_, idx) => idx !== i))}>
                 <Text style={{ fontSize: 12, color: Colors.red }}>削除</Text>
-              </TouchableOpacity>
+              </PunyTouchable>
             )}
           </View>
         </View>
       ))}
-      <TouchableOpacity style={s.addRowBtn} onPress={() => setSlipItems(prev => [...prev, { name: '', qty: 1, price: 0 }])}>
+      <PunyTouchable style={s.addRowBtn} onPress={() = scaleTo={0.95} haptic="light"> setSlipItems(prev => [...prev, { name: '', qty: 1, price: 0 }])}>
         <Ionicons name="add" size={16} color={Colors.gold} />
         <Text style={s.addRowBtnText}>品目を追加</Text>
-      </TouchableOpacity>
+      </PunyTouchable>
 
       {/* 合計 */}
       <View style={s.totalBlock}>
@@ -305,18 +305,18 @@ function SlipInput({ shopId }: { shopId: string }) {
       <TextInput style={s.input} value={memo} onChangeText={setMemo}
         placeholder="客名・備考など" placeholderTextColor={Colors.text3} />
 
-      <TouchableOpacity style={s.saveBtn} onPress={handleSave} disabled={saving}>
+      <PunyTouchable style={s.saveBtn} onPress={handleSave} disabled={saving} scaleTo={0.95} haptic="light">
         {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={s.saveBtnText}>{editingId ? '✏️ 更新する' : '伝票を保存する'}</Text>}
-      </TouchableOpacity>
+      </PunyTouchable>
 
       {/* 本日の伝票履歴 */}
-      <TouchableOpacity style={s.historyHeader} onPress={() => setShowHistory(v => !v)}>
+      <PunyTouchable style={s.historyHeader} onPress={() = scaleTo={0.95} haptic="light"> setShowHistory(v => !v)}>
         <Text style={s.historyHeaderText}>
           📋 {date}の伝票
           {todaySlips.length > 0 && <Text style={{ color: Colors.gold }}> {todaySlips.length}件 {fmtYen(todaySlips.reduce((a: number, b: any) => a + b.total, 0))}</Text>}
         </Text>
         <Ionicons name={showHistory ? 'chevron-up' : 'chevron-down'} size={16} color={Colors.text3} />
-      </TouchableOpacity>
+      </PunyTouchable>
 
       {showHistory && todaySlips.map((slip: any, idx: number) => {
         const castNames = (slip.cast_entries || []).map((c: any) => {
@@ -336,12 +336,12 @@ function SlipInput({ shopId }: { shopId: string }) {
             <Text style={s.slipItemText}>{(slip.items || []).map((i: any) => `${i.name}×${i.qty}`).join('　')}</Text>
             {slip.memo ? <Text style={s.slipMemoText}>📝 {slip.memo}</Text> : null}
             <View style={s.slipActions}>
-              <TouchableOpacity style={s.slipEditBtn} onPress={() => startEdit(slip)}>
+              <PunyTouchable style={s.slipEditBtn} onPress={() = scaleTo={0.95} haptic="light"> startEdit(slip)}>
                 <Text style={s.slipEditBtnText}>✏️ 修正</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={s.slipDeleteBtn} onPress={() => handleDelete(slip)}>
+              </PunyTouchable>
+              <PunyTouchable style={s.slipDeleteBtn} onPress={() = scaleTo={0.95} haptic="light"> handleDelete(slip)}>
                 <Text style={s.slipDeleteBtnText}>削除</Text>
-              </TouchableOpacity>
+              </PunyTouchable>
             </View>
           </View>
         );
@@ -433,40 +433,40 @@ function ShopSales({ shopId }: { shopId: string }) {
       {/* 期間切替 */}
       <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
         {PERIODS.map(p => (
-          <TouchableOpacity key={p.key} onPress={() => setPeriod(p.key)}
+          <PunyTouchable key={p.key} onPress={() = scaleTo={0.95} haptic="light"> setPeriod(p.key)}
             style={[s.periodBtn, period === p.key && s.periodBtnActive]}>
             <Text style={[s.periodBtnText, period === p.key && s.periodBtnTextActive]}>{p.label}</Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         ))}
       </View>
 
       {/* ナビゲーション */}
       {period === 'daily' && (
         <View style={s.monthNav}>
-          <TouchableOpacity onPress={() => setDailyDate(addDay(dailyDate, -1))} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></TouchableOpacity>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setDailyDate(addDay(dailyDate, -1))} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></PunyTouchable>
           <Text style={s.monthLabel}>{fmtDateLabel(dailyDate)}</Text>
-          <TouchableOpacity onPress={() => setDailyDate(addDay(dailyDate, 1))} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></TouchableOpacity>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setDailyDate(addDay(dailyDate, 1))} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></PunyTouchable>
         </View>
       )}
       {period === 'weekly' && (
         <View style={s.monthNav}>
-          <TouchableOpacity onPress={() => setWeekBase(addDay(weekBase, -7))} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></TouchableOpacity>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setWeekBase(addDay(weekBase, -7))} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></PunyTouchable>
           <Text style={s.monthLabel}>{(() => { const w = getWeekDates(weekBase); return `${w[0].slice(5).replace('-','/')} 〜 ${w[6].slice(5).replace('-','/')}`; })()}</Text>
-          <TouchableOpacity onPress={() => setWeekBase(addDay(weekBase, 7))} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></TouchableOpacity>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setWeekBase(addDay(weekBase, 7))} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></PunyTouchable>
         </View>
       )}
       {period === 'monthly' && (
         <View style={s.monthNav}>
-          <TouchableOpacity onPress={() => { const d = new Date(year, month - 2, 1); setYear(d.getFullYear()); setMonth(d.getMonth() + 1); }} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></TouchableOpacity>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> { const d = new Date(year, month - 2, 1); setYear(d.getFullYear()); setMonth(d.getMonth() + 1); }} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></PunyTouchable>
           <Text style={s.monthLabel}>{monthStr}</Text>
-          <TouchableOpacity onPress={() => { const d = new Date(year, month, 1); setYear(d.getFullYear()); setMonth(d.getMonth() + 1); }} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></TouchableOpacity>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> { const d = new Date(year, month, 1); setYear(d.getFullYear()); setMonth(d.getMonth() + 1); }} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></PunyTouchable>
         </View>
       )}
       {period === 'yearly' && (
         <View style={s.monthNav}>
-          <TouchableOpacity onPress={() => setYear(y => y - 1)} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></TouchableOpacity>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setYear(y => y - 1)} style={s.monthBtn}><Ionicons name="chevron-back" size={18} color={Colors.text2} /></PunyTouchable>
           <Text style={s.monthLabel}>{year}年</Text>
-          <TouchableOpacity onPress={() => setYear(y => y + 1)} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></TouchableOpacity>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setYear(y => y + 1)} style={s.monthBtn}><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></PunyTouchable>
         </View>
       )}
 
@@ -560,14 +560,14 @@ function MenuManagement({ shopId }: { shopId: string }) {
             placeholder="例: シャンパン" placeholderTextColor={Colors.text3} />
           <TextInput style={[s.input, { flex: 1 }]} value={price} onChangeText={setPrice}
             placeholder="¥" placeholderTextColor={Colors.text3} keyboardType="number-pad" />
-          <TouchableOpacity style={[s.saveBtn, { flex: 1, height: 44, marginTop: 0 }]} onPress={handleSave} disabled={saving}>
+          <PunyTouchable style={[s.saveBtn, { flex: 1, height: 44, marginTop: 0 }]} onPress={handleSave} disabled={saving} scaleTo={0.95} haptic="light">
             {saving ? <ActivityIndicator color="#1a1200" size="small" /> : <Text style={s.saveBtnText}>{editTarget ? '更新' : '追加'}</Text>}
-          </TouchableOpacity>
+          </PunyTouchable>
         </View>
         {editTarget && (
-          <TouchableOpacity onPress={() => { setEditTarget(null); setName(''); setPrice(''); }} style={{ marginTop: 6 }}>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> { setEditTarget(null); setName(''); setPrice(''); }} style={{ marginTop: 6 }}>
             <Text style={{ fontSize: 12, color: Colors.text3, textAlign: 'center' }}>キャンセル</Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         )}
       </View>
 
@@ -576,12 +576,12 @@ function MenuManagement({ shopId }: { shopId: string }) {
         <View key={m.id} style={s.menuItem}>
           <Text style={s.menuName}>{m.name}</Text>
           <Text style={s.menuPrice}>{fmtYen(m.price || 0)}</Text>
-          <TouchableOpacity onPress={() => { setEditTarget(m); setName(m.name); setPrice(String(m.price || 0)); }} style={{ padding: 6 }}>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> { setEditTarget(m); setName(m.name); setPrice(String(m.price || 0)); }} style={{ padding: 6 }}>
             <Ionicons name="create-outline" size={16} color={Colors.text2} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleDelete(m.id, m.name)} style={{ padding: 6 }}>
+          </PunyTouchable>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> handleDelete(m.id, m.name)} style={{ padding: 6 }}>
             <Ionicons name="trash-outline" size={16} color={Colors.red} />
-          </TouchableOpacity>
+          </PunyTouchable>
         </View>
       ))}
       {menus.length === 0 && <Text style={s.empty}>品名が登録されていません</Text>}
@@ -608,11 +608,11 @@ export default function SlipScreen() {
       <Text style={s.screenTitle}>売上管理</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.tabScroll} contentContainerStyle={s.tabContent}>
         {TABS.map(tab => (
-          <TouchableOpacity key={tab.key} style={[s.tab, activeTab === tab.key && s.tabActive]}
-            onPress={() => setActiveTab(tab.key)}>
+          <PunyTouchable key={tab.key} style={[s.tab, activeTab === tab.key && s.tabActive]}
+            onPress={() = scaleTo={0.95} haptic="light"> setActiveTab(tab.key)}>
             <Ionicons name={tab.icon as any} size={14} color={activeTab === tab.key ? Colors.gold : Colors.text3} />
             <Text style={[s.tabText, activeTab === tab.key && s.tabTextActive]}>{tab.label}</Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         ))}
       </ScrollView>
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>

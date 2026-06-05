@@ -89,7 +89,7 @@ function DrumColumn({ items, selectedIndex, onSelect }: {
             <Text style={[ts.drumText, isSelected && ts.drumTextActive]}>
               {item}
             </Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         );
       }}
     />
@@ -168,7 +168,7 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
         {label && <Text style={ts.btnLabel}>{label}</Text>}
         <Text style={ts.btnValue}>{tLabel(currentH)} {MINUTES[currentM]}分</Text>
         <Ionicons name="time-outline" size={14} color={Colors.gold} />
-      </TouchableOpacity>
+      </PunyTouchable>
 
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
@@ -177,11 +177,11 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
             <View style={ts.sheetHeader}>
               <PunyTouchable onPress={() => setModalVisible(false)} style={{ padding: 8 }} scaleTo={0.88} haptic="light">
                 <Text style={ts.sheetCancel}>キャンセル</Text>
-              </TouchableOpacity>
+              </PunyTouchable>
               <Text style={ts.sheetTitle}>{label || '時間を選択'}</Text>
-              <TouchableOpacity onPress={confirm} style={{ padding: 8 }}>
+              <PunyTouchable onPress={confirm} style={{ padding: 8 }} scaleTo={0.95} haptic="light">
                 <Text style={ts.sheetDone}>完了</Text>
-              </TouchableOpacity>
+              </PunyTouchable>
             </View>
 
             {/* セレクター枠線 */}
@@ -418,12 +418,12 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                     <Text style={[styles.reqCastName, { color }]}>{req.casts?.name}</Text>
                     <Text style={styles.reqTime}>{req.start_time?.slice(0,5)}〜{req.end_time?.slice(0,5)}</Text>
                     {req.note ? <Text style={styles.reqNote}>📝{req.note}</Text> : null}
-                    <TouchableOpacity style={styles.approveBtn} onPress={() => addToDraft(selectedDate, String(req.cast_id))}>
+                    <PunyTouchable style={styles.approveBtn} onPress={() = scaleTo={0.95} haptic="light"> addToDraft(selectedDate, String(req.cast_id))}>
                       <Text style={styles.approveBtnText}>確定へ</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDeleteRequest(req.id)} style={styles.deleteReqBtn}>
+                    </PunyTouchable>
+                    <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> handleDeleteRequest(req.id)} style={styles.deleteReqBtn}>
                       <Ionicons name="trash-outline" size={14} color={Colors.red} />
-                    </TouchableOpacity>
+                    </PunyTouchable>
                   </View>
                 );
               })}
@@ -439,8 +439,8 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                 const hasReq = requests.some((r: any) => String(r.cast_id) === String(cast.id) && r.date === selectedDate);
                 const color = getCastColor(ci);
                 return (
-                  <TouchableOpacity key={cast.id}
-                    onPress={() => selected ? removeFromDraft(selectedDate, String(cast.id)) : addToDraft(selectedDate, String(cast.id))}
+                  <PunyTouchable key={cast.id}
+                    onPress={() = scaleTo={0.95} haptic="light"> selected ? removeFromDraft(selectedDate, String(cast.id)) : addToDraft(selectedDate, String(cast.id))}
                     style={[styles.castSelectBtn, {
                       backgroundColor: selected ? color : Colors.surface2,
                       borderColor: selected ? color : hasReq ? color + '88' : Colors.border,
@@ -448,7 +448,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                     <Text style={[styles.castSelectBtnText, { color: selected ? '#fff' : hasReq ? color : Colors.text2 }]}>
                       {selected ? '✓ ' : ''}{cast.name}{hasReq && !selected ? ' 📩' : ''}
                     </Text>
-                  </TouchableOpacity>
+                  </PunyTouchable>
                 );
               })}
             </View>
@@ -489,15 +489,15 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                   <View key={s.id} style={styles.confirmedRow}>
                     <Text style={[styles.confirmedName, { color }]}>{s.casts?.name}</Text>
                     <Text style={styles.confirmedTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
-                    <TouchableOpacity style={styles.changeTimeBtn} onPress={() => addToDraft(selectedDate, String(s.cast_id))}>
+                    <PunyTouchable style={styles.changeTimeBtn} onPress={() = scaleTo={0.95} haptic="light"> addToDraft(selectedDate, String(s.cast_id))}>
                       <Text style={styles.changeTimeBtnText}>時間変更</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => Alert.alert('削除確認', `${s.casts?.name}のシフトを削除しますか？`, [
+                    </PunyTouchable>
+                    <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> Alert.alert('削除確認', `${s.casts?.name}のシフトを削除しますか？`, [
                       { text: 'キャンセル', style: 'cancel' },
                       { text: '削除', style: 'destructive', onPress: () => handleDeleteConfirmed(String(s.cast_id), selectedDate) },
                     ])} style={styles.deleteConfBtn}>
                       <Ionicons name="trash-outline" size={14} color={Colors.red} />
-                    </TouchableOpacity>
+                    </PunyTouchable>
                   </View>
                 );
               })}
@@ -507,9 +507,9 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
       </View>
 
       {totalDraft > 0 && (
-        <TouchableOpacity style={[styles.confirmBtn, { marginTop: 16 }]} onPress={handleConfirm} disabled={saving}>
+        <PunyTouchable style={[styles.confirmBtn, { marginTop: 16 }]} onPress={handleConfirm} disabled={saving} scaleTo={0.95} haptic="light">
           {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={styles.confirmBtnText}>📲 {totalDraft}件のシフトを確定</Text>}
-        </TouchableOpacity>
+        </PunyTouchable>
       )}
     </View>
   );
@@ -719,9 +719,9 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
       <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalClose}>
+            <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setModalVisible(false)} style={styles.modalClose}>
               <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
+            </PunyTouchable>
             <Text style={styles.modalTitle}>シフト希望を提出</Text>
             <View style={{ width: 36 }} />
           </View>
@@ -768,9 +768,9 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
               })()}
             />
 
-            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={submitting}>
+            <PunyTouchable style={styles.submitBtn} onPress={handleSubmit} disabled={submitting} scaleTo={0.95} haptic="light">
               {submitting ? <ActivityIndicator color="#1a1200" /> : <Text style={styles.submitBtnText}>提出する</Text>}
-            </TouchableOpacity>
+            </PunyTouchable>
             <View style={{ height: 40 }} />
           </ScrollView>
         </View>

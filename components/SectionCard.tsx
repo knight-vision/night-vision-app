@@ -19,7 +19,7 @@ export function SectionCard({ title, actionLabel, onAction, children }: Props) {
       {actionLabel && (
         <PunyTouchable onPress={onAction} style={[styles.actionBtn, { backgroundColor: Colors.purpleDim }]} scaleTo={0.93} haptic="light">
           <Text style={[styles.action, { color: Colors.purple }]}>{actionLabel}</Text>
-        </TouchableOpacity>
+        </PunyTouchable>
       )}
     </View>
   );

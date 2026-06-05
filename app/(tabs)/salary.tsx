@@ -170,7 +170,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
       <PunyTouchable style={styles.addBtn} onPress={openAdd} scaleTo={0.96} haptic="medium">
         <Ionicons name="add-circle-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>手当・控除を追加</Text>
-      </TouchableOpacity>
+      </PunyTouchable>
 
       {allowances.map((a: any) => {
         const cast = casts.find((c: any) => c.id === a.cast_id);
@@ -185,7 +185,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
             </Text>
             <PunyTouchable onPress={() => handleDelete(a.id)} style={{ padding: 6 }} scaleTo={0.88} haptic="medium">
               <Ionicons name="trash-outline" size={16} color={Colors.red} />
-            </TouchableOpacity>
+            </PunyTouchable>
           </View>
         );
       })}
@@ -196,7 +196,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
           <View style={modal.header}>
             <PunyTouchable onPress={() => setModalVisible(false)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
+            </PunyTouchable>
             <Text style={modal.title}>手当・控除を追加</Text>
             <View style={{ width: 36 }} />
           </View>
@@ -208,7 +208,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
                 <PunyTouchable key={c.id} onPress={() => setCastId(c.id)} scaleTo={0.95} haptic="light"
                   style={[modal.chip, castId === c.id && modal.chipActive]}>
                   <Text style={[modal.chipText, castId === c.id && modal.chipTextActive]}>{c.name}</Text>
-                </TouchableOpacity>
+                </PunyTouchable>
               ))}
             </ScrollView>
 
@@ -223,7 +223,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
                       <Text style={[modal.chipText, { color: p.sign === '+' ? Colors.green : Colors.red }]}>
                         {p.name}
                       </Text>
-                    </TouchableOpacity>
+                    </PunyTouchable>
                   ))}
                 </ScrollView>
               </>
@@ -243,7 +243,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
                   <Text style={[modal.chipText, sign === s && { color: s === '+' ? Colors.green : Colors.red }]}>
                     {s === '+' ? '手当' : '控除'}
                   </Text>
-                </TouchableOpacity>
+                </PunyTouchable>
               ))}
             </View>
 
@@ -252,7 +252,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
 
             <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
-            </TouchableOpacity>
+            </PunyTouchable>
           </ScrollView>
         </View>
       </Modal>
@@ -325,7 +325,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
       <PunyTouchable style={styles.addBtn} onPress={openAdd} scaleTo={0.96} haptic="medium">
         <Ionicons name="add-circle-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>プリセットを追加</Text>
-      </TouchableOpacity>
+      </PunyTouchable>
 
       {presets.map((p: any) => (
         <View key={p.id} style={styles.allowanceItem}>
@@ -340,10 +340,10 @@ function PresetManagement({ shopId }: { shopId: string }) {
           </Text>
           <PunyTouchable onPress={() => openEdit(p)} style={{ padding: 6 }} scaleTo={0.88} haptic="light">
             <Ionicons name="create-outline" size={16} color={Colors.text2} />
-          </TouchableOpacity>
+          </PunyTouchable>
           <PunyTouchable onPress={() => handleDelete(p.id, p.name)} style={{ padding: 6 }} scaleTo={0.88} haptic="medium">
             <Ionicons name="trash-outline" size={16} color={Colors.red} />
-          </TouchableOpacity>
+          </PunyTouchable>
         </View>
       ))}
       {presets.length === 0 && <Text style={styles.empty}>プリセットがありません</Text>}
@@ -353,7 +353,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
           <View style={modal.header}>
             <PunyTouchable onPress={() => setModalVisible(false)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
+            </PunyTouchable>
             <Text style={modal.title}>{editTarget ? 'プリセット編集' : 'プリセット追加'}</Text>
             <View style={{ width: 36 }} />
           </View>
@@ -368,14 +368,14 @@ function PresetManagement({ shopId }: { shopId: string }) {
                   <Text style={[modal.chipText, sign === s && { color: s === '+' ? Colors.green : Colors.red }]}>
                     {s === '+' ? '手当' : '控除'}
                   </Text>
-                </TouchableOpacity>
+                </PunyTouchable>
               ))}
             </View>
             <Text style={modal.label}>金額（円）*</Text>
             <TextInput style={modal.input} value={amount} onChangeText={setAmount} placeholder="例: 1000" placeholderTextColor={Colors.text3} keyboardType="number-pad" />
             <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
-            </TouchableOpacity>
+            </PunyTouchable>
           </View>
         </View>
       </Modal>
@@ -411,11 +411,11 @@ export default function SalaryScreen() {
         <View style={styles.monthNav}>
           <PunyTouchable onPress={() => changeMonth(-1)} style={styles.monthBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-back" size={18} color={Colors.text2} />
-          </TouchableOpacity>
+          </PunyTouchable>
           <Text style={styles.monthLabel}>{month}</Text>
           <PunyTouchable onPress={() => changeMonth(1)} style={styles.monthBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
-          </TouchableOpacity>
+          </PunyTouchable>
         </View>
       </View>
 
@@ -425,7 +425,7 @@ export default function SalaryScreen() {
             onPress={() => setActiveTab(tab.key)}>
             <Ionicons name={tab.icon as any} size={14} color={activeTab === tab.key ? Colors.gold : Colors.text3} />
             <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>{tab.label}</Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         ))}
       </ScrollView>
 

@@ -145,7 +145,7 @@ function CastManagement({ shopId }: { shopId: string }) {
       <PunyTouchable style={styles.addBtn} onPress={openAdd} scaleTo={0.96} haptic="medium">
         <Ionicons name="person-add-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>キャストを追加</Text>
-      </TouchableOpacity>
+      </PunyTouchable>
 
       {casts.length === 0 && <Text style={styles.empty}>キャストが登録されていません</Text>}
 
@@ -176,13 +176,13 @@ function CastManagement({ shopId }: { shopId: string }) {
             <View style={{ gap: 6 }}>
               <PunyTouchable onPress={() => openEdit(c)} style={styles.iconBtn} scaleTo={0.88} haptic="light">
                 <Ionicons name="create-outline" size={18} color={Colors.text2} />
-              </TouchableOpacity>
+              </PunyTouchable>
               <PunyTouchable onPress={() => { setAccountModalCast(c); setAccountEmail(''); }} style={styles.iconBtn} scaleTo={0.88} haptic="light">
                 <Ionicons name="mail-outline" size={18} color={Colors.purple} />
-              </TouchableOpacity>
+              </PunyTouchable>
               <PunyTouchable onPress={() => handleDelete(c.id, c.name)} style={styles.iconBtn} scaleTo={0.88} haptic="medium">
                 <Ionicons name="trash-outline" size={18} color={Colors.red} />
-              </TouchableOpacity>
+              </PunyTouchable>
             </View>
           </View>
         );
@@ -194,7 +194,7 @@ function CastManagement({ shopId }: { shopId: string }) {
           <View style={modal.header}>
             <PunyTouchable onPress={() => setModalVisible(false)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
+            </PunyTouchable>
             <Text style={modal.title}>{editTarget ? 'キャスト編集' : 'キャスト追加'}</Text>
             <View style={{ width: 36 }} />
           </View>
@@ -213,7 +213,7 @@ function CastManagement({ shopId }: { shopId: string }) {
             <TextInput style={[modal.input, { height: 80, textAlignVertical: 'top' }]} value={comment} onChangeText={setComment} placeholder="自己紹介など" placeholderTextColor={Colors.text3} multiline />
             <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
-            </TouchableOpacity>
+            </PunyTouchable>
             <View style={{ height: 40 }} />
           </ScrollView>
         </View>
@@ -225,7 +225,7 @@ function CastManagement({ shopId }: { shopId: string }) {
           <View style={modal.header}>
             <PunyTouchable onPress={() => setAccountModalCast(null)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
+            </PunyTouchable>
             <Text style={modal.title}>{accountModalCast?.name}のアカウント発行</Text>
             <View style={{ width: 36 }} />
           </View>
@@ -239,7 +239,7 @@ function CastManagement({ shopId }: { shopId: string }) {
             </Text>
             <PunyTouchable style={modal.submitBtn} onPress={handleIssueAccount} scaleTo={0.97} haptic="success">
               {issuingAccount ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>アカウントを発行する</Text>}
-            </TouchableOpacity>
+            </PunyTouchable>
           </View>
         </View>
       </Modal>
@@ -275,11 +275,11 @@ function SalarySection({ shopId }: { shopId: string }) {
       <View style={styles.monthNav}>
         <PunyTouchable onPress={() => changeMonth(-1)} style={styles.monthBtn} scaleTo={0.92} haptic="light">
           <Ionicons name="chevron-back" size={18} color={Colors.text2} />
-        </TouchableOpacity>
+        </PunyTouchable>
         <Text style={styles.monthLabel}>{month}</Text>
         <PunyTouchable onPress={() => changeMonth(1)} style={styles.monthBtn} scaleTo={0.92} haptic="light">
           <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
-        </TouchableOpacity>
+        </PunyTouchable>
       </View>
 
       {/* サブタブ */}
@@ -288,7 +288,7 @@ function SalarySection({ shopId }: { shopId: string }) {
           <PunyTouchable key={t.key} onPress={() => setSubTab(t.key)} scaleTo={0.95} haptic="light"
             style={[styles.subTab, subTab === t.key && styles.subTabActive]}>
             <Text style={[styles.subTabText, subTab === t.key && styles.subTabTextActive]}>{t.label}</Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         ))}
       </View>
 
@@ -429,10 +429,10 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
 
   return (
     <View>
-      <TouchableOpacity style={styles.addBtn} onPress={() => { setCastId(casts[0]?.id || ''); setDate(new Date().toISOString().slice(0,10)); setLabel(''); setSign('+'); setAmount(''); setModalVisible(true); }}>
+      <PunyTouchable style={styles.addBtn} onPress={() = scaleTo={0.95} haptic="light"> { setCastId(casts[0]?.id || ''); setDate(new Date().toISOString().slice(0,10)); setLabel(''); setSign('+'); setAmount(''); setModalVisible(true); }}>
         <Ionicons name="add-circle-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>手当・控除を追加</Text>
-      </TouchableOpacity>
+      </PunyTouchable>
       {allowances.map((a: any) => {
         const cast = casts.find((c: any) => c.id === a.cast_id);
         return (
@@ -446,7 +446,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
             </Text>
             <PunyTouchable onPress={() => handleDelete(a.id)} style={styles.iconBtn} scaleTo={0.88} haptic="medium">
               <Ionicons name="trash-outline" size={16} color={Colors.red} />
-            </TouchableOpacity>
+            </PunyTouchable>
           </View>
         );
       })}
@@ -457,7 +457,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
           <View style={modal.header}>
             <PunyTouchable onPress={() => setModalVisible(false)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
+            </PunyTouchable>
             <Text style={modal.title}>手当・控除を追加</Text>
             <View style={{ width: 36 }} />
           </View>
@@ -468,7 +468,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
                 <PunyTouchable key={c.id} onPress={() => setCastId(c.id)} scaleTo={0.95} haptic="light"
                   style={[modal.chip, castId === c.id && modal.chipActive]}>
                   <Text style={[modal.chipText, castId === c.id && modal.chipTextActive]}>{c.name}</Text>
-                </TouchableOpacity>
+                </PunyTouchable>
               ))}
             </ScrollView>
             {presets.length > 0 && (
@@ -479,7 +479,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
                     <PunyTouchable key={p.id} onPress={() => { setLabel(p.name); setSign(p.sign); setAmount(String(p.amount)); }} scaleTo={0.95} haptic="light"
                       style={[modal.chip, { borderColor: p.sign === '+' ? Colors.green : Colors.red }]}>
                       <Text style={{ fontSize: 13, color: p.sign === '+' ? Colors.green : Colors.red }}>{p.name}</Text>
-                    </TouchableOpacity>
+                    </PunyTouchable>
                   ))}
                 </ScrollView>
               </>
@@ -494,14 +494,14 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
                 <PunyTouchable key={s} onPress={() => setSign(s)} scaleTo={0.92} haptic="light"
                   style={[modal.chip, sign === s && { backgroundColor: s === '+' ? 'rgba(78,203,138,0.15)' : 'rgba(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
                   <Text style={[modal.chipText, sign === s && { color: s === '+' ? Colors.green : Colors.red }]}>{s === '+' ? '手当' : '控除'}</Text>
-                </TouchableOpacity>
+                </PunyTouchable>
               ))}
             </View>
             <Text style={modal.label}>金額（円）*</Text>
             <TextInput style={modal.input} value={amount} onChangeText={setAmount} placeholder="例: 1000" placeholderTextColor={Colors.text3} keyboardType="number-pad" />
             <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
-            </TouchableOpacity>
+            </PunyTouchable>
           </ScrollView>
         </View>
       </Modal>
@@ -552,7 +552,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
       <PunyTouchable style={styles.addBtn} onPress={() => { setEditTarget(null); setName(''); setSign('+'); setAmount(''); setModalVisible(true); }} scaleTo={0.96} haptic="medium">
         <Ionicons name="add-circle-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>プリセットを追加</Text>
-      </TouchableOpacity>
+      </PunyTouchable>
       {presets.map((p: any) => (
         <View key={p.id} style={styles.allowanceItem}>
           <View style={{ flex: 1 }}>
@@ -564,8 +564,8 @@ function PresetManagement({ shopId }: { shopId: string }) {
           </Text>
           <PunyTouchable onPress={() => { setEditTarget(p); setName(p.name); setSign(p.sign); setAmount(String(p.amount)); setModalVisible(true); }} style={styles.iconBtn} scaleTo={0.88} haptic="light">
             <Ionicons name="create-outline" size={16} color={Colors.text2} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => {
+          </PunyTouchable>
+          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> {
             Alert.alert('削除', `「${p.name}」を削除しますか？`, [
               { text: 'キャンセル', style: 'cancel' },
               { text: '削除', style: 'destructive', onPress: async () => {
@@ -575,7 +575,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
             ]);
           }} style={styles.iconBtn}>
             <Ionicons name="trash-outline" size={16} color={Colors.red} />
-          </TouchableOpacity>
+          </PunyTouchable>
         </View>
       ))}
       {presets.length === 0 && <Text style={styles.empty}>プリセットがありません</Text>}
@@ -585,7 +585,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
           <View style={modal.header}>
             <PunyTouchable onPress={() => setModalVisible(false)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
+            </PunyTouchable>
             <Text style={modal.title}>{editTarget ? 'プリセット編集' : 'プリセット追加'}</Text>
             <View style={{ width: 36 }} />
           </View>
@@ -598,14 +598,14 @@ function PresetManagement({ shopId }: { shopId: string }) {
                 <PunyTouchable key={s} onPress={() => setSign(s)} scaleTo={0.92} haptic="light"
                   style={[modal.chip, sign === s && { backgroundColor: s === '+' ? 'rgba(78,203,138,0.15)' : 'rgba(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
                   <Text style={[modal.chipText, sign === s && { color: s === '+' ? Colors.green : Colors.red }]}>{s === '+' ? '手当' : '控除'}</Text>
-                </TouchableOpacity>
+                </PunyTouchable>
               ))}
             </View>
             <Text style={modal.label}>金額（円）*</Text>
             <TextInput style={modal.input} value={amount} onChangeText={setAmount} placeholder="例: 1000" placeholderTextColor={Colors.text3} keyboardType="number-pad" />
             <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
-            </TouchableOpacity>
+            </PunyTouchable>
           </View>
         </View>
       </Modal>
@@ -671,11 +671,11 @@ function ResultsSection({ shopId }: { shopId: string }) {
       <View style={styles.monthNav}>
         <PunyTouchable onPress={() => changeMonth(-1)} style={styles.monthBtn} scaleTo={0.92} haptic="light">
           <Ionicons name="chevron-back" size={18} color={Colors.text2} />
-        </TouchableOpacity>
+        </PunyTouchable>
         <Text style={styles.monthLabel}>{month}</Text>
         <PunyTouchable onPress={() => changeMonth(1)} style={styles.monthBtn} scaleTo={0.92} haptic="light">
           <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
-        </TouchableOpacity>
+        </PunyTouchable>
       </View>
 
       {loading && <ActivityIndicator color={Colors.gold} style={{ marginTop: 20 }} />}
@@ -700,9 +700,9 @@ function ResultsSection({ shopId }: { shopId: string }) {
       ))}
 
       {!loading && castTotals.length > 3 && (
-        <TouchableOpacity style={styles.showAllBtn} onPress={() => setShowAll(v => !v)}>
+        <PunyTouchable style={styles.showAllBtn} onPress={() = scaleTo={0.95} haptic="light"> setShowAll(v => !v)}>
           <Text style={styles.showAllBtnText}>{showAll ? '▲ 折りたたむ' : `▼ 全員表示（${castTotals.length}名）`}</Text>
-        </TouchableOpacity>
+        </PunyTouchable>
       )}
       {!loading && castTotals.length === 0 && <Text style={styles.empty}>売上データがありません</Text>}
     </View>
@@ -729,13 +729,13 @@ function DatePickerC({ value, onChange }: { value: string; onChange: (d: string)
   return (
     <View style={cStyles.cal}>
       <View style={cStyles.calHeader}>
-        <TouchableOpacity onPress={() => { const d = new Date(y, m-2, 1); setY(d.getFullYear()); setM(d.getMonth()+1); }}>
+        <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> { const d = new Date(y, m-2, 1); setY(d.getFullYear()); setM(d.getMonth()+1); }}>
           <Ionicons name="chevron-back" size={16} color={Colors.text2} />
-        </TouchableOpacity>
+        </PunyTouchable>
         <Text style={cStyles.calTitle}>{y}年{m}月</Text>
-        <TouchableOpacity onPress={() => { const d = new Date(y, m, 1); setY(d.getFullYear()); setM(d.getMonth()+1); }}>
+        <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> { const d = new Date(y, m, 1); setY(d.getFullYear()); setM(d.getMonth()+1); }}>
           <Ionicons name="chevron-forward" size={16} color={Colors.text2} />
-        </TouchableOpacity>
+        </PunyTouchable>
       </View>
       <View style={cStyles.calDayRow}>
         {CAL_DAYS_C.map(d => <Text key={d} style={cStyles.calDayLabel}>{d}</Text>)}
@@ -747,10 +747,10 @@ function DatePickerC({ value, onChange }: { value: string; onChange: (d: string)
           const sel = ds === value;
           const today = ds === getDateStrC(new Date());
           return (
-            <TouchableOpacity key={ds} onPress={() => onChange(ds)}
+            <PunyTouchable key={ds} onPress={() = scaleTo={0.95} haptic="light"> onChange(ds)}
               style={[cStyles.calCell, sel && cStyles.calCellSel, today && !sel && cStyles.calCellToday]}>
               <Text style={[cStyles.calDay, sel && cStyles.calDaySel, today && !sel && cStyles.calDayToday]}>{day}</Text>
-            </TouchableOpacity>
+            </PunyTouchable>
           );
         })}
       </View>
@@ -849,24 +849,24 @@ function CustomerSection({ shopId }: { shopId: string }) {
   return (
     <View>
       <View style={styles.monthNav}>
-        <PunyTouchable onPress={() => changeMonth(-1)} style={styles.monthBtn} scaleTo={0.92} haptic="light"><Ionicons name="chevron-back" size={18} color={Colors.text2} /></TouchableOpacity>
+        <PunyTouchable onPress={() => changeMonth(-1)} style={styles.monthBtn} scaleTo={0.92} haptic="light"><Ionicons name="chevron-back" size={18} color={Colors.text2} /></PunyTouchable>
         <Text style={styles.monthLabel}>{month}</Text>
-        <PunyTouchable onPress={() => changeMonth(1)} style={styles.monthBtn} scaleTo={0.92} haptic="light"><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></TouchableOpacity>
+        <PunyTouchable onPress={() => changeMonth(1)} style={styles.monthBtn} scaleTo={0.92} haptic="light"><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></PunyTouchable>
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
         {[{ id: '', name: '全員' }, ...casts].map((c: any) => (
-          <TouchableOpacity key={c.id} onPress={() => setFilterCast(c.id)}
+          <PunyTouchable key={c.id} onPress={() = scaleTo={0.95} haptic="light"> setFilterCast(c.id)}
             style={[styles.filterChip, filterCast === c.id && styles.filterChipActive]}>
             <Text style={[styles.filterChipText, filterCast === c.id && styles.filterChipTextActive]}>{c.name}</Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         ))}
       </ScrollView>
 
       <PunyTouchable style={styles.addBtn} onPress={openAdd} scaleTo={0.96} haptic="medium">
         <Ionicons name="person-add-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>顧客を追加</Text>
-      </TouchableOpacity>
+      </PunyTouchable>
 
       {filtered.length === 0 && <Text style={styles.empty}>この月の顧客データがありません</Text>}
 
@@ -888,10 +888,10 @@ function CustomerSection({ shopId }: { shopId: string }) {
             <View style={{ gap: 6 }}>
               <PunyTouchable onPress={() => openEdit(c)} style={styles.iconBtn} scaleTo={0.88} haptic="light">
                 <Ionicons name="create-outline" size={18} color={Colors.text2} />
-              </TouchableOpacity>
+              </PunyTouchable>
               <PunyTouchable onPress={() => handleDelete(c.id, c.name)} style={styles.iconBtn} scaleTo={0.88} haptic="medium">
                 <Ionicons name="trash-outline" size={18} color={Colors.red} />
-              </TouchableOpacity>
+              </PunyTouchable>
             </View>
           </View>
         );
@@ -902,7 +902,7 @@ function CustomerSection({ shopId }: { shopId: string }) {
           <View style={modal.header}>
             <PunyTouchable onPress={() => setModalVisible(false)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
+            </PunyTouchable>
             <Text style={modal.title}>{editTarget ? '顧客を編集' : '顧客を追加'}</Text>
             <View style={{ width: 36 }} />
           </View>
@@ -922,7 +922,7 @@ function CustomerSection({ shopId }: { shopId: string }) {
                     <PunyTouchable key={c.id} onPress={() => setCastId(c.id)} scaleTo={0.95} haptic="light"
                       style={[modal.chip, castId === c.id && modal.chipActive]}>
                       <Text style={[modal.chipText, castId === c.id && modal.chipTextActive]}>{c.name}</Text>
-                    </TouchableOpacity>
+                    </PunyTouchable>
                   ))}
                 </ScrollView>
               </>
@@ -930,13 +930,13 @@ function CustomerSection({ shopId }: { shopId: string }) {
 
             <Text style={modal.label}>来店回数</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-              <TouchableOpacity onPress={() => setVisitCount(v => String(Math.max(1, Number(v) - 1)))} style={cStyles.counterBtn}>
+              <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setVisitCount(v => String(Math.max(1, Number(v) - 1)))} style={cStyles.counterBtn}>
                 <Text style={cStyles.counterBtnText}>−</Text>
-              </TouchableOpacity>
+              </PunyTouchable>
               <Text style={cStyles.counterValue}>{visitCount}回目</Text>
-              <TouchableOpacity onPress={() => setVisitCount(v => String(Number(v) + 1))} style={cStyles.counterBtn}>
+              <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setVisitCount(v => String(Number(v) + 1))} style={cStyles.counterBtn}>
                 <Text style={cStyles.counterBtnText}>＋</Text>
-              </TouchableOpacity>
+              </PunyTouchable>
             </View>
 
             <Text style={modal.label}>メモ</Text>
@@ -947,7 +947,7 @@ function CustomerSection({ shopId }: { shopId: string }) {
 
             <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
-            </TouchableOpacity>
+            </PunyTouchable>
             <View style={{ height: 40 }} />
           </ScrollView>
         </View>
@@ -979,11 +979,11 @@ export default function ManageScreen() {
       <Text style={styles.screenTitle}>キャスト管理</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabScroll} contentContainerStyle={styles.tabContent}>
         {TABS.map(tab => (
-          <TouchableOpacity key={tab.key} style={[styles.tab, activeTab === tab.key && styles.tabActive]}
-            onPress={() => setActiveTab(tab.key)}>
+          <PunyTouchable key={tab.key} style={[styles.tab, activeTab === tab.key && styles.tabActive]}
+            onPress={() = scaleTo={0.95} haptic="light"> setActiveTab(tab.key)}>
             <Ionicons name={tab.icon as any} size={14} color={activeTab === tab.key ? Colors.gold : Colors.text3} />
             <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>{tab.label}</Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         ))}
       </ScrollView>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>

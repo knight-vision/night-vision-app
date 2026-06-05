@@ -153,7 +153,7 @@ function LoginModal({ type, visible, onClose }: {
             <View style={modal.header}>
               <PunyTouchable onPress={handleClose} style={modal.closeBtn} scaleTo={0.88} haptic="light">
                 <Ionicons name="close" size={22} color={Colors.text2} />
-              </TouchableOpacity>
+              </PunyTouchable>
               <Text style={modal.title}>{isOwner ? '店舗管理者ログイン' : 'キャストログイン'}</Text>
               <View style={{ width: 36 }} />
             </View>
@@ -177,7 +177,7 @@ function LoginModal({ type, visible, onClose }: {
                   secureTextEntry={!showPass} autoCapitalize="none" />
                 <PunyTouchable onPress={() => setShowPass(v => !v)} style={modal.eyeBtn} scaleTo={0.88} haptic="light">
                   <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={18} color={Colors.text3} />
-                </TouchableOpacity>
+                </PunyTouchable>
               </View>
               {error ? <Text style={modal.errorText}>{error}</Text> : null}
               <PunyTouchable

@@ -104,7 +104,7 @@ function ShopInfo({ shopId }: { shopId: string }) {
         <Ionicons name="globe-outline" size={18} color={Colors.gold} />
         <Text style={styles.webLinkText}>Webサイトで店舗ページを確認</Text>
         <Ionicons name="open-outline" size={16} color={Colors.gold} />
-      </TouchableOpacity>
+      </PunyTouchable>
 
 
       <Text style={styles.sectionTitle}>基本情報</Text>
@@ -160,7 +160,7 @@ function ShopInfo({ shopId }: { shopId: string }) {
 
       <PunyTouchable style={styles.saveBtn} onPress={handleSave} disabled={saving} scaleTo={0.97} haptic="success">
         {saving ? <ActivityIndicator color="#1a1200" size="small" /> : <Text style={styles.saveBtnText}>保存する</Text>}
-      </TouchableOpacity>
+      </PunyTouchable>
     </View>
   );
 }
@@ -252,7 +252,7 @@ function JobsSection({ shopId }: { shopId: string }) {
       <PunyTouchable style={styles.addBtn} onPress={openAdd} scaleTo={0.96} haptic="medium">
         <Ionicons name="add-circle-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>求人を追加</Text>
-      </TouchableOpacity>
+      </PunyTouchable>
 
       {jobs.length === 0 && <Text style={styles.empty}>求人が登録されていません</Text>}
 
@@ -279,11 +279,11 @@ function JobsSection({ shopId }: { shopId: string }) {
             <PunyTouchable style={styles.actionBtn} onPress={() => openEdit(job)} scaleTo={0.92} haptic="light">
               <Ionicons name="create-outline" size={14} color={Colors.text2} />
               <Text style={styles.actionBtnText}>編集</Text>
-            </TouchableOpacity>
+            </PunyTouchable>
             <PunyTouchable style={styles.actionBtn} onPress={() => handleDelete(job.id, job.title)} scaleTo={0.92} haptic="medium">
               <Ionicons name="trash-outline" size={14} color={Colors.red} />
               <Text style={[styles.actionBtnText, { color: Colors.red }]}>削除</Text>
-            </TouchableOpacity>
+            </PunyTouchable>
           </View>
         </View>
       ))}
@@ -293,7 +293,7 @@ function JobsSection({ shopId }: { shopId: string }) {
           <View style={modal.header}>
             <PunyTouchable onPress={() => setModalVisible(false)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
+            </PunyTouchable>
             <Text style={modal.title}>{editTarget ? '求人を編集' : '求人を作成'}</Text>
             <View style={{ width: 36 }} />
           </View>
@@ -316,7 +316,7 @@ function JobsSection({ shopId }: { shopId: string }) {
             </View>
             <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
-            </TouchableOpacity>
+            </PunyTouchable>
             <View style={{ height: 40 }} />
           </ScrollView>
         </View>
@@ -349,7 +349,7 @@ export default function ShopManageScreen() {
             onPress={() => setActiveTab(tab.key)}>
             <Ionicons name={tab.icon as any} size={14} color={activeTab === tab.key ? Colors.gold : Colors.text3} />
             <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>{tab.label}</Text>
-          </TouchableOpacity>
+          </PunyTouchable>
         ))}
       </ScrollView>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
