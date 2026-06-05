@@ -35,13 +35,25 @@ export default function TabLayout() {
         headerShown: false,
         sceneStyle: { backgroundColor: Colors.bg },
         tabBarStyle: {
-          backgroundColor: tabBarBg,
-          borderTopColor: Colors.border,
-          borderTopWidth: 0.5,
+          backgroundColor: Platform.OS === 'ios' ? 'transparent' : tabBarBg,
+          borderTopColor: 'transparent',
+          borderTopWidth: 0,
           height: 88,
           paddingBottom: 20,
           paddingTop: 8,
+          position: 'absolute',
         },
+        tabBarBackground: () =>
+          Platform.OS === 'ios' ? (
+            <GlassView
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              glassEffectStyle={{
+                style: 'regular',
+                tintColor: Colors.purple + '22',
+                animate: true,
+              }}
+            />
+          ) : null,
         tabBarActiveTintColor: Colors.gold,
         tabBarInactiveTintColor: Colors.text3,
         tabBarLabelStyle: { fontSize: 11, marginTop: 3, fontWeight: '500' },
