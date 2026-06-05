@@ -2,7 +2,8 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { setupNotificationListeners } from '../lib/notifications';
-import { useThemeStore, THEMES } from '../store/theme';
+import { useThemeStore } from '../store/theme';
+import { THEMES } from '../constants/theme';
 
 export default function RootLayout() {
   const themeId = useThemeStore((s) => s.themeId);

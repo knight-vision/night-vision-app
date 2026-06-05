@@ -16,6 +16,7 @@ import { PunyTouchable, haptic } from '../../components/PunyTouchable';
 function ChangePasswordModal({ visible, onClose, userId, role }: {
   visible: boolean; onClose: () => void; userId: string; role: string;
 }) {
+  const Colors = useColors();
   const [current, setCurrent] = useState('');
   const [newPass, setNewPass] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -44,25 +45,25 @@ function ChangePasswordModal({ visible, onClose, userId, role }: {
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={modal.container}>
-        <View style={modal.header}>
+      <View style={[modal.container, { backgroundColor: Colors.bg }]}>
+        <View style={[modal.header, { borderBottomColor: Colors.border }]}>
           <TouchableOpacity onPress={onClose} style={modal.closeBtn}>
             <Ionicons name="close" size={22} color={Colors.text2} />
           </TouchableOpacity>
-          <Text style={modal.title}>パスワード変更</Text>
+          <Text style={[modal.title, { color: Colors.text }]}>パスワード変更</Text>
           <View style={{ width: 36 }} />
         </View>
         <View style={modal.body}>
-          <Text style={modal.label}>現在のパスワード</Text>
-          <TextInput style={modal.input} secureTextEntry placeholder="現在のパスワード"
+          <Text style={[modal.label, { color: Colors.text2 }]}>現在のパスワード</Text>
+          <TextInput style={[modal.input, { backgroundColor: Colors.surface, borderColor: Colors.border, color: Colors.text }]} secureTextEntry placeholder="現在のパスワード"
             placeholderTextColor={Colors.text3} value={current} onChangeText={setCurrent} />
-          <Text style={modal.label}>新しいパスワード</Text>
-          <TextInput style={modal.input} secureTextEntry placeholder="6文字以上"
+          <Text style={[modal.label, { color: Colors.text2 }]}>新しいパスワード</Text>
+          <TextInput style={[modal.input, { backgroundColor: Colors.surface, borderColor: Colors.border, color: Colors.text }]} secureTextEntry placeholder="6文字以上"
             placeholderTextColor={Colors.text3} value={newPass} onChangeText={setNewPass} />
-          <Text style={modal.label}>新しいパスワード（確認）</Text>
-          <TextInput style={modal.input} secureTextEntry placeholder="もう一度入力"
+          <Text style={[modal.label, { color: Colors.text2 }]}>新しいパスワード（確認）</Text>
+          <TextInput style={[modal.input, { backgroundColor: Colors.surface, borderColor: Colors.border, color: Colors.text }]} secureTextEntry placeholder="もう一度入力"
             placeholderTextColor={Colors.text3} value={confirm} onChangeText={setConfirm} />
-          <PunyTouchable style={modal.submitBtn} onPress={handleSubmit} disabled={loading} haptic="success">
+          <PunyTouchable style={[modal.submitBtn, { backgroundColor: Colors.gold }]} onPress={handleSubmit} disabled={loading} haptic="success">
             {loading ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>変更する</Text>}
           </PunyTouchable>
         </View>
@@ -75,6 +76,7 @@ function ChangePasswordModal({ visible, onClose, userId, role }: {
 function ChangeEmailModal({ visible, onClose, userId, role, currentEmail }: {
   visible: boolean; onClose: () => void; userId: string; role: string; currentEmail?: string;
 }) {
+  const Colors = useColors();
   const [newEmail, setNewEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -101,24 +103,24 @@ function ChangeEmailModal({ visible, onClose, userId, role, currentEmail }: {
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={modal.container}>
-        <View style={modal.header}>
+      <View style={[modal.container, { backgroundColor: Colors.bg }]}>
+        <View style={[modal.header, { borderBottomColor: Colors.border }]}>
           <TouchableOpacity onPress={onClose} style={modal.closeBtn}>
             <Ionicons name="close" size={22} color={Colors.text2} />
           </TouchableOpacity>
-          <Text style={modal.title}>メールアドレス変更</Text>
+          <Text style={[modal.title, { color: Colors.text }]}>メールアドレス変更</Text>
           <View style={{ width: 36 }} />
         </View>
         <View style={modal.body}>
           {currentEmail && <Text style={[modal.label, { marginBottom: 12 }]}>現在: {currentEmail}</Text>}
-          <Text style={modal.label}>新しいメールアドレス</Text>
-          <TextInput style={modal.input} placeholder="新しいメールアドレス"
+          <Text style={[modal.label, { color: Colors.text2 }]}>新しいメールアドレス</Text>
+          <TextInput style={[modal.input, { backgroundColor: Colors.surface, borderColor: Colors.border, color: Colors.text }]} placeholder="新しいメールアドレス"
             placeholderTextColor={Colors.text3} value={newEmail} onChangeText={setNewEmail}
             keyboardType="email-address" autoCapitalize="none" />
-          <Text style={modal.label}>現在のパスワード（確認）</Text>
-          <TextInput style={modal.input} secureTextEntry placeholder="パスワードを入力"
+          <Text style={[modal.label, { color: Colors.text2 }]}>現在のパスワード（確認）</Text>
+          <TextInput style={[modal.input, { backgroundColor: Colors.surface, borderColor: Colors.border, color: Colors.text }]} secureTextEntry placeholder="パスワードを入力"
             placeholderTextColor={Colors.text3} value={password} onChangeText={setPassword} />
-          <PunyTouchable style={modal.submitBtn} onPress={handleSubmit} disabled={loading} haptic="success">
+          <PunyTouchable style={[modal.submitBtn, { backgroundColor: Colors.gold }]} onPress={handleSubmit} disabled={loading} haptic="success">
             {loading ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>変更する</Text>}
           </PunyTouchable>
         </View>
@@ -150,9 +152,9 @@ export default function AccountScreen() {
   const roleBg    = role === 'owner' ? Colors.goldDim : Colors.purpleDim;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: Colors.bg }]} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={styles.screenTitle}>アカウント</Text>
+        <Text style={[styles.screenTitle, { color: Colors.text }]}>アカウント</Text>
 
         <ChangePasswordModal
           visible={showPasswordModal}
@@ -169,14 +171,14 @@ export default function AccountScreen() {
         />
 
         {/* プロフィール */}
-        <View style={styles.profileCard}>
+        <View style={[styles.profileCard, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
           <View style={[styles.profileAvatar, { borderColor: roleColor, backgroundColor: roleBg }]}>
             <Text style={[styles.profileAvatarText, { color: roleColor }]}>{name?.[0] || '?'}</Text>
           </View>
           <View>
-            <Text style={styles.profileName}>{name}</Text>
-            {email && <Text style={styles.profileEmail}>{email}</Text>}
-            {shopName && role === 'owner' && <Text style={styles.shopName}>{shopName}</Text>}
+            <Text style={[styles.profileName, { color: Colors.text }]}>{name}</Text>
+            {email && <Text style={[styles.profileEmail, { color: Colors.text3 }]}>{email}</Text>}
+            {shopName && role === 'owner' && <Text style={[styles.shopName, { color: Colors.text3 }]}>{shopName}</Text>}
             <View style={[styles.roleBadge, { backgroundColor: roleBg, borderColor: roleColor + '60' }]}>
               <Text style={[styles.roleBadgeText, { color: roleColor }]}>{roleLabel}</Text>
             </View>
@@ -184,33 +186,33 @@ export default function AccountScreen() {
         </View>
 
         {/* アカウント設定 */}
-        <View style={styles.menuGroup}>
+        <View style={[styles.menuGroup, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
           <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}
             onPress={() => setShowPasswordModal(true)}>
-            <View style={styles.menuIconWrap}><Ionicons name="lock-closed-outline" size={18} color={Colors.purple} /></View>
+            <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="lock-closed-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.menuLabel}>パスワード変更</Text>
-              <Text style={styles.menuSub}>セキュリティ設定</Text>
+              <Text style={[styles.menuLabel, { color: Colors.text }]}>パスワード変更</Text>
+              <Text style={[styles.menuSub, { color: Colors.text3 }]}>セキュリティ設定</Text>
             </View>
             <Ionicons name="chevron-forward" size={14} color={Colors.text3} />
           </TouchableOpacity>
           <PunyTouchable scaleTo={0.97} haptic="light" style={styles.menuItem} onPress={() => setShowEmailModal(true)}>
-            <View style={styles.menuIconWrap}><Ionicons name="mail-outline" size={18} color={Colors.purple} /></View>
+            <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="mail-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.menuLabel}>メールアドレス変更</Text>
-              <Text style={styles.menuSub}>{email || 'メールアドレスを設定'}</Text>
+              <Text style={[styles.menuLabel, { color: Colors.text }]}>メールアドレス変更</Text>
+              <Text style={[styles.menuSub, { color: Colors.text3 }]}>{email || 'メールアドレスを設定'}</Text>
             </View>
             <Ionicons name="chevron-forward" size={14} color={Colors.text3} />
           </PunyTouchable>
         </View>
 
         {/* テーマ設定 */}
-        <View style={styles.menuGroup}>
+        <View style={[styles.menuGroup, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
           <View style={styles.menuItemCol}>
-            <View style={styles.menuIconWrap}><Ionicons name="color-palette-outline" size={18} color={Colors.purple} /></View>
+            <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="color-palette-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1, marginBottom: 10 }}>
-              <Text style={styles.menuLabel}>テーマ</Text>
-              <Text style={styles.menuSub}>アプリの見た目を変更</Text>
+              <Text style={[styles.menuLabel, { color: Colors.text }]}>テーマ</Text>
+              <Text style={[styles.menuSub, { color: Colors.text3 }]}>アプリの見た目を変更</Text>
             </View>
           </View>
           <View style={styles.themeRow}>
@@ -235,12 +237,12 @@ export default function AccountScreen() {
         </View>
 
         {/* 通知設定 */}
-        <View style={styles.menuGroup}>
+        <View style={[styles.menuGroup, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
           <View style={[styles.menuItem, { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}>
-            <View style={styles.menuIconWrap}><Ionicons name="notifications-outline" size={18} color={Colors.purple} /></View>
+            <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="notifications-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.menuLabel}>シフト承認時の通知</Text>
-              <Text style={styles.menuSub}>承認・否認された時に通知</Text>
+              <Text style={[styles.menuLabel, { color: Colors.text }]}>シフト承認時の通知</Text>
+              <Text style={[styles.menuSub, { color: Colors.text3 }]}>承認・否認された時に通知</Text>
             </View>
             <Switch
               value={notifyApproved}
@@ -251,10 +253,10 @@ export default function AccountScreen() {
             />
           </View>
           <View style={styles.menuItem}>
-            <View style={styles.menuIconWrap}><Ionicons name="calendar-outline" size={18} color={Colors.purple} /></View>
+            <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="calendar-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.menuLabel}>シフト確定時の通知</Text>
-              <Text style={styles.menuSub}>シフトが確定された時に通知</Text>
+              <Text style={[styles.menuLabel, { color: Colors.text }]}>シフト確定時の通知</Text>
+              <Text style={[styles.menuSub, { color: Colors.text3 }]}>シフトが確定された時に通知</Text>
             </View>
             <Switch
               value={notifyConfirmed}
@@ -267,28 +269,28 @@ export default function AccountScreen() {
         </View>
 
         {/* その他 */}
-        <View style={styles.menuGroup}>
+        <View style={[styles.menuGroup, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
           <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}
             onPress={() => Alert.alert('お問い合わせ', 'kushiro.night.vision@gmail.com\nまでご連絡ください')}>
-            <View style={styles.menuIconWrap}><Ionicons name="help-circle-outline" size={18} color={Colors.purple} /></View>
+            <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="help-circle-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.menuLabel}>ヘルプ・お問い合わせ</Text>
-              <Text style={styles.menuSub}>サポートへ連絡</Text>
+              <Text style={[styles.menuLabel, { color: Colors.text }]}>ヘルプ・お問い合わせ</Text>
+              <Text style={[styles.menuSub, { color: Colors.text3 }]}>サポートへ連絡</Text>
             </View>
             <Ionicons name="chevron-forward" size={14} color={Colors.text3} />
           </TouchableOpacity>
           <View style={styles.menuItem}>
-            <View style={styles.menuIconWrap}><Ionicons name="information-circle-outline" size={18} color={Colors.purple} /></View>
+            <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="information-circle-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.menuLabel}>アプリバージョン</Text>
-              <Text style={styles.menuSub}>v1.0.0</Text>
+              <Text style={[styles.menuLabel, { color: Colors.text }]}>アプリバージョン</Text>
+              <Text style={[styles.menuSub, { color: Colors.text3 }]}>v1.0.0</Text>
             </View>
           </View>
         </View>
 
-        <PunyTouchable style={styles.logoutBtn} onPress={handleLogout} haptic="warning">
+        <PunyTouchable style={[styles.logoutBtn, { backgroundColor: Colors.surface }]} onPress={handleLogout} haptic="warning">
           <Ionicons name="log-out-outline" size={16} color={Colors.red} />
-          <Text style={styles.logoutText}>ログアウト</Text>
+          <Text style={[styles.logoutText, { color: Colors.red }]}>ログアウト</Text>
         </PunyTouchable>
       </ScrollView>
     </SafeAreaView>
@@ -296,34 +298,34 @@ export default function AccountScreen() {
 }
 
 const modal = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
-  header:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  container: { flex: 1, backgroundColor: '#0d0d18' },
+  header:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   closeBtn:  { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  title:     { fontSize: 16, fontWeight: '500', color: Colors.text },
+  title:     { fontSize: 16, fontWeight: '500', color: '#f8f4ff' },
   body:      { padding: 20, gap: 8 },
-  label:     { fontSize: 12, color: Colors.text2, marginTop: 8 },
-  input:     { backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, padding: 12, color: Colors.text, fontSize: 14 },
-  submitBtn: { backgroundColor: Colors.gold, borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 16 },
+  label:     { fontSize: 12, color: '#b8b0cc', marginTop: 8 },
+  input:     { backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, color: '#f8f4ff', fontSize: 14 },
+  submitBtn: { borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 16 },
   submitText: { color: '#1a1200', fontSize: 15, fontWeight: '600' },
 });
 
 const styles = StyleSheet.create({
-  safe:              { flex: 1, backgroundColor: Colors.bg },
+  safe:              { flex: 1 },
   scroll:            { paddingHorizontal: 16, paddingBottom: 40 },
-  screenTitle:       { fontSize: 20, fontWeight: '500', color: Colors.text, paddingVertical: 16 },
-  profileCard:       { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: Colors.surface, borderRadius: 14, borderWidth: 0.5, borderColor: Colors.border, padding: 16, marginBottom: 20 },
+  screenTitle:       { fontSize: 20, fontWeight: '500', paddingVertical: 16 },
+  profileCard:       { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 14, borderWidth: 0.5, padding: 16, marginBottom: 20 },
   profileAvatar:     { width: 52, height: 52, borderRadius: 26, borderWidth: 1.5, justifyContent: 'center', alignItems: 'center' },
   profileAvatarText: { fontSize: 18, fontWeight: '500' },
-  profileName:       { fontSize: 16, fontWeight: '500', color: Colors.text, marginBottom: 2 },
-  profileEmail:      { fontSize: 11, color: Colors.text3, marginBottom: 2 },
-  shopName:          { fontSize: 11, color: Colors.text3, marginBottom: 5 },
+  profileName:       { fontSize: 16, fontWeight: '500', marginBottom: 2 },
+  profileEmail:      { fontSize: 11, marginBottom: 2 },
+  shopName:          { fontSize: 11, marginBottom: 5 },
   roleBadge:         { borderRadius: 8, borderWidth: 0.5, paddingHorizontal: 8, paddingVertical: 2, alignSelf: 'flex-start' },
   roleBadgeText:     { fontSize: 10 },
-  menuGroup:         { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, marginBottom: 12 },
+  menuGroup:         { borderRadius: 12, borderWidth: 0.5, marginBottom: 12 },
   menuItem:          { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
-  menuIconWrap:      { width: 32, height: 32, borderRadius: 8, backgroundColor: Colors.purpleDim, justifyContent: 'center', alignItems: 'center' },
-  menuLabel:         { fontSize: 13, color: Colors.text, fontWeight: '500' },
-  menuSub:           { fontSize: 11, color: Colors.text3, marginTop: 1 },
-  logoutBtn:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(224,92,106,0.25)', padding: 16, marginTop: 8 },
-  logoutText:        { fontSize: 14, color: Colors.red, fontWeight: '500' },
+  menuIconWrap:      { width: 32, height: 32, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+  menuLabel:         { fontSize: 13, fontWeight: '500' },
+  menuSub:           { fontSize: 11, marginTop: 1 },
+  logoutBtn:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(224,92,106,0.25)', padding: 16, marginTop: 8 },
+  logoutText:        { fontSize: 14, fontWeight: '500' },
 });
