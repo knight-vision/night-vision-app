@@ -128,7 +128,7 @@ function LoginModal({ type, visible, onClose }: {
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'ログインに失敗しました'); return; }
       if (isOwner) {
-        setOwner({ owner_id: String(data.owner_id), shop_id: String(data.shop_id), shop_name: data.shop_name, email });
+        setOwner({ owner_id: String(data.owner_id), shop_id: String(data.shop_id), shop_name: data.shop_name, shop_slug: data.shop_slug, email });
         registerPushToken(String(data.owner_id), 'owner');
       } else {
         setCast({ id: String(data.id), cast_id: String(data.cast_id), cast_name: data.cast_name, shop_id: String(data.shop_id), email });

@@ -19,9 +19,11 @@ const DAYS = ['月', '火', '水', '木', '金', '土', '日'];
 // 店舗情報
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function ShopInfo({ shopId }: { shopId: string }) {
+  const Colors = useColors();
+  const { shopSlug: authShopSlug } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [shopSlug, setShopSlug] = useState('');
+  const [shopSlug, setShopSlug] = useState(authShopSlug || '');
   const [shopName, setShopName] = useState('');
   const [tel, setTel] = useState('');
   const [area, setArea] = useState('');
@@ -90,8 +92,9 @@ function ShopInfo({ shopId }: { shopId: string }) {
 
 
   const openWebsite = () => {
-    const url = shopSlug
-      ? `https://www.night-vision.jp/shops/${shopSlug}`
+    const slug = shopSlug || authShopSlug;
+    const url = slug
+      ? `https://www.night-vision.jp/shops/${slug}`
       : 'https://www.night-vision.jp';
     Linking.openURL(url);
   };
@@ -344,15 +347,15 @@ export default function ShopManageScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Text style={styles.screenTitle}>店舗管理</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabScroll} contentContainerStyle={styles.tabContent}>
+      <View style={styles.segmentWrap}>
         {TABS.map(tab => (
-          <PunyTouchable key={tab.key} style={[styles.tab, activeTab === tab.key && styles.tabActive]} scaleTo={0.95} haptic="light"
+          <PunyTouchable key={tab.key} style={[styles.segmentBtn, activeTab === tab.key && styles.segmentBtnActive]} scaleTo={0.96} haptic="light"
             onPress={() => setActiveTab(tab.key)}>
             <Ionicons name={tab.icon as any} size={14} color={activeTab === tab.key ? Colors.gold : Colors.text3} />
-            <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>{tab.label}</Text>
+            <Text style={[styles.segmentText, activeTab === tab.key && styles.segmentTextActive]}>{tab.label}</Text>
           </PunyTouchable>
         ))}
-      </ScrollView>
+      </View>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {activeTab === 'info' && <ShopInfo shopId={shopId} />}
         {activeTab === 'jobs' && <JobsSection shopId={shopId} />}
@@ -376,12 +379,11 @@ const styles = StyleSheet.create({
   safe:          { flex: 1, backgroundColor: Colors.bg },
   screenTitle:   { fontSize: 20, fontWeight: '500', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
   scroll:        { paddingHorizontal: 16, paddingBottom: 108 },
-  tabScroll:     { maxHeight: 48, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  tabContent:    { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
-  tab:           { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: Colors.border },
-  tabActive:     { backgroundColor: Colors.goldDim, borderColor: Colors.gold },
-  tabText:       { fontSize: 12, color: Colors.text3 },
-  tabTextActive: { fontSize: 12, color: Colors.gold, fontWeight: '500' },
+  segmentWrap:       { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: 3, marginHorizontal: 16, marginBottom: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.15)' },
+  segmentBtn:        { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 9, borderRadius: 11 },
+  segmentBtnActive:  { backgroundColor: Colors.goldDim, borderWidth: 0.5, borderColor: Colors.gold },
+  segmentText:       { fontSize: 13, color: Colors.text3, fontWeight: '500' },
+  segmentTextActive: { fontSize: 13, color: Colors.gold, fontWeight: '700' },
   webLinkBtn:    { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: Colors.goldDim, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.gold, padding: 14, marginTop: 12, marginBottom: 4 },
   webLinkText:   { flex: 1, fontSize: 14, color: Colors.gold, fontWeight: '500' },
   sectionTitle:  { fontSize: 13, color: Colors.text2, fontWeight: '600', marginTop: 20, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
