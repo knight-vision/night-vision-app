@@ -273,7 +273,7 @@ function JobsSection({ shopId }: { shopId: string }) {
               )}
             </View>
             <View style={[styles.publicBadge, { backgroundColor: job.is_active ? 'rgba(78,203,138,0.15)' : Colors.surface2 }]}>
-              <Text style={{ fontSize: 11, fontWeight: '', color: job.is_active ? Colors.green : Colors.text3 }}>
+              <Text style={{ fontSize: 11, fontWeight: '600', color: job.is_active ? Colors.green : Colors.text3 }}>
                 {job.is_active ? '公開中' : '非公開'}
               </Text>
             </View>
@@ -369,36 +369,36 @@ const modal = StyleSheet.create({
   container:  { flex: 1, backgroundColor: Colors.bg },
   header:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
   closeBtn:   { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  title:      { fontSize: 16, fontWeight: '', color: Colors.text },
+  title:      { fontSize: 16, fontWeight: '600', color: Colors.text },
   label:      { fontSize: 12, color: Colors.text2, marginBottom: 6 },
   input:      { backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, padding: 12, color: Colors.text, fontSize: 14, marginBottom: 12 },
   submitBtn:  { backgroundColor: Colors.gold, borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 8 },
-  submitText: { color: '#1a1200', fontSize: 15, fontWeight: '' },
+  submitText: { color: '#1a1200', fontSize: 15, fontWeight: '600' },
 });
 
 const styles = StyleSheet.create({
   safe:          { flex: 1, backgroundColor: '#0c0c1a' },
-  screenTitle:   { fontSize: 20, fontWeight: '', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
+  screenTitle:   { fontSize: 20, fontWeight: '600', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
   scroll:        { paddingHorizontal: 16, paddingBottom: 108 },
   segmentWrap:       { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: 3, marginHorizontal: 16, marginBottom: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.15)' },
   segmentBtn:        { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 9, borderRadius: 11 },
   segmentBtnActive:  { backgroundColor: 'rgba(255,136,204,0.15)', borderWidth: 0.5, borderColor: '#ff88cc' },
   segmentText:       { fontSize: 13, color: '#eeeeff', fontWeight: '500' },
-  segmentTextActive: { fontSize: 13, color: '#ff88cc', fontWeight: '' },
+  segmentTextActive: { fontSize: 13, color: '#ff88cc', fontWeight: '600' },
   webLinkBtn:    { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 12, borderWidth: 0.5, borderColor: '#ff88cc', padding: 14, marginTop: 12, marginBottom: 4 },
-  webLinkText:   { flex: 1, fontSize: 14, color: '#ff88cc', fontWeight: '' },
+  webLinkText:   { flex: 1, fontSize: 14, color: '#ff88cc', fontWeight: '600' },
   sectionTitle:  { fontSize: 13, color: '#eeeeff', fontWeight: '600', marginTop: 20, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
   fieldLabel:    { fontSize: 12, color: '#eeeeff', marginBottom: 5 },
   input:         { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, color: '#eeeeff', fontSize: 14 },
   dayRow:        { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   dayLabel:      { fontSize: 14, color: '#eeeeff', width: 20 },
   saveBtn:       { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 8 },
-  saveBtnText:   { color: '#1a1200', fontWeight: '', fontSize: 15 },
+  saveBtnText:   { color: '#1a1200', fontWeight: '600', fontSize: 15 },
   addBtn:        { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 10, borderWidth: 0.5, borderColor: '#ff88cc', padding: 12, marginTop: 12, marginBottom: 8 },
-  addBtnText:    { fontSize: 14, color: '#ff88cc', fontWeight: '' },
+  addBtnText:    { fontSize: 14, color: '#ff88cc', fontWeight: '600' },
   empty:         { fontSize: 13, color: '#eeeeff', paddingVertical: 20, textAlign: 'center' },
   jobCard:       { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 8 },
-  jobTitle:      { fontSize: 14, fontWeight: '', color: '#eeeeff' },
+  jobTitle:      { fontSize: 14, fontWeight: '600', color: '#eeeeff' },
   jobInfo:       { fontSize: 12, color: '#eeeeff', marginBottom: 4 },
   publicBadge:   { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
   jobActions:    { flexDirection: 'row', gap: 6, marginTop: 8, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: 'rgba(200,180,255,0.18)' },

@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  title:     { fontSize: 12, fontWeight: '', letterSpacing: 0.5, textTransform: 'uppercase' },
+  title:     { fontSize: 12, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase' },
   actionBtn: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-  action:    { fontSize: 11, fontWeight: '' },
+  action:    { fontSize: 11, fontWeight: '600' },
 });

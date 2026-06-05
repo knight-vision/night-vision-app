@@ -452,15 +452,15 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   safe:           { flex: 1, backgroundColor: Colors.bg },
-  screenTitle:    { fontSize: 20, fontWeight: '', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
+  screenTitle:    { fontSize: 20, fontWeight: '600', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   scroll:         { paddingHorizontal: 16, paddingBottom: 108 },
   statGrid:       { flexDirection: 'row', gap: 10 },
   castRow:        { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
   castAvatar:     { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
-  castAvatarText: { fontSize: 14, fontWeight: '' },
-  castName:       { fontSize: 14, fontWeight: '', color: Colors.text },
+  castAvatarText: { fontSize: 14, fontWeight: '600' },
+  castName:       { fontSize: 14, fontWeight: '600', color: Colors.text },
   castRole:       { fontSize: 11, color: Colors.text3, marginTop: 1 },
-  castSales:      { fontSize: 14, fontWeight: '' },
+  castSales:      { fontSize: 14, fontWeight: '600' },
   barRow:         { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 },
   barDay:         { width: 24, fontSize: 11, color: Colors.text2, textAlign: 'center' },
   barTrack:       { flex: 1, height: 6, backgroundColor: Colors.surface2, borderRadius: 3, overflow: 'hidden' },
@@ -471,8 +471,8 @@ const styles = StyleSheet.create({
 const wt = StyleSheet.create({
   weekNav:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, paddingHorizontal: 2 },
   weekNavBtn:    { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.2)' },
-  weekNavText:   { fontSize: 12, color: Colors.text2, fontWeight: '', letterSpacing: 0.3 },
-  weekRange:     { fontSize: 13, color: Colors.text, fontWeight: '', letterSpacing: 0.5 },
+  weekNavText:   { fontSize: 12, color: Colors.text2, fontWeight: '600', letterSpacing: 0.3 },
+  weekRange:     { fontSize: 13, color: Colors.text, fontWeight: '600', letterSpacing: 0.5 },
 
   // 横スクロールコンテナ
   scrollContent: { flexDirection: 'row', gap: DAY_COL_GAP, paddingBottom: 4, paddingHorizontal: 2 },
@@ -483,20 +483,20 @@ const wt = StyleSheet.create({
   // 日付ヘッダー
   dayHeader:     { alignItems: 'center', paddingVertical: 6, paddingHorizontal: 4, borderRadius: 10, marginBottom: 4, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.12)', height: 52 },
   dayHeaderToday:{ backgroundColor: 'rgba(232,180,200,0.14)', borderColor: 'rgba(232,180,200,0.5)' },
-  dayOfWeek:     { fontSize: 11, fontWeight: '', letterSpacing: 0.5 },
-  dayNum:        { fontSize: 16, color: Colors.text, fontWeight: '', marginTop: 2, letterSpacing: -0.5 },
+  dayOfWeek:     { fontSize: 11, fontWeight: '600', letterSpacing: 0.5 },
+  dayNum:        { fontSize: 16, color: Colors.text, fontWeight: '600', marginTop: 2, letterSpacing: -0.5 },
   todayDot:      { width: 5, height: 5, borderRadius: 3, backgroundColor: Colors.gold, marginTop: 4 },
 
   // シフト表示エリア
   dayBody:       { backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, paddingVertical: 6, paddingHorizontal: 5, gap: 4, flex: 1, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.08)', alignItems: 'center', overflow: 'hidden', justifyContent: 'flex-start' },
   dayBodyToday:  { borderColor: 'rgba(232,180,200,0.2)' },
 
-  emptyMark:     { fontSize: 16, color: 'rgba(255,255,255,0.12)', marginTop: 14, fontWeight: '' },
+  emptyMark:     { fontSize: 16, color: 'rgba(255,255,255,0.12)', marginTop: 14, fontWeight: '600' },
 
   // シフトチップ（横スクロール版・縦長）
   shiftChip:     { flexDirection: 'row', alignItems: 'center', gap: 4, width: '%', paddingVertical: 5, paddingHorizontal: 6, borderRadius: 8, borderWidth: 0.5 },
   chipDot:       { width: 4, height: 4, borderRadius: 2, flexShrink: 0 },
-  chipName:      { fontSize: 10, fontWeight: '', letterSpacing: 0.2 },
-  chipTime:      { fontSize: 9, color: Colors.text3, fontWeight: '', marginTop: 1 },
-  moreText:      { fontSize: 9, color: Colors.text3, fontWeight: '', marginTop: 2 },
+  chipName:      { fontSize: 10, fontWeight: '600', letterSpacing: 0.2 },
+  chipTime:      { fontSize: 9, color: Colors.text3, fontWeight: '600', marginTop: 1 },
+  moreText:      { fontSize: 9, color: Colors.text3, fontWeight: '600', marginTop: 2 },
 });
