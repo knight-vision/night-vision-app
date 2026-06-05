@@ -43,12 +43,12 @@ function OwnerResultsView({ shopId }: { shopId: string }) {
       <SectionCard title="今月キャスト売上ランキング">
         {(data.cast_ranking || []).map((c: any, i: number) => (
           <View key={c.cast_id} style={[styles.rankRow, i === (data.cast_ranking.length - 1) && { borderBottomWidth: 0 }]}>
-            <Text style={[styles.rankNum, i === 0 && { color: Colors.gold }]}>#{i + 1}</Text>
+            <Text style={[styles.rankNum, i === 0 && { color: '#ff88cc' }]}>#{i + 1}</Text>
             <View style={[styles.castAvatar, { backgroundColor: i === 0 ? Colors.goldDim : Colors.purpleDim }]}>
               <Text style={[styles.castAvatarText, { color: i === 0 ? Colors.gold : Colors.purple }]}>{c.name[0]}</Text>
             </View>
             <Text style={[styles.rankName, { flex: 1 }]}>{c.name}</Text>
-            <Text style={[styles.rankSales, i === 0 && { color: Colors.gold }]}>{fmtYen(c.total)}</Text>
+            <Text style={[styles.rankSales, i === 0 && { color: '#ff88cc' }]}>{fmtYen(c.total)}</Text>
           </View>
         ))}
       </SectionCard>
@@ -236,11 +236,11 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
   return (
     <>
       {/* 期間切替 */}
-      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+      <View style={styles.periodRow}>
         {PERIODS.map(p => (
-          <PunyTouchable key={p.key} onPress={() => setPeriod(p.key)} scaleTo={0.95} haptic="light"
-            style={[styles.periodBtn, period === p.key && styles.periodBtnActive]}>
-            <Text style={[styles.periodBtnText, period === p.key && styles.periodBtnTextActive]}>{p.label}</Text>
+          <PunyTouchable key={p.key} onPress={() => setPeriod(p.key)} scaleTo={0.94} haptic="light"
+            style={[styles.periodPill, period === p.key && styles.periodPillActive]}>
+            <Text style={[styles.periodPillText, period === p.key && styles.periodPillTextActive]}>{p.label}</Text>
           </PunyTouchable>
         ))}
       </View>
@@ -264,7 +264,7 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
             onMonthChange={(y, m) => setRefMonth(`${y}-${String(m+1).padStart(2,'0')}`)}
             onDayPress={(d) => setRefDate(getDateStr(d))}
             initialSelected={new Date(refDate + 'T00:00:00')}
-            events={shifts.map((s: any) => ({ date: s.date, color: Colors.gold }))}
+            events={shifts.map((s: any) => ({ date: s.date, color: '#ff88cc' }))}
           />
         </>
       )}
@@ -306,13 +306,13 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
             {allowTotal > 0 && (
               <View style={styles.payRow}>
                 <Text style={styles.payLabel}>手当合計</Text>
-                <Text style={[styles.payValue, { color: Colors.green }]}>+{fmtYen(allowTotal)}</Text>
+                <Text style={[styles.payValue, { color: '#80d8b0' }]}>+{fmtYen(allowTotal)}</Text>
               </View>
             )}
             {deductTotal > 0 && (
               <View style={styles.payRow}>
                 <Text style={styles.payLabel}>控除合計</Text>
-                <Text style={[styles.payValue, { color: Colors.red }]}>-{fmtYen(deductTotal)}</Text>
+                <Text style={[styles.payValue, { color: '#f08098' }]}>-{fmtYen(deductTotal)}</Text>
               </View>
             )}
             <View style={[styles.payRow, styles.payTotalRow]}>
@@ -333,7 +333,7 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
                     <Text style={styles.shiftDetailDate}>{s.date}</Text>
                     <Text style={styles.shiftDetailTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
                     <Text style={styles.shiftDetailHrs}>{hrs.toFixed(1)}h</Text>
-                    <Text style={[styles.shiftDetailPay, { color: Colors.gold }]}>{fmtYen(Math.round(hrs * (castInfo?.hourly_wage || 0)))}</Text>
+                    <Text style={[styles.shiftDetailPay, { color: '#ff88cc' }]}>{fmtYen(Math.round(hrs * (castInfo?.hourly_wage || 0)))}</Text>
                   </View>
                 );
               })}
@@ -372,16 +372,16 @@ function CastResultsView({ castId, shopId }: { castId: string; shopId: string })
 
   return (
     <>
-      <View style={styles.innerTabRow}>
-        <PunyTouchable onPress={() => setTab('pay')} scaleTo={0.95} haptic="light"
-          style={[styles.innerTab, tab === 'pay' && styles.innerTabActive]}>
+      <View style={styles.segmentWrap}>
+        <PunyTouchable onPress={() => setTab('pay')} scaleTo={0.96} haptic="light"
+          style={[styles.segmentBtn, tab === 'pay' && styles.segmentBtnActive]}>
           <Ionicons name="wallet-outline" size={14} color={tab === 'pay' ? Colors.gold : Colors.text3} />
-          <Text style={[styles.innerTabText, tab === 'pay' && styles.innerTabTextActive]}>給与</Text>
+          <Text style={[styles.segmentText, tab === 'pay' && styles.segmentTextActive]}>給与</Text>
         </PunyTouchable>
-        <PunyTouchable onPress={() => setTab('perf')} scaleTo={0.95} haptic="light"
-          style={[styles.innerTab, tab === 'perf' && styles.innerTabActive]}>
+        <PunyTouchable onPress={() => setTab('perf')} scaleTo={0.96} haptic="light"
+          style={[styles.segmentBtn, tab === 'perf' && styles.segmentBtnActive]}>
           <Ionicons name="trophy-outline" size={14} color={tab === 'perf' ? Colors.gold : Colors.text3} />
-          <Text style={[styles.innerTabText, tab === 'perf' && styles.innerTabTextActive]}>実績</Text>
+          <Text style={[styles.segmentText, tab === 'perf' && styles.segmentTextActive]}>実績</Text>
         </PunyTouchable>
       </View>
       {tab === 'pay'  && <CastPayTab  castId={castId} shopId={shopId}
@@ -413,49 +413,50 @@ export default function ResultsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe:              { flex: 1, backgroundColor: Colors.bg },
-  screenTitle:       { fontSize: 20, fontWeight: '500', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
+  safe:              { flex: 1, backgroundColor: '#0c0c1a' },
+  screenTitle:       { fontSize: 20, fontWeight: '500', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   scroll:            { paddingHorizontal: 16, paddingBottom: 108 },
-  emptyText:         { color: Colors.text2, textAlign: 'center', marginTop: 40 },
+  emptyText:         { color: '#aaaacc', textAlign: 'center', marginTop: 40 },
   statGrid:          { flexDirection: 'row', gap: 10, marginBottom: 0 },
-  rankRow:           { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  rankNum:           { fontSize: 13, fontWeight: '700', color: Colors.text2, width: 24 },
+  rankRow:           { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
+  rankNum:           { fontSize: 13, fontWeight: '700', color: '#aaaacc', width: 24 },
   castAvatar:        { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   castAvatarText:    { fontSize: 12, fontWeight: '600' },
-  rankName:          { fontSize: 13, color: Colors.text },
-  rankSales:         { fontSize: 13, fontWeight: '600', color: Colors.text },
+  rankName:          { fontSize: 13, color: '#eeeeff' },
+  rankSales:         { fontSize: 13, fontWeight: '600', color: '#eeeeff' },
   barRow:            { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 },
-  barLabel:          { width: 32, fontSize: 11, color: Colors.text2 },
-  barTrack:          { flex: 1, height: 6, backgroundColor: Colors.surface2, borderRadius: 3, overflow: 'hidden' },
-  barFill:           { height: '100%', backgroundColor: Colors.gold, borderRadius: 3 },
-  barVal:            { width: 72, fontSize: 11, color: Colors.text2, textAlign: 'right' },
-  // 内部タブ
-  innerTabRow:       { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  innerTab:          { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, backgroundColor: Colors.surface },
-  innerTabActive:    { backgroundColor: Colors.goldDim, borderColor: Colors.gold },
-  innerTabText:      { fontSize: 13, color: Colors.text3, fontWeight: '500' },
-  innerTabTextActive:{ color: Colors.gold, fontWeight: '600' },
-  // 期間切替
-  periodBtn:         { flex: 1, paddingVertical: 9, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, alignItems: 'center', backgroundColor: Colors.surface },
-  periodBtnActive:   { backgroundColor: Colors.goldDim, borderColor: Colors.gold },
-  periodBtnText:     { fontSize: 12, color: Colors.text3 },
-  periodBtnTextActive:{ color: Colors.gold, fontWeight: '600' },
+  barLabel:          { width: 32, fontSize: 11, color: '#aaaacc' },
+  barTrack:          { flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.05)'2, borderRadius: 3, overflow: 'hidden' },
+  barFill:           { height: '100%', backgroundColor: '#ff88cc', borderRadius: 3 },
+  barVal:            { width: 72, fontSize: 11, color: '#aaaacc', textAlign: 'right' },
+  // 給与/実績セグメント
+  segmentWrap:       { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: 3, marginBottom: 16, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.15)' },
+  segmentBtn:        { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 9, borderRadius: 11 },
+  segmentBtnActive:  { backgroundColor: 'rgba(255,136,204,0.18)', borderWidth: 0.5, borderColor: 'rgba(255,136,204,0.5)' },
+  segmentText:       { fontSize: 13, color: '#666688', fontWeight: '500' },
+  segmentTextActive: { color: '#ff88cc', fontWeight: '700' },
+  // 期間ピル
+  periodRow:         { flexDirection: 'row', gap: 6, marginBottom: 12 },
+  periodPill:        { paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', backgroundColor: 'rgba(255,255,255,0.04)' },
+  periodPillActive:  { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
+  periodPillText:    { fontSize: 12, color: '#666688', fontWeight: '500' },
+  periodPillTextActive: { color: '#ff88cc', fontWeight: '700' },
   // ナビ
   navRow:            { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 12 },
   navBtn:            { padding: 6 },
-  navLabel:          { fontSize: 14, color: Colors.text, fontWeight: '500', minWidth: 140, textAlign: 'center' },
+  navLabel:          { fontSize: 14, color: '#eeeeff', fontWeight: '500', minWidth: 140, textAlign: 'center' },
   // 給与カード
-  payCard:           { backgroundColor: Colors.surface, borderRadius: 14, borderWidth: 0.5, borderColor: Colors.border, padding: 16, marginBottom: 16 },
-  payRow:            { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  payLabel:          { fontSize: 13, color: Colors.text2 },
-  payValue:          { fontSize: 13, color: Colors.text, fontWeight: '500' },
-  payTotalRow:       { borderBottomWidth: 0, marginTop: 6, paddingTop: 12, borderTopWidth: 1, borderTopColor: Colors.border },
-  payTotalLabel:     { fontSize: 15, fontWeight: '700', color: Colors.text },
-  payTotalValue:     { fontSize: 22, fontWeight: '900', color: Colors.gold },
+  payCard:           { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 16, marginBottom: 16 },
+  payRow:            { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
+  payLabel:          { fontSize: 13, color: '#aaaacc' },
+  payValue:          { fontSize: 13, color: '#eeeeff', fontWeight: '500' },
+  payTotalRow:       { borderBottomWidth: 0, marginTop: 6, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(200,180,255,0.18)' },
+  payTotalLabel:     { fontSize: 15, fontWeight: '700', color: '#eeeeff' },
+  payTotalValue:     { fontSize: 22, fontWeight: '900', color: '#ff88cc' },
   // シフト明細
-  shiftDetailRow:    { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: Colors.border, gap: 8 },
-  shiftDetailDate:   { fontSize: 12, color: Colors.text2, width: 72 },
-  shiftDetailTime:   { fontSize: 12, color: Colors.text, flex: 1 },
-  shiftDetailHrs:    { fontSize: 12, color: Colors.text3, width: 36, textAlign: 'right' },
+  shiftDetailRow:    { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)', gap: 8 },
+  shiftDetailDate:   { fontSize: 12, color: '#aaaacc', width: 72 },
+  shiftDetailTime:   { fontSize: 12, color: '#eeeeff', flex: 1 },
+  shiftDetailHrs:    { fontSize: 12, color: '#666688', width: 36, textAlign: 'right' },
   shiftDetailPay:    { fontSize: 13, fontWeight: '600', width: 64, textAlign: 'right' },
 });
