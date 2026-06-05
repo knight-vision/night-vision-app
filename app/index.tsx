@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   logoWrap:     { alignItems: 'center', marginBottom: 56 },
   logoImg:      { width: 90, height: 90, borderRadius: 24, marginBottom: 16 },
   logoText:     { fontSize: 22, fontWeight: '600', color: Colors.gold, letterSpacing: 3 },
-  btnGroup:     { width: '%', gap: 14 },
+  btnGroup:     { width: '100%', gap: 14 },
   ownerBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: Colors.purple, borderRadius: 14, height: 54 },
   ownerBtnText: { fontSize: 15, fontWeight: '600', color: '#fff', letterSpacing: 0.5 },
   castBtn:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: Colors.gold, borderRadius: 14, height: 54 },

@@ -9,7 +9,7 @@ type Props = {
   children: React.ReactNode;
   disabled?: boolean;
   haptic?: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'select' | 'none';
-  scaleTo?: number;       // どこまで縮むか（小さいほどぷにっと感大）
+  scaleTo?: number;
   springConfig?: { tension?: number; friction?: number };
   hitSlop?: number;
 };
@@ -25,12 +25,15 @@ const hapticMap = {
   none:    () => Promise.resolve(),
 };
 
-/**
- * ぷにぷにボタン
- * - 押下: スプリングで0.94倍に縮む
- * - 離す: 跳ねながら元に戻る
- * - 触覚フィードバック付き
- */
+// レイアウト系プロパティ（Pressable に渡すべきもの）
+const LAYOUT_KEYS = [
+  'flex', 'flexGrow', 'flexShrink', 'flexBasis',
+  'width', 'height', 'minWidth', 'maxWidth', 'minHeight', 'maxHeight',
+  'alignSelf', 'position', 'top', 'right', 'bottom', 'left', 'zIndex',
+  'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
+  'marginHorizontal', 'marginVertical', 'marginStart', 'marginEnd',
+];
+
 export function PunyTouchable({
   onPress,
   onLongPress,
@@ -62,17 +65,19 @@ export function PunyTouchable({
       toValue: 1,
       useNativeDriver: true,
       speed: 20,
-      bounciness: 18, // よく跳ねる
+      bounciness: 18,
       ...springConfig,
     }).start();
   };
 
-  // styleからレイアウト系プロパティを抽出してPressableに渡す（flex等を効かせるため）
+  // styleからレイアウト系だけ抽出してPressableに渡す（flex等を効かせるため）
+  // 見た目系（borderRadius, backgroundColor, padding等）は Animated.View に残す
   const flat = StyleSheet.flatten(style) || {};
   const pressableStyle: ViewStyle = {};
-  const layoutKeys = ['flex', 'flexGrow', 'flexShrink', 'flexBasis', 'width', 'height', 'minWidth', 'maxWidth', 'minHeight', 'maxHeight', 'alignSelf', 'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft', 'marginHorizontal', 'marginVertical'];
-  layoutKeys.forEach(k => {
-    if ((flat as any)[k] !== undefined) (pressableStyle as any)[k] = (flat as any)[k];
+  LAYOUT_KEYS.forEach(k => {
+    if ((flat as any)[k] !== undefined) {
+      (pressableStyle as any)[k] = (flat as any)[k];
+    }
   });
 
   return (
@@ -91,5 +96,4 @@ export function PunyTouchable({
   );
 }
 
-// シンプルな触覚だけ実行するヘルパー
 export const haptic = hapticMap;

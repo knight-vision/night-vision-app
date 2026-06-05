@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   barRow:         { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 },
   barDay:         { width: 24, fontSize: 11, color: Colors.text2, textAlign: 'center' },
   barTrack:       { flex: 1, height: 6, backgroundColor: Colors.surface2, borderRadius: 3, overflow: 'hidden' },
-  barFill:        { height: '%', backgroundColor: Colors.gold, borderRadius: 3 },
+  barFill:        { height: '100%', backgroundColor: Colors.gold, borderRadius: 3 },
   barVal:         { width: 72, fontSize: 11, color: Colors.text2, textAlign: 'right' },
 });
 
@@ -494,7 +494,7 @@ const wt = StyleSheet.create({
   emptyMark:     { fontSize: 16, color: 'rgba(255,255,255,0.12)', marginTop: 14, fontWeight: '600' },
 
   // シフトチップ（横スクロール版・縦長）
-  shiftChip:     { flexDirection: 'row', alignItems: 'center', gap: 4, width: '%', paddingVertical: 5, paddingHorizontal: 6, borderRadius: 8, borderWidth: 0.5 },
+  shiftChip:     { flexDirection: 'row', alignItems: 'center', gap: 4, width: '100%', paddingVertical: 5, paddingHorizontal: 6, borderRadius: 8, borderWidth: 0.5 },
   chipDot:       { width: 4, height: 4, borderRadius: 2, flexShrink: 0 },
   chipName:      { fontSize: 10, fontWeight: '600', letterSpacing: 0.2 },
   chipTime:      { fontSize: 9, color: Colors.text3, fontWeight: '600', marginTop: 1 },

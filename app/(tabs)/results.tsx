@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
   barRow:            { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 },
   barLabel:          { width: 32, fontSize: 11, color: '#aaaacc' },
   barTrack:          { flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' },
-  barFill:           { height: '%', backgroundColor: '#ff88cc', borderRadius: 3 },
+  barFill:           { height: '100%', backgroundColor: '#ff88cc', borderRadius: 3 },
   barVal:            { width: 72, fontSize: 11, color: '#aaaacc', textAlign: 'right' },
   // 給与/実績セグメント
   segmentWrap:       { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: 3, marginBottom: 16, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.15)' },
