@@ -26,7 +26,7 @@ function autumnalEquinox(year: number): number {
 function buildHolidays(year: number): Map<string, string> {
   const h = new Map<string, string>();
   const add = (m: number, d: number, name: string) =>
-    h.set(`${year}-${String(m).padStart(2, '')}-${String(d).padStart(2, '')}`, name);
+    h.set(`${year}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`, name);
 
   add(1, 1, '元日');
   add(1, nthMonday(year, 1, 2), '成人の日');
@@ -49,7 +49,7 @@ function buildHolidays(year: number): Map<string, string> {
     const d = new Date(k);
     if (d.getDay() === 0) {
       const next = new Date(d); next.setDate(next.getDate() + 1);
-      const nk = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '')}-${String(next.getDate()).padStart(2, '')}`;
+      const nk = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
       if (!h.has(nk)) h.set(nk, '振替休日');
     }
   }
@@ -59,8 +59,8 @@ function buildHolidays(year: number): Map<string, string> {
     if (d.getDay() === 0) continue;
     const prev = new Date(d); prev.setDate(d.getDate() - 1);
     const next = new Date(d); next.setDate(d.getDate() + 1);
-    const pk = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '')}-${String(prev.getDate()).padStart(2, '')}`;
-    const nk = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '')}-${String(next.getDate()).padStart(2, '')}`;
+    const pk = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-${String(prev.getDate()).padStart(2, '0')}`;
+    const nk = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
     if (h.has(pk) && h.has(nk) && !h.has(k)) h.set(k, '国民の休日');
   }
   return h;
@@ -70,7 +70,7 @@ const holidayCache = new Map<number, Map<string, string>>();
 export function getHoliday(date: Date): string | undefined {
   const y = date.getFullYear();
   if (!holidayCache.has(y)) holidayCache.set(y, buildHolidays(y));
-  const k = `${y}-${String(date.getMonth() + 1).padStart(2, '')}-${String(date.getDate()).padStart(2, '')}`;
+  const k = `${y}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   return holidayCache.get(y)!.get(k);
 }
 
@@ -85,7 +85,7 @@ function buildCalendarDays(year: number, month: number): (Date | null)[] {
 }
 
 function toDateKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '')}-${String(date.getDate()).padStart(2, '')}`;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 function sameDay(a: Date, b: Date): boolean {

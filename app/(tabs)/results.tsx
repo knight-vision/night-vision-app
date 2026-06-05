@@ -119,7 +119,7 @@ function CastPerformanceTab({ castId, shopId }: { castId: string; shopId: string
 type PayPeriod = 'daily' | 'weekly' | 'monthly';
 
 function getDateStr(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function getWeekDates(base: string) {
   const b = new Date(base + 'T00:00:00');
@@ -261,7 +261,7 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
           <MonthCalendar
             year={parseInt(refMonth.slice(0,4), 10)}
             month={parseInt(refMonth.slice(5,7), 10) - 1}
-            onMonthChange={(y, m) => setRefMonth(`${y}-${String(m+1).padStart(2,'')}`)}
+            onMonthChange={(y, m) => setRefMonth(`${y}-${String(m+1).padStart(2,'0')}`)}
             onDayPress={(d) => setRefDate(getDateStr(d))}
             initialSelected={new Date(refDate + 'T00:00:00')}
             events={shifts.map((s: any) => ({ date: s.date, color: '#ff88cc' }))}
@@ -281,11 +281,11 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
       )}
       {period === 'monthly' && (
         <View style={styles.navRow}>
-          <PunyTouchable onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()-1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}`); }} style={styles.navBtn} scaleTo={0.92} haptic="light">
+          <PunyTouchable onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()-1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }} style={styles.navBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-back" size={18} color={Colors.text2} />
           </PunyTouchable>
           <Text style={styles.navLabel}>{refMonth}</Text>
-          <PunyTouchable onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()+1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}`); }} style={styles.navBtn} scaleTo={0.92} haptic="light">
+          <PunyTouchable onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()+1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }} style={styles.navBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
           </PunyTouchable>
         </View>

@@ -19,7 +19,7 @@ const MINUTES = ['', '', '', '', '', ''];
 const CAL_DAYS = ['月', '火', '水', '木', '金', '土', '日'];
 
 function getDateStr(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function getWeekDates(base: string): string[] {
   const b = new Date(base + 'T00:00:00');
@@ -158,7 +158,7 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
         ? visibleMinutes[tempMIdx]
         : MINUTES[tempMIdx];
     // Supabase time型は0-23のみ。25時→1時に正規化（日付跨ぎを表現）
-    const h = String(selectedHourValue >= 24 ? selectedHourValue - 24 : selectedHourValue).padStart(2, '');
+    const h = String(selectedHourValue >= 24 ? selectedHourValue - 24 : selectedHourValue).padStart(2, '0');
     onChange(`${h}:${selectedMinuteValue}`);
     setModalVisible(false);
   };
@@ -646,7 +646,7 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
         month={calMonth - 1}
         onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m + 1); }}
         onDayPress={(d) => {
-          const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
+          const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
           const todayStr = getDateStr(new Date());
           if (dateStr < todayStr) {
             Alert.alert('過去の日付', '過去の日にはシフト希望を出せません');
@@ -733,7 +733,7 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
               month={calMonth - 1}
               onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m + 1); }}
               onDayPress={(d) => {
-                const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
+                const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                 const todayStr = getDateStr(new Date());
                 if (ds < todayStr) {
                   Alert.alert('過去の日付', '過去の日にはシフト希望を出せません');

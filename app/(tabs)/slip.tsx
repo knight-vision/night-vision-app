@@ -20,7 +20,7 @@ const TAX_RATE = 0.1;
 const CAL_DAYS = ['月', '火', '水', '木', '金', '土', '日'];
 
 function getDateStr(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function fmtDateLabel(ds: string) {
   const d = new Date(ds + 'T00:00:00');
@@ -39,7 +39,7 @@ function DatePicker({ value, onChange }: { value: string; onChange: (d: string) 
       month={month}
       onMonthChange={(y, m) => { setYear(y); setMonth(m); }}
       onDayPress={(d) => {
-        const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
+        const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         onChange(ds);
       }}
       initialSelected={initDate}
@@ -365,14 +365,14 @@ function ShopSales({ shopId }: { shopId: string }) {
   const [allSales, setAllSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const monthStr = `${year}-${String(month).padStart(2, '')}`;
+  const monthStr = `${year}-${String(month).padStart(2, '0')}`;
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       // 年次は12ヶ月分まとめて取得
       if (period === 'yearly') {
-        const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '')}`);
+        const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
         const results = await Promise.all(months.map(m => fetch(`${API_BASE}/daily-sales?shop_id=${shopId}&month=${m}`).then(r => r.json())));
         setAllSales(results.flat().filter(Array.isArray(results[0]) ? Boolean : Boolean));
       } else {
@@ -406,7 +406,7 @@ function ShopSales({ shopId }: { shopId: string }) {
     if (period === 'monthly') return allSales;
     // yearly: 月別集計
     return Array.from({ length: 12 }, (_, i) => {
-      const m = `${year}-${String(i + 1).padStart(2, '')}`;
+      const m = `${year}-${String(i + 1).padStart(2, '0')}`;
       const monthData = allSales.filter((s: any) => s.date?.startsWith(m));
       return {
         date: m,

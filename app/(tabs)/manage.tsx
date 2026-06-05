@@ -34,7 +34,7 @@ function CastManagement({ shopId }: { shopId: string }) {
   const [saving, setSaving] = useState(false);
 
   const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'')}-${String(today.getDate()).padStart(2,'')}`;
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -256,13 +256,13 @@ type SalarySubTab = 'summary' | 'allowance' | 'presets';
 
 function SalarySection({ shopId }: { shopId: string }) {
   const now = new Date();
-  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '')}`);
+  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
   const [subTab, setSubTab] = useState<SalarySubTab>('summary');
 
   const changeMonth = (delta: number) => {
     const d = new Date(month + '-01');
     d.setMonth(d.getMonth() + delta);
-    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '')}`);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
   };
 
   const SUB_TABS: { key: SalarySubTab; label: string }[] = [
@@ -628,7 +628,7 @@ const SALES_TYPES = [
 
 function ResultsSection({ shopId }: { shopId: string }) {
   const now = new Date();
-  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '')}`);
+  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
   const [data, setData] = useState<any[]>([]);
   const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -636,7 +636,7 @@ function ResultsSection({ shopId }: { shopId: string }) {
   const changeMonth = (delta: number) => {
     const d = new Date(month + '-01');
     d.setMonth(d.getMonth() + delta);
-    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '')}`);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
   };
 
   const load = useCallback(async () => {
@@ -717,7 +717,7 @@ function ResultsSection({ shopId }: { shopId: string }) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const CAL_DAYS_C = ['月','火','水','木','金','土','日'];
 function getDateStrC(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function DatePickerC({ value, onChange }: { value: string; onChange: (d: string) => void }) {
@@ -745,7 +745,7 @@ function DatePickerC({ value, onChange }: { value: string; onChange: (d: string)
       <View style={cStyles.calGrid}>
         {days.map((day, i) => {
           if (!day) return <View key={`p${i}`} style={cStyles.calCell} />;
-          const ds = `${y}-${String(m).padStart(2,'')}-${String(day).padStart(2,'')}`;
+          const ds = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
           const sel = ds === value;
           const today = ds === getDateStrC(new Date());
           return (
@@ -762,7 +762,7 @@ function DatePickerC({ value, onChange }: { value: string; onChange: (d: string)
 
 function CustomerSection({ shopId }: { shopId: string }) {
   const now = new Date();
-  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'')}`);
+  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`);
   const [customers, setCustomers] = useState<any[]>([]);
   const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -779,7 +779,7 @@ function CustomerSection({ shopId }: { shopId: string }) {
   const changeMonth = (delta: number) => {
     const d = new Date(month + '-01');
     d.setMonth(d.getMonth() + delta);
-    setMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}`);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
   };
 
   const load = useCallback(async () => {

@@ -390,7 +390,7 @@ export default function SalaryScreen() {
   const { shopId } = useAuthStore();
   const [activeTab, setActiveTab] = useState<SalaryTab>('summary');
   const now = new Date();
-  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '')}`);
+  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
 
   const TABS: { key: SalaryTab; label: string; icon: string }[] = [
     { key: 'summary',   label: '月次サマリー', icon: 'wallet-outline' },
@@ -401,7 +401,7 @@ export default function SalaryScreen() {
   const changeMonth = (delta: number) => {
     const d = new Date(month + '-01');
     d.setMonth(d.getMonth() + delta);
-    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '')}`);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
   };
 
   if (!shopId) return null;
