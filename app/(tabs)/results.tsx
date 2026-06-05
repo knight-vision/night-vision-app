@@ -137,12 +137,23 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
   const now = new Date();
   const initDate = initialDate || getDateStr(now);
   const [period, setPeriod] = useState<PayPeriod>(initialPeriod || 'monthly');
-  const [refDate, setRefDate] = useState(initDate); // 日/週の基準日
+  const [refDate, setRefDate] = useState(initDate);
   const [refMonth, setRefMonth] = useState(initDate.slice(0, 7));
   const [shifts, setShifts] = useState<any[]>([]);
   const [allowances, setAllowances] = useState<any[]>([]);
   const [castInfo, setCastInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  // 外部から渡された日付/期間に追従
+  useEffect(() => {
+    if (initialDate) {
+      setRefDate(initialDate);
+      setRefMonth(initialDate.slice(0, 7));
+    }
+  }, [initialDate]);
+  useEffect(() => {
+    if (initialPeriod) setPeriod(initialPeriod);
+  }, [initialPeriod]);
 
   const addDay = (ds: string, n: number) => {
     const d = new Date(ds + 'T00:00:00'); d.setDate(d.getDate() + n); return getDateStr(d);
