@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
   rankSales:         { fontSize: 13, fontWeight: '600', color: '#eeeeff' },
   barRow:            { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 },
   barLabel:          { width: 32, fontSize: 11, color: '#aaaacc' },
-  barTrack:          { flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.05)'2, borderRadius: 3, overflow: 'hidden' },
+  barTrack:          { flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' },
   barFill:           { height: '100%', backgroundColor: '#ff88cc', borderRadius: 3 },
   barVal:            { width: 72, fontSize: 11, color: '#aaaacc', textAlign: 'right' },
   // 給与/実績セグメント
