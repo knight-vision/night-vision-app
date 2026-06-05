@@ -106,9 +106,10 @@ function WeeklyShiftTable({
                       <View style={[wt.chipDot, { backgroundColor: color, opacity: isPending ? 0.5 : 1 }]} />
                       <View style={{ flex: 1 }}>
                         <Text style={[wt.chipName, { color, opacity: isPending ? 0.8 : 1 }]} numberOfLines={1}>
-                          {isPending ? '希望' : castName.slice(0, 4)}
+                          {castName.slice(0, 4)}
                         </Text>
-                        <Text style={[wt.chipTime, isPending && { color: Colors.purple } as any]} numberOfLines={1}>
+                        {isPending && <Text style={[wt.chipTime, { color: Colors.purple, fontSize: 8 }]}>希望中</Text>}
+                        <Text style={wt.chipTime} numberOfLines={1}>
                           {(s.start_time || '').slice(0, 5)}
                         </Text>
                       </View>
@@ -128,24 +129,34 @@ function WeeklyShiftTable({
 }
 
 // ── オーナー版 ────────────────────────────────────────────────
+type MonthCache = { confirmed: any[]; requests: any[] };
+
 function OwnerHome() {
   const { shopId } = useAuthStore();
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
-  // 月ごとのシフトキャッシュ: "YYYY-M" => shift[]
-  const [shiftCache, setShiftCache] = useState<Record<string, any[]>>({});
+  // 月ごとキャッシュ: "YYYY-M" => { confirmed, requests }
+  const [cache, setCache] = useState<Record<string, MonthCache>>({});
   const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const now = new Date();
   const [weekBase, setWeekBase] = useState(now);
-  const weekDates = getWeekDates(weekBase);
-  const y = weekBase.getFullYear();
-  const m = weekBase.getMonth() + 1;
-  const cacheKey = `${y}-${m}`;
-  const allConfirmed = shiftCache[cacheKey] ?? [];
+  const [reqWeekBase, setReqWeekBase] = useState(now);
 
-  // 初回のみ: ダッシュボード・キャスト・当月シフト
+  const confKey = (base: Date) => `${base.getFullYear()}-${base.getMonth()+1}`;
+  const weekDates    = getWeekDates(weekBase);
+  const reqWeekDates = getWeekDates(reqWeekBase);
+  const allConfirmed = cache[confKey(weekBase)]?.confirmed ?? [];
+  const allRequests  = cache[confKey(reqWeekBase)]?.requests ?? [];
+
+  const saveMonth = (key: string, sd: any) => {
+    const confirmed = Array.isArray(sd) ? sd : (sd?.confirmed || []);
+    const requests  = Array.isArray(sd) ? [] : (sd?.requests  || []);
+    setCache(prev => ({ ...prev, [key]: { confirmed, requests } }));
+  };
+
+  // 初回: ダッシュボード・キャスト・当月シフト
   useEffect(() => {
     if (!shopId) return;
     setLoading(true);
@@ -157,27 +168,42 @@ function OwnerHome() {
       fetch(`${API_BASE}/casts?shop_id=${shopId}`).then(r => r.json()).catch(() => []),
     ]).then(([d, sd, cd]) => {
       setData(d);
-      const shifts = Array.isArray(sd) ? sd : (sd?.confirmed || []);
-      setShiftCache({ [key]: shifts });
+      saveMonth(key, sd);
       setCasts(Array.isArray(cd) ? cd : []);
     }).finally(() => setLoading(false));
   }, [shopId]);
 
-  // 週移動で月が変わった場合のみ追加フェッチ（ローディングなし）
-  useEffect(() => {
-    if (!shopId || shiftCache[cacheKey] !== undefined) return;
+  // 月をまたいだ場合のみ差分フェッチ（確定シフト・希望シフトそれぞれ独立）
+  const fetchIfNeeded = (base: Date) => {
+    const key = confKey(base);
+    if (!shopId || cache[key] !== undefined) return;
+    const y = base.getFullYear(), m = base.getMonth() + 1;
     fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${y}&month=${m}`)
       .then(r => r.json())
-      .then(sd => {
-        const shifts = Array.isArray(sd) ? sd : (sd?.confirmed || []);
-        setShiftCache(prev => ({ ...prev, [cacheKey]: shifts }));
-      }).catch(() => {
-        setShiftCache(prev => ({ ...prev, [cacheKey]: [] }));
-      });
-  }, [shopId, cacheKey]);
+      .then(sd => saveMonth(key, sd))
+      .catch(() => setCache(prev => ({ ...prev, [key]: { confirmed: [], requests: [] } })));
+  };
+  useEffect(() => { fetchIfNeeded(weekBase); },    [weekBase, shopId]);
+  useEffect(() => { fetchIfNeeded(reqWeekBase); }, [reqWeekBase, shopId]);
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
   if (!data) return <Text style={{ color: Colors.text2, textAlign: 'center', marginTop: 40 }}>データを取得できませんでした</Text>;
+
+  // 希望シフトをWeeklyShiftTable互換に変換（キャストごとに色付け）
+  const reqAsShifts = allRequests
+    .filter((r: any) => r.status === 'pending' && reqWeekDates.includes(r.date));
+
+  const WeekNav = ({ base, setBase }: { base: Date; setBase: (d: Date) => void }) => (
+    <View style={wt.weekNav}>
+      <PunyTouchable haptic="light" onPress={() => { const d = new Date(base); d.setDate(d.getDate()-7); setBase(d); }} style={wt.weekNavBtn}>
+        <Text style={wt.weekNavText}>‹ 前週</Text>
+      </PunyTouchable>
+      <Text style={wt.weekRange}>{shortDate(getWeekDates(base)[0]).dm} 〜 {shortDate(getWeekDates(base)[6]).dm}</Text>
+      <PunyTouchable haptic="light" onPress={() => { const d = new Date(base); d.setDate(d.getDate()+7); setBase(d); }} style={wt.weekNavBtn}>
+        <Text style={wt.weekNavText}>次週 ›</Text>
+      </PunyTouchable>
+    </View>
+  );
 
   return (
     <>
@@ -200,17 +226,21 @@ function OwnerHome() {
         </PunyTouchable>
       </View>
 
+      {/* 提出された希望シフト */}
+      <SectionCard title="📩 提出された希望シフト" actionLabel="シフト管理 →" onAction={() => router.push('/(tabs)/shift')}>
+        <WeekNav base={reqWeekBase} setBase={setReqWeekBase} />
+        <WeeklyShiftTable
+          weekDates={reqWeekDates}
+          allConfirmed={reqAsShifts}
+          casts={casts}
+          onDayPress={() => router.push('/(tabs)/shift')}
+          isPending
+        />
+      </SectionCard>
+
       {/* 週間確定シフト */}
       <SectionCard title="🏪 今週の確定シフト" actionLabel="シフト管理 →" onAction={() => router.push('/(tabs)/shift')}>
-        <View style={wt.weekNav}>
-          <PunyTouchable haptic="light" onPress={() => { const d = new Date(weekBase); d.setDate(d.getDate()-7); setWeekBase(d); }} style={wt.weekNavBtn}>
-            <Text style={wt.weekNavText}>‹ 前週</Text>
-          </PunyTouchable>
-          <Text style={wt.weekRange}>{shortDate(weekDates[0]).dm} 〜 {shortDate(weekDates[6]).dm}</Text>
-          <PunyTouchable haptic="light" onPress={() => { const d = new Date(weekBase); d.setDate(d.getDate()+7); setWeekBase(d); }} style={wt.weekNavBtn}>
-            <Text style={wt.weekNavText}>次週 ›</Text>
-          </PunyTouchable>
-        </View>
+        <WeekNav base={weekBase} setBase={setWeekBase} />
         <WeeklyShiftTable weekDates={weekDates} allConfirmed={allConfirmed} casts={casts}
           onDayPress={() => router.push('/(tabs)/shift')} />
       </SectionCard>
