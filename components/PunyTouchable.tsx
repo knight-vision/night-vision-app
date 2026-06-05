@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Animated, Pressable, ViewStyle, StyleProp, GestureResponderEvent } from 'react-native';
+import { Animated, Pressable, ViewStyle, StyleProp, GestureResponderEvent, StyleSheet } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 type Props = {
@@ -67,6 +67,14 @@ export function PunyTouchable({
     }).start();
   };
 
+  // styleからレイアウト系プロパティを抽出してPressableに渡す（flex等を効かせるため）
+  const flat = StyleSheet.flatten(style) || {};
+  const pressableStyle: ViewStyle = {};
+  const layoutKeys = ['flex', 'flexGrow', 'flexShrink', 'flexBasis', 'width', 'height', 'minWidth', 'maxWidth', 'minHeight', 'maxHeight', 'alignSelf', 'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft', 'marginHorizontal', 'marginVertical'];
+  layoutKeys.forEach(k => {
+    if ((flat as any)[k] !== undefined) (pressableStyle as any)[k] = (flat as any)[k];
+  });
+
   return (
     <Pressable
       onPress={onPress}
@@ -74,7 +82,8 @@ export function PunyTouchable({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={disabled}
-      hitSlop={hitSlop}>
+      hitSlop={hitSlop}
+      style={pressableStyle}>
       <Animated.View style={[style, { transform: [{ scale }], opacity: disabled ? 0.5 : 1 }]}>
         {children}
       </Animated.View>
