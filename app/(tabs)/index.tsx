@@ -453,17 +453,17 @@ const wt = StyleSheet.create({
   scrollContent: { flexDirection: 'row', gap: DAY_COL_GAP, paddingBottom: 4, paddingHorizontal: 2 },
 
   // 各日カラム
-  dayCol:        { width: DAY_COL_WIDTH },
+  dayCol:        { width: DAY_COL_WIDTH, height: 142 },
 
   // 日付ヘッダー
-  dayHeader:     { alignItems: 'center', paddingVertical: 8, paddingHorizontal: 4, borderRadius: 10, marginBottom: 4, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.12)' },
+  dayHeader:     { alignItems: 'center', paddingVertical: 6, paddingHorizontal: 4, borderRadius: 10, marginBottom: 4, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.12)', height: 52 },
   dayHeaderToday:{ backgroundColor: 'rgba(232,180,200,0.14)', borderColor: 'rgba(232,180,200,0.5)' },
   dayOfWeek:     { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
   dayNum:        { fontSize: 16, color: Colors.text, fontWeight: '800', marginTop: 2, letterSpacing: -0.5 },
   todayDot:      { width: 5, height: 5, borderRadius: 3, backgroundColor: Colors.gold, marginTop: 4 },
 
   // シフト表示エリア
-  dayBody:       { backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, paddingVertical: 6, paddingHorizontal: 5, gap: 4, height: 88, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.08)', alignItems: 'center', overflow: 'hidden', justifyContent: 'flex-start' },
+  dayBody:       { backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, paddingVertical: 6, paddingHorizontal: 5, gap: 4, flex: 1, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.08)', alignItems: 'center', overflow: 'hidden', justifyContent: 'flex-start' },
   dayBodyToday:  { borderColor: 'rgba(232,180,200,0.2)' },
 
   emptyMark:     { fontSize: 16, color: 'rgba(255,255,255,0.12)', marginTop: 14, fontWeight: '300' },
