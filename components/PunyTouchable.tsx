@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import { Animated, Pressable, ViewStyle, StyleProp, GestureResponderEvent } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { Animated, Pressable, ViewStyle, StyleProp, GestureResponderEvent } from '-native';
+import * as Haptics from '-haptics';
 
 type Props = {
   onPress?: (e: GestureResponderEvent) => void;
@@ -8,7 +8,7 @@ type Props = {
   style?: StyleProp<ViewStyle>;
   children: React.ReactNode;
   disabled?: boolean;
-  haptic?: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'select' | 'none';
+  haptic?: '' | '' | '' | '' | '' | '' | '' | '';
   scaleTo?: number;       // どこまで縮むか（小さいほどぷにっと感大）
   springConfig?: { tension?: number; friction?: number };
   hitSlop?: number;
@@ -37,7 +37,7 @@ export function PunyTouchable({
   style,
   children,
   disabled,
-  haptic = 'light',
+  haptic = '',
   scaleTo = 0.94,
   springConfig,
   hitSlop = 8,

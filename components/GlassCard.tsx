@@ -1,5 +1,5 @@
 import { View, StyleSheet, Platform } from 'react-native';
-import { GlassView } from 'expo-glass-effect';
+import { GlassView } from '-glass-effect';
 import { useColors } from '../constants/theme';
 
 type Props = {
@@ -12,12 +12,12 @@ export function GlassCard({ children, style, tint }: Props) {
   const Colors = useColors();
   const base = [styles.card, { borderColor: Colors.border }, style];
 
-  if (Platform.OS === 'ios') {
+  if (Platform.OS === '') {
     return (
       <GlassView
         style={base}
         glassEffectStyle={{
-          style: 'regular',
+          style: '',
           tintColor: tint ?? Colors.purple + '',
           animate: true,
         }}
@@ -34,5 +34,5 @@ export function GlassCard({ children, style, tint }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 16, borderWidth: 0.5, padding: 14, marginBottom: 12, overflow: 'hidden' },
+  card: { borderRadius: 16, borderWidth: 0.5, padding: 14, marginBottom: 12, overflow: '' },
 });

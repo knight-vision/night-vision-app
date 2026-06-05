@@ -3,16 +3,16 @@ import { PunyTouchable } from '../../components/PunyTouchable';
 import {
   ScrollView, View, Text, StyleSheet,
   TextInput, Alert, ActivityIndicator, Switch, Linking, Modal,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+} from '-native';
+import { SafeAreaView } from '-native-safe-area-context';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from '';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, fmtYen , useColors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 
-type ShopTab = 'info' | 'jobs';
+type ShopTab = '' | '';
 
 const DAYS = ['月', '火', '水', '木', '金', '土', '日'];
 
@@ -72,8 +72,8 @@ function ShopInfo({ shopId }: { shopId: string }) {
     setSaving(true);
     try {
       await fetch(`${API_BASE}/shop-info`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: '',
+        headers: { '-Type': '/json' },
         body: JSON.stringify({
           shop_id: shopId, name: shopName, tel, area,
           seats: Number(seats) || null, budget: Number(budget) || null,
@@ -96,7 +96,7 @@ function ShopInfo({ shopId }: { shopId: string }) {
     const slug = shopSlug || authShopSlug;
     const url = slug
       ? `https://www.night-vision.jp/shop/${slug}`
-      : 'https://www.night-vision.jp';
+      : '://www.night-vision.jp';
     Linking.openURL(url);
   };
 
@@ -122,7 +122,7 @@ function ShopInfo({ shopId }: { shopId: string }) {
       <Field label="システム料" value={system} onChange={setSystem} placeholder="例: 席料3,000円・指名料2,000円" multiline />
 
       <Text style={styles.sectionTitle}>通常営業時間</Text>
-      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
+      <View style={{ flexDirection: '', gap: 12, marginBottom: 12 }}>
         <View style={{ flex: 1 }}>
           <Text style={styles.fieldLabel}>開店</Text>
           <TextInput style={styles.input} value={openTime} onChangeText={setOpenTime} placeholder="20:00" placeholderTextColor={Colors.text3} />
@@ -140,17 +140,17 @@ function ShopInfo({ shopId }: { shopId: string }) {
           <Text style={styles.dayLabel}>{day}</Text>
           <Switch
             value={!(weeklyHours[day]?.closed)}
-            onValueChange={v => updateDay(day, 'closed', !v)}
+            onValueChange={v => updateDay(day, '', !v)}
             trackColor={{ false: Colors.surface2, true: Colors.goldDim }}
             thumbColor={!weeklyHours[day]?.closed ? Colors.gold : Colors.text3}
           />
           {!weeklyHours[day]?.closed ? (
-            <View style={{ flex: 1, flexDirection: 'row', gap: 6 }}>
+            <View style={{ flex: 1, flexDirection: '', gap: 6 }}>
               <TextInput style={[styles.input, { flex: 1 }]} value={weeklyHours[day]?.open || ':00'}
-                onChangeText={v => updateDay(day, 'open', v)} placeholder="20:00" placeholderTextColor={Colors.text3} />
-              <Text style={{ color: Colors.text3, alignSelf: 'center' }}>〜</Text>
+                onChangeText={v => updateDay(day, '', v)} placeholder="20:00" placeholderTextColor={Colors.text3} />
+              <Text style={{ color: Colors.text3, alignSelf: '' }}>〜</Text>
               <TextInput style={[styles.input, { flex: 1 }]} value={weeklyHours[day]?.close || ':00'}
-                onChangeText={v => updateDay(day, 'close', v)} placeholder="03:00" placeholderTextColor={Colors.text3} />
+                onChangeText={v => updateDay(day, '', v)} placeholder="03:00" placeholderTextColor={Colors.text3} />
             </View>
           ) : (
             <Text style={{ fontSize: 13, color: Colors.text3, flex: 1, paddingLeft: 8 }}>定休日</Text>
@@ -175,9 +175,9 @@ function Field({ label, value, onChange, placeholder, multiline, keyboardType }:
     <View style={{ marginBottom: 12 }}>
       <Text style={styles.fieldLabel}>{label}</Text>
       <TextInput
-        style={[styles.input, multiline && { height: 80, textAlignVertical: 'top' }]}
+        style={[styles.input, multiline && { height: 80, textAlignVertical: '' }]}
         value={value} onChangeText={onChange} placeholder={placeholder}
-        placeholderTextColor={Colors.text3} multiline={multiline} keyboardType={keyboardType || 'default'}
+        placeholderTextColor={Colors.text3} multiline={multiline} keyboardType={keyboardType || ''}
       />
     </View>
   );
@@ -231,8 +231,8 @@ function JobsSection({ shopId }: { shopId: string }) {
     try {
       const body = { shop_id: shopId, title, hourly_wage_min: Number(wageMin) || null, hourly_wage_max: Number(wageMax) || null, work_days: workDays, conditions, benefits, is_active: isPublic };
       await fetch(`${API_BASE}/job-postings`, {
-        method: editTarget ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: editTarget ? '' : '',
+        headers: { '-Type': '/json' },
         body: JSON.stringify(editTarget ? { ...body, id: editTarget.id } : body),
       });
       setModalVisible(false);
@@ -242,9 +242,9 @@ function JobsSection({ shopId }: { shopId: string }) {
 
   const handleDelete = (id: string, jobTitle: string) => {
     Alert.alert('削除確認', `「${jobTitle}」を削除しますか？`, [
-      { text: 'キャンセル', style: 'cancel' },
-      { text: '削除', style: 'destructive', onPress: async () => {
-        await fetch(`${API_BASE}/job-postings`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+      { text: 'キャンセル', style: '' },
+      { text: '削除', style: '', onPress: async () => {
+        await fetch(`${API_BASE}/job-postings`, { method: '', headers: { '-Type': '/json' }, body: JSON.stringify({ id }) });
         load();
       }},
     ]);
@@ -263,7 +263,7 @@ function JobsSection({ shopId }: { shopId: string }) {
 
       {jobs.map((job: any) => (
         <View key={job.id} style={styles.jobCard}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
+          <View style={{ flexDirection: '', alignItems: '-start', gap: 8, marginBottom: 6 }}>
             <View style={{ flex: 1 }}>
               <Text style={styles.jobTitle}>{job.title}</Text>
               {(job.hourly_wage_min || job.hourly_wage_max) && (
@@ -272,8 +272,8 @@ function JobsSection({ shopId }: { shopId: string }) {
                 </Text>
               )}
             </View>
-            <View style={[styles.publicBadge, { backgroundColor: job.is_active ? 'rgba(78,203,138,0.15)' : Colors.surface2 }]}>
-              <Text style={{ fontSize: 11, fontWeight: '', color: job.is_active ? Colors.green : Colors.text3 }}>
+            <View style={[styles.publicBadge, { backgroundColor: job.is_active ? '(78,203,138,0.15)' : Colors.surface2 }]}>
+              <Text style={{ fontSize: 11, fontWeight: '600', color: job.is_active ? Colors.green : Colors.text3 }}>
                 {job.is_active ? '公開中' : '非公開'}
               </Text>
             </View>
@@ -312,10 +312,10 @@ function JobsSection({ shopId }: { shopId: string }) {
             <Text style={modal.label}>勤務日</Text>
             <TextInput style={modal.input} value={workDays} onChangeText={setWorkDays} placeholder="例: 週2日〜OK" placeholderTextColor={Colors.text3} />
             <Text style={modal.label}>応募条件</Text>
-            <TextInput style={[modal.input, { height: 80, textAlignVertical: 'top' }]} value={conditions} onChangeText={setConditions} placeholder="例: 18歳以上、未経験歓迎" placeholderTextColor={Colors.text3} multiline />
+            <TextInput style={[modal.input, { height: 80, textAlignVertical: '' }]} value={conditions} onChangeText={setConditions} placeholder="例: 18歳以上、未経験歓迎" placeholderTextColor={Colors.text3} multiline />
             <Text style={modal.label}>待遇・福利厚生</Text>
-            <TextInput style={[modal.input, { height: 80, textAlignVertical: 'top' }]} value={benefits} onChangeText={setBenefits} placeholder="例: 交通費支給、日払いOK" placeholderTextColor={Colors.text3} multiline />
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <TextInput style={[modal.input, { height: 80, textAlignVertical: '' }]} value={benefits} onChangeText={setBenefits} placeholder="例: 交通費支給、日払いOK" placeholderTextColor={Colors.text3} multiline />
+            <View style={{ flexDirection: '', alignItems: '', justifyContent: '-between', marginBottom: 12 }}>
               <Text style={modal.label}>公開する</Text>
               <Switch value={isPublic} onValueChange={setIsPublic} trackColor={{ false: Colors.surface2, true: Colors.goldDim }} thumbColor={isPublic ? Colors.gold : Colors.text3} />
             </View>
@@ -336,17 +336,17 @@ function JobsSection({ shopId }: { shopId: string }) {
 export default function ShopManageScreen() {
   const Colors = useColors();
   const { shopId } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<ShopTab>('info');
+  const [activeTab, setActiveTab] = useState<ShopTab>('');
 
   const TABS: { key: ShopTab; label: string; icon: string }[] = [
-    { key: 'info', label: '店舗情報', icon: 'storefront-outline' },
-    { key: 'jobs', label: '求人管理', icon: 'briefcase-outline' },
+    { key: '', label: '店舗情報', icon: '-outline' },
+    { key: '', label: '求人管理', icon: '-outline' },
   ];
 
   if (!shopId) return null;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['']}>
       <Text style={styles.screenTitle}>店舗管理</Text>
       <View style={styles.segmentWrap}>
         {TABS.map(tab => (
@@ -358,8 +358,8 @@ export default function ShopManageScreen() {
         ))}
       </View>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {activeTab === 'info' && <ShopInfo shopId={shopId} />}
-        {activeTab === 'jobs' && <JobsSection shopId={shopId} />}
+        {activeTab === '' && <ShopInfo shopId={shopId} />}
+        {activeTab === '' && <JobsSection shopId={shopId} />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -367,41 +367,41 @@ export default function ShopManageScreen() {
 
 const modal = StyleSheet.create({
   container:  { flex: 1, backgroundColor: Colors.bg },
-  header:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  closeBtn:   { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  title:      { fontSize: 16, fontWeight: '', color: Colors.text },
+  header:     { flexDirection: '', alignItems: '', justifyContent: '-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  closeBtn:   { width: 36, height: 36, justifyContent: '', alignItems: '' },
+  title:      { fontSize: 16, fontWeight: '600', color: Colors.text },
   label:      { fontSize: 12, color: Colors.text2, marginBottom: 6 },
   input:      { backgroundColor: Colors.surface, borderRadius: 10, borderWidth: 0.5, borderColor: Colors.border, padding: 12, color: Colors.text, fontSize: 14, marginBottom: 12 },
-  submitBtn:  { backgroundColor: Colors.gold, borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 8 },
-  submitText: { color: '#1a1200', fontSize: 15, fontWeight: '' },
+  submitBtn:  { backgroundColor: Colors.gold, borderRadius: 12, height: 50, justifyContent: '', alignItems: '', marginTop: 8 },
+  submitText: { color: '#1a1200', fontSize: 15, fontWeight: '600' },
 });
 
 const styles = StyleSheet.create({
   safe:          { flex: 1, backgroundColor: '#0c0c1a' },
-  screenTitle:   { fontSize: 20, fontWeight: '', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
+  screenTitle:   { fontSize: 20, fontWeight: '600', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
   scroll:        { paddingHorizontal: 16, paddingBottom: 108 },
-  segmentWrap:       { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: 3, marginHorizontal: 16, marginBottom: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.15)' },
-  segmentBtn:        { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 9, borderRadius: 11 },
-  segmentBtnActive:  { backgroundColor: 'rgba(255,136,204,0.15)', borderWidth: 0.5, borderColor: '#ff88cc' },
+  segmentWrap:       { flexDirection: '', backgroundColor: '(255,255,255,0.05)', borderRadius: 14, padding: 3, marginHorizontal: 16, marginBottom: 12, borderWidth: 0.5, borderColor: '(200,180,255,0.15)' },
+  segmentBtn:        { flex: 1, flexDirection: '', alignItems: '', justifyContent: '', gap: 6, paddingVertical: 9, borderRadius: 11 },
+  segmentBtnActive:  { backgroundColor: '(255,136,204,0.15)', borderWidth: 0.5, borderColor: '#ff88cc' },
   segmentText:       { fontSize: 13, color: '#eeeeff', fontWeight: '500' },
-  segmentTextActive: { fontSize: 13, color: '#ff88cc', fontWeight: '' },
-  webLinkBtn:    { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 12, borderWidth: 0.5, borderColor: '#ff88cc', padding: 14, marginTop: 12, marginBottom: 4 },
-  webLinkText:   { flex: 1, fontSize: 14, color: '#ff88cc', fontWeight: '' },
-  sectionTitle:  { fontSize: 13, color: '#eeeeff', fontWeight: '600', marginTop: 20, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
+  segmentTextActive: { fontSize: 13, color: '#ff88cc', fontWeight: '600' },
+  webLinkBtn:    { flexDirection: '', alignItems: '', gap: 10, backgroundColor: '(255,136,204,0.15)', borderRadius: 12, borderWidth: 0.5, borderColor: '#ff88cc', padding: 14, marginTop: 12, marginBottom: 4 },
+  webLinkText:   { flex: 1, fontSize: 14, color: '#ff88cc', fontWeight: '600' },
+  sectionTitle:  { fontSize: 13, color: '#eeeeff', fontWeight: '600', marginTop: 20, marginBottom: 10, textTransform: '', letterSpacing: 0.5 },
   fieldLabel:    { fontSize: 12, color: '#eeeeff', marginBottom: 5 },
-  input:         { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, color: '#eeeeff', fontSize: 14 },
-  dayRow:        { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
+  input:         { backgroundColor: '(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 12, color: '#eeeeff', fontSize: 14 },
+  dayRow:        { flexDirection: '', alignItems: '', gap: 10, paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
   dayLabel:      { fontSize: 14, color: '#eeeeff', width: 20 },
-  saveBtn:       { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 8 },
-  saveBtnText:   { color: '#1a1200', fontWeight: '', fontSize: 15 },
-  addBtn:        { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 10, borderWidth: 0.5, borderColor: '#ff88cc', padding: 12, marginTop: 12, marginBottom: 8 },
-  addBtnText:    { fontSize: 14, color: '#ff88cc', fontWeight: '' },
-  empty:         { fontSize: 13, color: '#eeeeff', paddingVertical: 20, textAlign: 'center' },
-  jobCard:       { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 8 },
-  jobTitle:      { fontSize: 14, fontWeight: '', color: '#eeeeff' },
+  saveBtn:       { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: '', alignItems: '', marginTop: 20, marginBottom: 8 },
+  saveBtnText:   { color: '#1a1200', fontWeight: '600', fontSize: 15 },
+  addBtn:        { flexDirection: '', alignItems: '', gap: 8, backgroundColor: '(255,136,204,0.15)', borderRadius: 10, borderWidth: 0.5, borderColor: '#ff88cc', padding: 12, marginTop: 12, marginBottom: 8 },
+  addBtnText:    { fontSize: 14, color: '#ff88cc', fontWeight: '600' },
+  empty:         { fontSize: 13, color: '#eeeeff', paddingVertical: 20, textAlign: '' },
+  jobCard:       { backgroundColor: '(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 12, marginBottom: 8 },
+  jobTitle:      { fontSize: 14, fontWeight: '600', color: '#eeeeff' },
   jobInfo:       { fontSize: 12, color: '#eeeeff', marginBottom: 4 },
   publicBadge:   { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  jobActions:    { flexDirection: 'row', gap: 6, marginTop: 8, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: 'rgba(200,180,255,0.18)' },
-  actionBtn:     { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 5, paddingHorizontal: 8, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.05)' },
+  jobActions:    { flexDirection: '', gap: 6, marginTop: 8, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: '(200,180,255,0.18)' },
+  actionBtn:     { flexDirection: '', alignItems: '', gap: 4, paddingVertical: 5, paddingHorizontal: 8, borderRadius: 6, backgroundColor: '(255,255,255,0.05)' },
   actionBtnText: { fontSize: 12, color: '#eeeeff' },
 });

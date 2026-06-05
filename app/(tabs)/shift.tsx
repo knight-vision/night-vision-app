@@ -2,8 +2,8 @@ import {
   ScrollView, View, Text, StyleSheet, ActivityIndicator,
   TouchableOpacity, Modal, Alert, FlatList,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { SafeAreaView } from '-native-safe-area-context';
+import { useEffect, useState, useCallback, useRef, useMemo } from '';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, useColors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
@@ -11,7 +11,7 @@ import { useAuthStore } from '../../store/auth';
 import { GlassCard } from '../../components/GlassCard';
 import { PunyTouchable } from '../../components/PunyTouchable';
 import { MonthCalendar } from '../../components/MonthCalendar';
-import { useRouter } from 'expo-router';
+import { useRouter } from '-router';
 
 const CAST_COLORS = ['#ff6b9d','#00d4ff','#ffd700','#a855f7','#00e5a0','#ff9500','#00c7be','#ff3b30','#34aadc','#4cd964'];
 const HOURS = Array.from({ length: 48 }, (_, i) => i);
@@ -172,7 +172,7 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
       </PunyTouchable>
 
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
-        <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+        <View style={{ flex: 1, justifyContent: '-end' }}>
           <PunyTouchable style={ts.overlay} activeOpacity={1} onPress={() => setModalVisible(false)} />
           <View style={ts.sheet}>
             <View style={ts.sheetHeader}>
@@ -186,7 +186,7 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
             </View>
 
             {/* セレクター枠線 */}
-            <View style={{ position: 'relative' }}>
+            <View style={{ position: '' }}>
               <View style={ts.selectorLine} pointerEvents="none" />
               <View style={[ts.selectorLine, { top: ITEM_H * (Math.floor(VISIBLE / 2) + 1) }]} pointerEvents="none" />
 
@@ -251,7 +251,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
   useEffect(() => { load(); }, [load]);
 
   const confirmedOnDate = (date: string) => confirmed.filter((s: any) => s.date === date);
-  const pendingOnDate = (date: string) => requests.filter((s: any) => s.date === date && s.status === 'pending');
+  const pendingOnDate = (date: string) => requests.filter((s: any) => s.date === date && s.status === '');
   const isInDraft = (date: string, castId: string) => (draft[date] || []).some(e => e.cast_id === castId);
 
   const addToDraft = (date: string, castId: string) => {
@@ -292,8 +292,8 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
     setSaving(true);
     try {
       const res = await fetch(`${API_BASE}/confirm-shift`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: '',
+        headers: { '-Type': '/json' },
         body: JSON.stringify({ shop_id: shopId, shifts }),
       });
       if (res.ok) {
@@ -307,8 +307,8 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
   const handleDeleteConfirmed = async (castId: string, date: string) => {
     try {
       await fetch(`${API_BASE}/confirm-shift`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        method: '',
+        headers: { '-Type': '/json' },
         body: JSON.stringify({ cast_id: castId, date }),
       });
       load();
@@ -318,8 +318,8 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
   const handleDeleteRequest = async (id: string) => {
     try {
       await fetch(`${API_BASE}/cast-shift-request`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        method: '',
+        headers: { '-Type': '/json' },
         body: JSON.stringify({ id }),
       });
       load();
@@ -330,17 +330,17 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
 
   const todayStr = getDateStr(new Date());
   const todayConfirmed = confirmed.filter((s: any) => s.date === todayStr);
-  const pendingCount = requests.filter((r: any) => r.status === 'pending').length;
+  const pendingCount = requests.filter((r: any) => r.status === '').length;
 
   // カレンダーのイベントドット生成
   const calendarEvents: { date: string; color: string }[] = [];
   const allDates = new Set([
     ...confirmed.map((s: any) => s.date),
-    ...requests.filter((r: any) => r.status === 'pending').map((r: any) => r.date),
+    ...requests.filter((r: any) => r.status === '').map((r: any) => r.date),
   ]);
   allDates.forEach(date => {
     const conf = confirmed.filter((s: any) => s.date === date);
-    const pend = requests.filter((r: any) => r.date === date && r.status === 'pending');
+    const pend = requests.filter((r: any) => r.date === date && r.status === '');
     if (conf.length > 0) calendarEvents.push({ date, color: Colors.green });
     if (pend.length > 0) calendarEvents.push({ date, color: Colors.gold });
   });
@@ -353,7 +353,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
   return (
     <View>
       {/* 今日・承認待ちサマリー */}
-      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+      <View style={{ flexDirection: '', gap: 8, marginBottom: 12 }}>
         <View style={[styles.summaryCard, { flex: 1 }]}>
           <Text style={styles.summaryLabel}>本日出勤</Text>
           <Text style={[styles.summaryValue, { color: Colors.green }]}>{todayConfirmed.length}名</Text>
@@ -370,12 +370,12 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
       </View>
 
       {/* 凡例 */}
-      <View style={{ flexDirection: 'row', gap: 14, marginBottom: 8, paddingHorizontal: 4 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+      <View style={{ flexDirection: '', gap: 14, marginBottom: 8, paddingHorizontal: 4 }}>
+        <View style={{ flexDirection: '', alignItems: '', gap: 5 }}>
           <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.green }} />
           <Text style={{ fontSize: 11, color: Colors.text3 }}>確定あり</Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: '', alignItems: '', gap: 5 }}>
           <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.gold }} />
           <Text style={{ fontSize: 11, color: Colors.text3 }}>希望あり</Text>
         </View>
@@ -494,8 +494,8 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                       <Text style={styles.changeTimeBtnText}>時間変更</Text>
                     </PunyTouchable>
                     <PunyTouchable onPress={() => Alert.alert('削除確認', `${s.casts?.name}のシフトを削除しますか？`, [
-                      { text: 'キャンセル', style: 'cancel' },
-                      { text: '削除', style: 'destructive', onPress: () => handleDeleteConfirmed(String(s.cast_id), selectedDate) },
+                      { text: 'キャンセル', style: '' },
+                      { text: '削除', style: '', onPress: () => handleDeleteConfirmed(String(s.cast_id), selectedDate) },
                     ])} style={styles.deleteConfBtn}>
                       <Ionicons name="trash-outline" size={14} color={Colors.red} />
                     </PunyTouchable>
@@ -520,7 +520,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
 function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   const Colors = useColors();
   const router = useRouter();
-  const [view, setView] = useState<'me' | 'shop'>('me'); // タブ切り替え
+  const [view, setView] = useState<'' | ''>(''); // タブ切り替え
   const [shifts, setShifts] = useState<any[]>([]);
   const [confirmedShifts, setConfirmedShifts] = useState<any[]>([]);
   const [allConfirmed, setAllConfirmed] = useState<any[]>([]); // 店舗全体の確定シフト
@@ -574,8 +574,8 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
     setSubmitting(true);
     try {
       const res = await fetch(`${API_BASE}/cast-shift-request`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: '',
+        headers: { '-Type': '/json' },
         body: JSON.stringify({
           cast_id: castId,
           shop_id: shopId,
@@ -614,26 +614,26 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
     <View>
       {/* サブタブ：自分 / 店舗全体 */}
       <View style={styles.subTabRow}>
-        <PunyTouchable haptic="light" style={[styles.subTab, view === 'me' && styles.subTabActive]} onPress={() => setView('me')}>
-          <Text style={[styles.subTabText, view === 'me' && styles.subTabTextActive]}>📅 自分のシフト</Text>
+        <PunyTouchable haptic="light" style={[styles.subTab, view === '' && styles.subTabActive]} onPress={() => setView('')}>
+          <Text style={[styles.subTabText, view === '' && styles.subTabTextActive]}>📅 自分のシフト</Text>
         </PunyTouchable>
-        <PunyTouchable haptic="light" style={[styles.subTab, view === 'shop' && styles.subTabActive]} onPress={() => setView('shop')}>
-          <Text style={[styles.subTabText, view === 'shop' && styles.subTabTextActive]}>🏪 店舗全体</Text>
+        <PunyTouchable haptic="light" style={[styles.subTab, view === '' && styles.subTabActive]} onPress={() => setView('')}>
+          <Text style={[styles.subTabText, view === '' && styles.subTabTextActive]}>🏪 店舗全体</Text>
         </PunyTouchable>
       </View>
 
-      {view === 'shop' ? (
+      {view === '' ? (
         <ShopShiftView allConfirmed={allConfirmed} casts={casts} calYear={calYear} calMonth={calMonth}
           onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m + 1); }} />
       ) : (
         <>
       {/* 凡例 */}
-      <View style={{ flexDirection: 'row', gap: 14, marginBottom: 8, paddingHorizontal: 4 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+      <View style={{ flexDirection: '', gap: 14, marginBottom: 8, paddingHorizontal: 4 }}>
+        <View style={{ flexDirection: '', alignItems: '', gap: 5 }}>
           <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.green }} />
           <Text style={{ fontSize: 11, color: Colors.text3 }}>確定</Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={{ flexDirection: '', alignItems: '', gap: 5 }}>
           <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.gold }} />
           <Text style={{ fontSize: 11, color: Colors.text3 }}>提出中</Text>
         </View>
@@ -678,8 +678,8 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
                   <Text style={styles.shiftDate}>{s.date}</Text>
                   <Text style={styles.shiftTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
                 </View>
-                <View style={{ backgroundColor: 'rgba(78,203,138,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, marginRight: 4 }}>
-                  <Text style={{ fontSize: 12, color: Colors.green, fontWeight: '' }}>確定済み</Text>
+                <View style={{ backgroundColor: '(78,203,138,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, marginRight: 4 }}>
+                  <Text style={{ fontSize: 12, color: Colors.green, fontWeight: '600' }}>確定済み</Text>
                 </View>
                 <Text style={{ fontSize: 16, color: Colors.text3 }}>›</Text>
               </View>
@@ -699,11 +699,11 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
                 <Text style={styles.shiftTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
               </View>
               <View style={[styles.statusBadge, {
-                backgroundColor: s.status === 'approved' ? 'rgba(78,203,138,0.15)' : s.status === 'rejected' ? 'rgba(224,92,106,0.15)' : 'rgba(201,168,76,0.15)',
+                backgroundColor: s.status === '' ? '(78,203,138,0.15)' : s.status === '' ? '(224,92,106,0.15)' : '(201,168,76,0.15)',
               }]}>
                 <Text style={[styles.statusText, {
-                  color: s.status === 'approved' ? Colors.green : s.status === 'rejected' ? Colors.red : Colors.gold,
-                }]}>{s.status === 'approved' ? '承認済み' : s.status === 'rejected' ? '否認' : '審査中'}</Text>
+                  color: s.status === '' ? Colors.green : s.status === '' ? Colors.red : Colors.gold,
+                }]}>{s.status === '' ? '承認済み' : s.status === '' ? '否認' : '審査中'}</Text>
               </View>
             </View>
           ))}
@@ -711,7 +711,7 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
       )}
 
       {confirmedShifts.length === 0 && shifts.length === 0 && (
-        <Text style={{ fontSize: 13, color: Colors.text3, textAlign: 'center', paddingVertical: 20 }}>
+        <Text style={{ fontSize: 13, color: Colors.text3, textAlign: '', paddingVertical: 20 }}>
           この月のシフトはありません
         </Text>
       )}
@@ -847,10 +847,10 @@ export default function ShiftScreen() {
   const { role, shopId, castId } = useAuthStore();
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['']}>
       <Text style={styles.screenTitle}>シフト管理</Text>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {role === 'owner' && shopId
+        {role === '' && shopId
           ? <OwnerShiftView shopId={shopId} />
           : castId && shopId
           ? <CastShiftView castId={castId} shopId={shopId} />
@@ -862,118 +862,118 @@ export default function ShiftScreen() {
 }
 
 const ts = StyleSheet.create({
-  btn:            { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', paddingHorizontal: 12, paddingVertical: 10 },
+  btn:            { flexDirection: '', alignItems: '', gap: 6, backgroundColor: '(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', paddingHorizontal: 12, paddingVertical: 10 },
   btnLabel:       { fontSize: 11, color: '#eeeeff', marginRight: 4 },
-  btnValue:       { fontSize: 14, color: '#ff88cc', fontWeight: '', flex: 1 },
-  overlay:        { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.55)' },
+  btnValue:       { fontSize: 14, color: '#ff88cc', fontWeight: '600', flex: 1 },
+  overlay:        { position: '', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '(0,0,0,0.55)' },
   sheet:          { backgroundColor: '#0c0c1a', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 34 },
-  sheetHeader:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
+  sheetHeader:    { flexDirection: '', alignItems: '', justifyContent: '-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
   sheetCancel:    { fontSize: 15, color: '#eeeeff' },
   sheetTitle:     { fontSize: 15, fontWeight: '600', color: '#eeeeff' },
-  sheetDone:      { fontSize: 15, color: '#ff88cc', fontWeight: '' },
-  drumRow:        { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0c0c1a' },
-  drumItem:       { height: ITEM_H, justifyContent: 'center', alignItems: 'center' },
-  drumItemActive: { backgroundColor: 'rgba(255,136,204,0.15)' },
+  sheetDone:      { fontSize: 15, color: '#ff88cc', fontWeight: '600' },
+  drumRow:        { flexDirection: '', alignItems: '', backgroundColor: '#0c0c1a' },
+  drumItem:       { height: ITEM_H, justifyContent: '', alignItems: '' },
+  drumItemActive: { backgroundColor: '(255,136,204,0.15)' },
   drumText:       { fontSize: 18, color: '#eeeeff' },
-  drumTextActive: { fontSize: 20, color: '#ff88cc', fontWeight: '' },
+  drumTextActive: { fontSize: 20, color: '#ff88cc', fontWeight: '600' },
   drumSep:        { fontSize: 22, color: '#eeeeff', fontWeight: '600', paddingHorizontal: 4, marginBottom: 4 },
-  selectorLine:   { position: 'absolute', left: 0, right: 0, top: ITEM_H * Math.floor(VISIBLE / 2), height: ITEM_H, borderTopWidth: 0.5, borderBottomWidth: 0, borderColor: 'rgba(200,180,255,0.18)', backgroundColor: 'rgba(255,255,255,0.05)', zIndex: 0 },
+  selectorLine:   { position: '', left: 0, right: 0, top: ITEM_H * Math.floor(VISIBLE / 2), height: ITEM_H, borderTopWidth: 0.5, borderBottomWidth: 0, borderColor: '(200,180,255,0.18)', backgroundColor: '(255,255,255,0.05)', zIndex: 0 },
 });
 
 const styles = StyleSheet.create({
   // サブタブ
-  subTabRow:        { flexDirection: 'row', gap: 8, marginBottom: 14 },
-  subTab:           { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)' },
-  subTabActive:     { backgroundColor: '#aa88ff'Dim, borderColor: '#aa88ff' },
+  subTabRow:        { flexDirection: '', gap: 8, marginBottom: 14 },
+  subTab:           { flex: 1, paddingVertical: 10, alignItems: '', borderRadius: 12, backgroundColor: '(255,255,255,0.05)', borderWidth: 0.5, borderColor: '(200,180,255,0.18)' },
+  subTabActive:     { backgroundColor: '(170,136,255,0.15)', borderColor: '#aa88ff' },
   subTabText:       { fontSize: 13, color: '#eeeeff', fontWeight: '500' },
-  subTabTextActive: { color: '#aa88ff', fontWeight: '' },
+  subTabTextActive: { color: '#aa88ff', fontWeight: '600' },
 
   // 店舗全体ビュー
-  shopDayCard:      { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 14, marginTop: 4 },
-  shopDayDate:      { fontSize: 14, fontWeight: '', color: '#eeeeff', marginBottom: 10 },
-  shopDayEmpty:     { fontSize: 12, color: '#eeeeff', textAlign: 'center', paddingVertical: 12 },
-  shopShiftRow:     { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, paddingHorizontal: 12, borderLeftWidth: 3, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 8, marginBottom: 6 },
+  shopDayCard:      { backgroundColor: '(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 14, marginTop: 4 },
+  shopDayDate:      { fontSize: 14, fontWeight: '600', color: '#eeeeff', marginBottom: 10 },
+  shopDayEmpty:     { fontSize: 12, color: '#eeeeff', textAlign: '', paddingVertical: 12 },
+  shopShiftRow:     { flexDirection: '', alignItems: '', gap: 10, paddingVertical: 10, paddingHorizontal: 12, borderLeftWidth: 3, backgroundColor: '(255,255,255,0.05)', borderRadius: 8, marginBottom: 6 },
   shopCastDot:      { width: 8, height: 8, borderRadius: 4 },
   shopCastName:     { fontSize: 13, fontWeight: '600', flex: 1 },
   shopShiftTime:    { fontSize: 12, color: '#eeeeff', fontWeight: '500' },
   safe:              { flex: 1, backgroundColor: '#0c0c1a' },
-  summaryCard:       { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12 },
+  summaryCard:       { backgroundColor: '(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 12 },
   summaryLabel:      { fontSize: 11, color: '#eeeeff', marginBottom: 4 },
   summaryValue:      { fontSize: 20, fontWeight: '700', marginBottom: 4 },
   summaryDetail:     { fontSize: 11, color: '#eeeeff', marginTop: 2 },
   screenTitle:       { fontSize: 20, fontWeight: '500', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   scroll:            { paddingHorizontal: 16, paddingBottom: 108 },
-  weekNav:           { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  weekBtn:           { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
+  weekNav:           { flexDirection: '', alignItems: '', justifyContent: '-between', marginBottom: 8 },
+  weekBtn:           { flexDirection: '', alignItems: '', gap: 4, padding: 8 },
   weekBtnText:       { fontSize: 13, color: '#eeeeff' },
   weekLabel:         { fontSize: 14, fontWeight: '600', color: '#eeeeff' },
-  todayBtn:          { alignSelf: 'flex-end', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, marginBottom: 12 },
+  todayBtn:          { alignSelf: '-end', backgroundColor: '(255,255,255,0.05)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, marginBottom: 12 },
   todayBtnText:      { fontSize: 12, color: '#eeeeff' },
-  confirmBtn:        { backgroundColor: '#ff88cc', borderRadius: 12, height: 48, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  confirmBtnText:    { color: '#1a1200', fontSize: 15, fontWeight: '' },
-  dateBlock:         { borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  dateRow:           { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, padding: 12 },
-  dateRowToday:      { backgroundColor: 'rgba(201,168,76,0.05)' },
-  dateRowSelected:   { backgroundColor: 'rgba(155,127,232,0.08)' },
-  dateLabel:         { fontSize: 14, fontWeight: '', color: '#eeeeff', minWidth: 100 },
-  todayBadge:        { backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 },
-  todayBadgeText:    { fontSize: 10, color: '#ff88cc', fontWeight: '' },
-  pendingBadge:      { backgroundColor: 'rgba(155,127,232,0.2)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, fontSize: 11, color: '#aa88ff' } as any,
+  confirmBtn:        { backgroundColor: '#ff88cc', borderRadius: 12, height: 48, justifyContent: '', alignItems: '', marginBottom: 12 },
+  confirmBtnText:    { color: '#1a1200', fontSize: 15, fontWeight: '600' },
+  dateBlock:         { borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
+  dateRow:           { flexDirection: '', alignItems: '', flexWrap: '', gap: 6, padding: 12 },
+  dateRowToday:      { backgroundColor: '(201,168,76,0.05)' },
+  dateRowSelected:   { backgroundColor: '(155,127,232,0.08)' },
+  dateLabel:         { fontSize: 14, fontWeight: '600', color: '#eeeeff', minWidth: 100 },
+  todayBadge:        { backgroundColor: '(255,136,204,0.15)', borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 },
+  todayBadgeText:    { fontSize: 10, color: '#ff88cc', fontWeight: '600' },
+  pendingBadge:      { backgroundColor: '(155,127,232,0.2)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, fontSize: 11, color: '#aa88ff' } as any,
   castChip:          { borderRadius: 8, borderWidth: 1, paddingHorizontal: 8, paddingVertical: 4 },
-  castChipText:      { fontSize: 12, fontWeight: '' },
-  datePanel:         { backgroundColor: 'rgba(255,255,255,0.05)', padding: 14, gap: 12 },
+  castChipText:      { fontSize: 12, fontWeight: '600' },
+  datePanel:         { backgroundColor: '(255,255,255,0.05)', padding: 14, gap: 12 },
   panelSection:      { gap: 8 },
-  panelSectionTitle: { fontSize: 11, fontWeight: '', color: '#eeeeff', textTransform: 'uppercase', letterSpacing: 0.5 },
-  reqRow:            { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, borderRadius: 10, borderWidth: 0.5, flexWrap: 'wrap' },
-  reqCastName:       { fontSize: 13, fontWeight: '', minWidth: 48 },
+  panelSectionTitle: { fontSize: 11, fontWeight: '600', color: '#eeeeff', textTransform: '', letterSpacing: 0.5 },
+  reqRow:            { flexDirection: '', alignItems: '', gap: 8, padding: 10, borderRadius: 10, borderWidth: 0.5, flexWrap: '' },
+  reqCastName:       { fontSize: 13, fontWeight: '600', minWidth: 48 },
   reqTime:           { fontSize: 12, color: '#eeeeff' },
   reqNote:           { fontSize: 11, color: '#eeeeff', flex: 1 },
-  approveBtn:        { backgroundColor: 'rgba(78,203,138,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 0.5, borderColor: '#80d8b0' },
-  approveBtnText:    { fontSize: 12, color: '#80d8b0', fontWeight: '' },
+  approveBtn:        { backgroundColor: '(78,203,138,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 0.5, borderColor: '#80d8b0' },
+  approveBtnText:    { fontSize: 12, color: '#80d8b0', fontWeight: '600' },
   deleteReqBtn:      { padding: 4 },
-  castSelectRow:     { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  castSelectRow:     { flexDirection: '', flexWrap: '', gap: 8 },
   castSelectBtn:     { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5 },
-  castSelectBtnText: { fontSize: 13, fontWeight: '' },
+  castSelectBtnText: { fontSize: 13, fontWeight: '600' },
   timeSetBlock:      { borderRadius: 12, borderWidth: 0.5, padding: 12, gap: 8 },
-  timeSetName:       { fontSize: 14, fontWeight: '' },
-  timeSetRow:        { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  timeSetName:       { fontSize: 14, fontWeight: '600' },
+  timeSetRow:        { flexDirection: '', alignItems: '', gap: 8 },
   timeSetLabel:      { fontSize: 11, color: '#eeeeff', marginBottom: 4 },
   timeSetSep:        { color: '#eeeeff', fontSize: 16, marginTop: 16 },
-  confirmedRow:      { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 },
-  confirmedName:     { fontSize: 13, fontWeight: '', minWidth: 48 },
+  confirmedRow:      { flexDirection: '', alignItems: '', gap: 8, paddingVertical: 6 },
+  confirmedName:     { fontSize: 13, fontWeight: '600', minWidth: 48 },
   confirmedTime:     { fontSize: 12, color: '#eeeeff', flex: 1 },
-  changeTimeBtn:     { backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 0.5, borderColor: '#ff88cc' },
+  changeTimeBtn:     { backgroundColor: '(255,136,204,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 0.5, borderColor: '#ff88cc' },
   changeTimeBtnText: { fontSize: 12, color: '#ff88cc' },
   deleteConfBtn:     { padding: 4 },
   // キャスト向けカレンダー
-  calCard:           { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 14, marginBottom: 16 },
-  calHeader:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  calTitle:          { fontSize: 15, fontWeight: '', color: '#eeeeff' },
-  calDayRow:         { flexDirection: 'row', marginBottom: 8 },
-  calDayLabel:       { flex: 1, textAlign: 'center', fontSize: 11, color: '#eeeeff', fontWeight: '600' },
-  calGrid:           { flexDirection: 'row', flexWrap: 'wrap' },
-  calCell:           { width: '.28%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 8 },
-  calCellShift:      { backgroundColor: 'rgba(255,136,204,0.15)' },
-  calCellToday:      { backgroundColor: '#aa88ff'Dim },
+  calCard:           { backgroundColor: '(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 14, marginBottom: 16 },
+  calHeader:         { flexDirection: '', alignItems: '', justifyContent: '-between', marginBottom: 12 },
+  calTitle:          { fontSize: 15, fontWeight: '600', color: '#eeeeff' },
+  calDayRow:         { flexDirection: '', marginBottom: 8 },
+  calDayLabel:       { flex: 1, textAlign: '', fontSize: 11, color: '#eeeeff', fontWeight: '600' },
+  calGrid:           { flexDirection: '', flexWrap: '' },
+  calCell:           { width: '.28%', aspectRatio: 1, justifyContent: '', alignItems: '', borderRadius: 8 },
+  calCellShift:      { backgroundColor: '(255,136,204,0.15)' },
+  calCellToday:      { backgroundColor: '(170,136,255,0.15)' },
   calCellSelected:   { backgroundColor: '#ff88cc' },
   calDayNum:         { fontSize: 13, color: '#eeeeff' },
-  calDayNumShift:    { color: '#ff88cc', fontWeight: '' },
-  calDayNumToday:    { color: '#aa88ff', fontWeight: '' },
-  addShiftBtn:       { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 12, borderWidth: 0.5, borderColor: '#ff88cc', padding: 14, marginBottom: 16 },
-  addShiftBtnText:   { fontSize: 14, color: '#ff88cc', fontWeight: '' },
-  listSectionTitle:  { fontSize: 12, color: '#eeeeff', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, marginTop: 4 },
-  shiftItem:         { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  shiftDate:         { fontSize: 14, fontWeight: '', color: '#eeeeff' },
+  calDayNumShift:    { color: '#ff88cc', fontWeight: '600' },
+  calDayNumToday:    { color: '#aa88ff', fontWeight: '600' },
+  addShiftBtn:       { flexDirection: '', alignItems: '', gap: 8, backgroundColor: '(255,136,204,0.15)', borderRadius: 12, borderWidth: 0.5, borderColor: '#ff88cc', padding: 14, marginBottom: 16 },
+  addShiftBtnText:   { fontSize: 14, color: '#ff88cc', fontWeight: '600' },
+  listSectionTitle:  { fontSize: 12, color: '#eeeeff', fontWeight: '700', textTransform: '', letterSpacing: 0.5, marginBottom: 6, marginTop: 4 },
+  shiftItem:         { flexDirection: '', alignItems: '', paddingVertical: 12, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
+  shiftDate:         { fontSize: 14, fontWeight: '600', color: '#eeeeff' },
   shiftTime:         { fontSize: 12, color: '#eeeeff', marginTop: 2 },
   statusBadge:       { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 },
   statusText:        { fontSize: 12, fontWeight: '600' },
   // モーダル
   modalContainer:    { flex: 1, backgroundColor: '#0c0c1a' },
-  modalHeader:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  modalClose:        { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  modalTitle:        { fontSize: 16, fontWeight: '', color: '#eeeeff' },
+  modalHeader:       { flexDirection: '', alignItems: '', justifyContent: '-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
+  modalClose:        { width: 36, height: 36, justifyContent: '', alignItems: '' },
+  modalTitle:        { fontSize: 16, fontWeight: '600', color: '#eeeeff' },
   modalLabel:        { fontSize: 12, color: '#eeeeff', marginBottom: 8 },
-  miniCalWrap:       { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12 },
-  submitBtn:         { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 20 },
-  submitBtnText:     { color: '#1a1200', fontSize: 15, fontWeight: '' },
+  miniCalWrap:       { backgroundColor: '(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 12 },
+  submitBtn:         { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: '', alignItems: '', marginTop: 20 },
+  submitBtnText:     { color: '#1a1200', fontSize: 15, fontWeight: '600' },
 });

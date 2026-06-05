@@ -3,15 +3,15 @@ import { PunyTouchable } from '../../components/PunyTouchable';
 import {
   ScrollView, View, Text, StyleSheet,
   TextInput, Alert, ActivityIndicator, Modal,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect, useCallback } from 'react';
+} from '-native';
+import { SafeAreaView } from '-native-safe-area-context';
+import { useState, useEffect, useCallback } from '';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, fmtYen , useColors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 
-type ManageTab = 'casts' | 'salary' | 'results' | 'customers';
+type ManageTab = '' | '' | '' | '';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // キャスト一覧
@@ -75,10 +75,10 @@ function CastManagement({ shopId }: { shopId: string }) {
     setSaving(true);
     try {
       const body = { shop_id: shopId, name, age: Number(age) || null, birthplace, hourly_wage: Number(hourlyWage) || 0, comment, instagram };
-      const method = editTarget ? 'PATCH' : 'POST';
+      const method = editTarget ? '' : '';
       await fetch(`${API_BASE}/casts`, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { '-Type': '/json' },
         body: JSON.stringify(editTarget ? { ...body, id: editTarget.id } : body),
       });
       Alert.alert(editTarget ? '更新しました' : '追加しました');
@@ -89,10 +89,10 @@ function CastManagement({ shopId }: { shopId: string }) {
 
   const handleDelete = (id: string, castName: string) => {
     Alert.alert('削除確認', `「${castName}」を削除しますか？`, [
-      { text: 'キャンセル', style: 'cancel' },
-      { text: '削除', style: 'destructive', onPress: async () => {
+      { text: 'キャンセル', style: '' },
+      { text: '削除', style: '', onPress: async () => {
         try {
-          await fetch(`${API_BASE}/casts`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+          await fetch(`${API_BASE}/casts`, { method: '', headers: { '-Type': '/json' }, body: JSON.stringify({ id }) });
           load();
         } catch { Alert.alert('エラー', '削除に失敗しました'); }
       }},
@@ -104,9 +104,9 @@ function CastManagement({ shopId }: { shopId: string }) {
     setIssuingAccount(true);
     try {
       const res = await fetch(`${API_BASE}/issue-cast-account`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cast_id: accountModalCast.id, email: accountEmail, shop_name: 'NIGHT VISION' }),
+        method: '',
+        headers: { '-Type': '/json' },
+        body: JSON.stringify({ cast_id: accountModalCast.id, email: accountEmail, shop_name: ' VISION' }),
       });
       if (res.ok) {
         Alert.alert('完了', `${accountModalCast.name}にアカウントを発行しました。\nメール: ${accountEmail}`);
@@ -156,11 +156,11 @@ function CastManagement({ shopId }: { shopId: string }) {
         const todayShift = todayShifts.find((s: any) => String(s.cast_id) === String(c.id));
         return (
           <View key={c.id} style={[styles.castCard, isToday && { borderColor: Colors.green, borderWidth: 1 }]}>
-            <View style={[styles.castAvatar, isToday && { backgroundColor: 'rgba(78,203,138,0.2)' }]}>
+            <View style={[styles.castAvatar, isToday && { backgroundColor: '(78,203,138,0.2)' }]}>
               <Text style={[styles.castAvatarText, isToday && { color: Colors.green }]}>{c.name?.[0] || '?'}</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ flexDirection: '', alignItems: '', gap: 6 }}>
                 <Text style={styles.castName}>{c.name}</Text>
                 {isToday && <View style={styles.ondutyBadge}><Text style={styles.ondutyBadgeText}>出勤中</Text></View>}
               </View>
@@ -212,7 +212,7 @@ function CastManagement({ shopId }: { shopId: string }) {
             <Text style={modal.label}>Instagram（@なし）</Text>
             <TextInput style={modal.input} value={instagram} onChangeText={setInstagram} placeholder="例: sakura_night" placeholderTextColor={Colors.text3} />
             <Text style={modal.label}>コメント</Text>
-            <TextInput style={[modal.input, { height: 80, textAlignVertical: 'top' }]} value={comment} onChangeText={setComment} placeholder="自己紹介など" placeholderTextColor={Colors.text3} multiline />
+            <TextInput style={[modal.input, { height: 80, textAlignVertical: '' }]} value={comment} onChangeText={setComment} placeholder="自己紹介など" placeholderTextColor={Colors.text3} multiline />
             <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
             </PunyTouchable>
@@ -252,12 +252,12 @@ function CastManagement({ shopId }: { shopId: string }) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 給与管理（salary.tsxの内容を統合）
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-type SalarySubTab = 'summary' | 'allowance' | 'presets';
+type SalarySubTab = '' | '' | '';
 
 function SalarySection({ shopId }: { shopId: string }) {
   const now = new Date();
   const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '')}`);
-  const [subTab, setSubTab] = useState<SalarySubTab>('summary');
+  const [subTab, setSubTab] = useState<SalarySubTab>('');
 
   const changeMonth = (delta: number) => {
     const d = new Date(month + '-01');
@@ -266,9 +266,9 @@ function SalarySection({ shopId }: { shopId: string }) {
   };
 
   const SUB_TABS: { key: SalarySubTab; label: string }[] = [
-    { key: 'summary',   label: '月次サマリー' },
-    { key: 'allowance', label: '手当・控除' },
-    { key: 'presets',   label: 'プリセット' },
+    { key: '',   label: '月次サマリー' },
+    { key: '', label: '手当・控除' },
+    { key: '',   label: 'プリセット' },
   ];
 
   return (
@@ -294,9 +294,9 @@ function SalarySection({ shopId }: { shopId: string }) {
         ))}
       </View>
 
-      {subTab === 'summary'   && <SalarySummary shopId={shopId} month={month} />}
-      {subTab === 'allowance' && <AllowanceManagement shopId={shopId} month={month} />}
-      {subTab === 'presets'   && <PresetManagement shopId={shopId} />}
+      {subTab === ''   && <SalarySummary shopId={shopId} month={month} />}
+      {subTab === '' && <AllowanceManagement shopId={shopId} month={month} />}
+      {subTab === ''   && <PresetManagement shopId={shopId} />}
     </View>
   );
 }
@@ -367,9 +367,9 @@ function SalarySummary({ shopId, month }: { shopId: string; month: string }) {
 
 function SalRow({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+    <View style={{ flexDirection: '', justifyContent: '-between', marginTop: 4 }}>
       <Text style={{ fontSize: 12, color: Colors.text3 }}>{label}</Text>
-      <Text style={{ fontSize: 12, color: color || Colors.text, fontWeight: '' }}>{value}</Text>
+      <Text style={{ fontSize: 12, color: color || Colors.text, fontWeight: '600' }}>{value}</Text>
     </View>
   );
 }
@@ -408,8 +408,8 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
     setSaving(true);
     try {
       await fetch(`${API_BASE}/cast-allowances`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: '',
+        headers: { '-Type': '/json' },
         body: JSON.stringify({ shop_id: shopId, cast_id: castId, date, label, amount: sign === '-' ? -Number(amount) : Number(amount) }),
       });
       setModalVisible(false);
@@ -419,9 +419,9 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
 
   const handleDelete = (id: string) => {
     Alert.alert('削除確認', 'この手当・控除を削除しますか？', [
-      { text: 'キャンセル', style: 'cancel' },
-      { text: '削除', style: 'destructive', onPress: async () => {
-        await fetch(`${API_BASE}/cast-allowances`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+      { text: 'キャンセル', style: '' },
+      { text: '削除', style: '', onPress: async () => {
+        await fetch(`${API_BASE}/cast-allowances`, { method: '', headers: { '-Type': '/json' }, body: JSON.stringify({ id }) });
         load();
       }},
     ]);
@@ -443,7 +443,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
               <Text style={styles.castName}>{a.label}</Text>
               <Text style={styles.castSub}>{cast?.name || ''} · {a.date}</Text>
             </View>
-            <Text style={{ fontSize: 14, fontWeight: '', color: a.amount >= 0 ? Colors.green : Colors.red }}>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: a.amount >= 0 ? Colors.green : Colors.red }}>
               {a.amount >= 0 ? '+' : ''}{fmtYen(a.amount)}
             </Text>
             <PunyTouchable onPress={() => handleDelete(a.id)} style={styles.iconBtn} scaleTo={0.88} haptic="medium">
@@ -491,10 +491,10 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
             <Text style={modal.label}>項目名 *</Text>
             <TextInput style={modal.input} value={label} onChangeText={setLabel} placeholder="例: 交通費" placeholderTextColor={Colors.text3} />
             <Text style={modal.label}>種別 *</Text>
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+            <View style={{ flexDirection: '', gap: 8, marginBottom: 12 }}>
               {(['+', '-'] as const).map(s => (
                 <PunyTouchable key={s} onPress={() => setSign(s)} scaleTo={0.92} haptic="light"
-                  style={[modal.chip, sign === s && { backgroundColor: s === '+' ? 'rgba(78,203,138,0.15)' : 'rgba(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
+                  style={[modal.chip, sign === s && { backgroundColor: s === '+' ? '(78,203,138,0.15)' : '(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
                   <Text style={[modal.chipText, sign === s && { color: s === '+' ? Colors.green : Colors.red }]}>{s === '+' ? '手当' : '控除'}</Text>
                 </PunyTouchable>
               ))}
@@ -536,10 +536,10 @@ function PresetManagement({ shopId }: { shopId: string }) {
     if (!name || !amount) { Alert.alert('エラー', '名前と金額を入力してください'); return; }
     setSaving(true);
     try {
-      const method = editTarget ? 'PATCH' : 'POST';
+      const method = editTarget ? '' : '';
       await fetch(`${API_BASE}/allowance-presets`, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { '-Type': '/json' },
         body: JSON.stringify(editTarget ? { id: editTarget.id, name, sign, amount: Number(amount) } : { shop_id: shopId, name, sign, amount: Number(amount) }),
       });
       setModalVisible(false);
@@ -561,7 +561,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
             <Text style={styles.castName}>{p.name}</Text>
             <Text style={[styles.castSub, { color: p.sign === '+' ? Colors.green : Colors.red }]}>{p.sign === '+' ? '手当' : '控除'}</Text>
           </View>
-          <Text style={{ fontSize: 14, fontWeight: '', color: p.sign === '+' ? Colors.green : Colors.red }}>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: p.sign === '+' ? Colors.green : Colors.red }}>
             {p.sign === '+' ? '+' : '-'}{fmtYen(p.amount)}
           </Text>
           <PunyTouchable onPress={() => { setEditTarget(p); setName(p.name); setSign(p.sign); setAmount(String(p.amount)); setModalVisible(true); }} style={styles.iconBtn} scaleTo={0.88} haptic="light">
@@ -569,9 +569,9 @@ function PresetManagement({ shopId }: { shopId: string }) {
           </PunyTouchable>
           <PunyTouchable onPress={() => {
             Alert.alert('削除', `「${p.name}」を削除しますか？`, [
-              { text: 'キャンセル', style: 'cancel' },
-              { text: '削除', style: 'destructive', onPress: async () => {
-                await fetch(`${API_BASE}/allowance-presets`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: p.id }) });
+              { text: 'キャンセル', style: '' },
+              { text: '削除', style: '', onPress: async () => {
+                await fetch(`${API_BASE}/allowance-presets`, { method: '', headers: { '-Type': '/json' }, body: JSON.stringify({ id: p.id }) });
                 load();
               }},
             ]);
@@ -595,10 +595,10 @@ function PresetManagement({ shopId }: { shopId: string }) {
             <Text style={modal.label}>項目名 *</Text>
             <TextInput style={modal.input} value={name} onChangeText={setName} placeholder="例: 交通費" placeholderTextColor={Colors.text3} />
             <Text style={modal.label}>種別 *</Text>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ flexDirection: '', gap: 8 }}>
               {(['+', '-'] as const).map(s => (
                 <PunyTouchable key={s} onPress={() => setSign(s)} scaleTo={0.92} haptic="light"
-                  style={[modal.chip, sign === s && { backgroundColor: s === '+' ? 'rgba(78,203,138,0.15)' : 'rgba(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
+                  style={[modal.chip, sign === s && { backgroundColor: s === '+' ? '(78,203,138,0.15)' : '(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
                   <Text style={[modal.chipText, sign === s && { color: s === '+' ? Colors.green : Colors.red }]}>{s === '+' ? '手当' : '控除'}</Text>
                 </PunyTouchable>
               ))}
@@ -619,11 +619,11 @@ function PresetManagement({ shopId }: { shopId: string }) {
 // 成績（オーナー向けキャスト売上ランキング）
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const SALES_TYPES = [
-  { key: 'honshimei', label: '本指名' },
-  { key: 'baai',      label: '場内' },
-  { key: 'douhan',    label: '同伴' },
-  { key: 'bottle',    label: 'ボトル' },
-  { key: 'other',     label: 'その他' },
+  { key: '', label: '本指名' },
+  { key: '',      label: '場内' },
+  { key: '',    label: '同伴' },
+  { key: '',    label: 'ボトル' },
+  { key: '',     label: 'その他' },
 ];
 
 function ResultsSection({ shopId }: { shopId: string }) {
@@ -685,16 +685,16 @@ function ResultsSection({ shopId }: { shopId: string }) {
       {!loading && displayed.map((cast: any, i: number) => (
         <View key={cast.id} style={styles.salaryCard}>
           <View style={styles.salaryHeader}>
-            <Text style={{ fontSize: 14, fontWeight: '', color: i === 0 ? Colors.gold : Colors.text2, width: 24 }}>#{i+1}</Text>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: i === 0 ? Colors.gold : Colors.text2, width: 24 }}>#{i+1}</Text>
             <View style={styles.castAvatar}><Text style={styles.castAvatarText}>{cast.name?.[0] || '?'}</Text></View>
             <Text style={[styles.castName, { flex: 1 }]}>{cast.name}</Text>
             <Text style={styles.totalPay}>{fmtYen(cast.total)}</Text>
           </View>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+          <View style={{ flexDirection: '', flexWrap: '', gap: 6, marginTop: 8 }}>
             {SALES_TYPES.map(type => cast.byType[type.key] > 0 && (
               <View key={type.key} style={{ backgroundColor: Colors.surface2, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }}>
                 <Text style={{ fontSize: 10, color: Colors.text3 }}>{type.label}</Text>
-                <Text style={{ fontSize: 12, color: Colors.text, fontWeight: '' }}>{fmtYen(cast.byType[type.key])}</Text>
+                <Text style={{ fontSize: 12, color: Colors.text, fontWeight: '600' }}>{fmtYen(cast.byType[type.key])}</Text>
               </View>
             ))}
           </View>
@@ -818,14 +818,14 @@ function CustomerSection({ shopId }: { shopId: string }) {
     try {
       if (editTarget) {
         await fetch(`${API_BASE}/customers`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          method: '',
+          headers: { '-Type': '/json' },
           body: JSON.stringify({ id: editTarget.id, name: custName || '名前なし', memo, visit_count: Number(visitCount) || 1 }),
         });
       } else {
         await fetch(`${API_BASE}/customers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: '',
+          headers: { '-Type': '/json' },
           body: JSON.stringify({ shop_id: shopId, cast_id: castId || null, visit_date: visitDate, name: custName || '名前なし', memo, visit_count: Number(visitCount) || 1 }),
         });
       }
@@ -836,9 +836,9 @@ function CustomerSection({ shopId }: { shopId: string }) {
 
   const handleDelete = (id: string, n: string) => {
     Alert.alert('削除確認', `「${n}」を削除しますか？`, [
-      { text: 'キャンセル', style: 'cancel' },
-      { text: '削除', style: 'destructive', onPress: async () => {
-        await fetch(`${API_BASE}/customers`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+      { text: 'キャンセル', style: '' },
+      { text: '削除', style: '', onPress: async () => {
+        await fetch(`${API_BASE}/customers`, { method: '', headers: { '-Type': '/json' }, body: JSON.stringify({ id }) });
         load();
       }},
     ]);
@@ -877,7 +877,7 @@ function CustomerSection({ shopId }: { shopId: string }) {
         return (
           <View key={c.id} style={styles.customerCard}>
             <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+              <View style={{ flexDirection: '', alignItems: '', gap: 8, marginBottom: 4, flexWrap: '' }}>
                 <Text style={styles.customerName}>{c.name}</Text>
                 {cast && <View style={styles.castTagBadge}><Text style={styles.castTagText}>{cast.name}</Text></View>}
                 {(c.visit_count || 0) > 1 && (
@@ -931,7 +931,7 @@ function CustomerSection({ shopId }: { shopId: string }) {
             )}
 
             <Text style={modal.label}>来店回数</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 12 }}>
+            <View style={{ flexDirection: '', alignItems: '', gap: 16, marginBottom: 12 }}>
               <PunyTouchable onPress={() => setVisitCount(v => String(Math.max(1, Number(v) - 1)))} style={cStyles.counterBtn}>
                 <Text style={cStyles.counterBtnText}>−</Text>
               </PunyTouchable>
@@ -942,7 +942,7 @@ function CustomerSection({ shopId }: { shopId: string }) {
             </View>
 
             <Text style={modal.label}>メモ</Text>
-            <TextInput style={[modal.input, { height: 100, textAlignVertical: 'top' }]}
+            <TextInput style={[modal.input, { height: 100, textAlignVertical: '' }]}
               value={memo} onChangeText={setMemo}
               placeholder="好きなお酒、話題、次回への引き継ぎなど"
               placeholderTextColor={Colors.text3} multiline />
@@ -965,19 +965,19 @@ function CustomerSection({ shopId }: { shopId: string }) {
 export default function ManageScreen() {
   const Colors = useColors();
   const { shopId } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<ManageTab>('casts');
+  const [activeTab, setActiveTab] = useState<ManageTab>('');
 
   const TABS: { key: ManageTab; label: string; icon: string }[] = [
-    { key: 'casts',     label: 'キャスト',  icon: 'people-outline' },
-    { key: 'salary',    label: '給与管理',  icon: 'wallet-outline' },
-    { key: 'results',   label: '成績',      icon: 'trophy-outline' },
-    { key: 'customers', label: '顧客管理',  icon: 'person-circle-outline' },
+    { key: '',     label: 'キャスト',  icon: '-outline' },
+    { key: '',    label: '給与管理',  icon: '-outline' },
+    { key: '',   label: '成績',      icon: '-outline' },
+    { key: '', label: '顧客管理',  icon: '-circle-outline' },
   ];
 
   if (!shopId) return null;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['']}>
       <Text style={styles.screenTitle}>キャスト管理</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabScroll} contentContainerStyle={styles.tabContent}>
         {TABS.map(tab => (
@@ -989,10 +989,10 @@ export default function ManageScreen() {
         ))}
       </ScrollView>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {activeTab === 'casts'     && <CastManagement shopId={shopId} />}
-        {activeTab === 'salary'    && <SalarySection shopId={shopId} />}
-        {activeTab === 'results'   && <ResultsSection shopId={shopId} />}
-        {activeTab === 'customers' && <CustomerSection shopId={shopId} />}
+        {activeTab === ''     && <CastManagement shopId={shopId} />}
+        {activeTab === ''    && <SalarySection shopId={shopId} />}
+        {activeTab === ''   && <ResultsSection shopId={shopId} />}
+        {activeTab === '' && <CustomerSection shopId={shopId} />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -1000,90 +1000,90 @@ export default function ManageScreen() {
 
 const modal = StyleSheet.create({
   container:     { flex: 1, backgroundColor: '#0c0c1a' },
-  header:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  closeBtn:      { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  title:         { fontSize: 16, fontWeight: '', color: '#eeeeff' },
+  header:        { flexDirection: '', alignItems: '', justifyContent: '-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
+  closeBtn:      { width: 36, height: 36, justifyContent: '', alignItems: '' },
+  title:         { fontSize: 16, fontWeight: '600', color: '#eeeeff' },
   label:         { fontSize: 12, color: '#eeeeff', marginBottom: 6 },
-  input:         { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, color: '#eeeeff', fontSize: 14, marginBottom: 12 },
-  chip:          { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', marginRight: 8 },
-  chipActive:    { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
+  input:         { backgroundColor: '(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 12, color: '#eeeeff', fontSize: 14, marginBottom: 12 },
+  chip:          { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', marginRight: 8 },
+  chipActive:    { backgroundColor: '(255,136,204,0.15)', borderColor: '#ff88cc' },
   chipText:      { fontSize: 13, color: '#eeeeff' },
   chipTextActive:{ color: '#ff88cc' },
-  submitBtn:     { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 12 },
-  submitText:    { color: '#1a1200', fontSize: 15, fontWeight: '' },
+  submitBtn:     { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: '', alignItems: '', marginTop: 12 },
+  submitText:    { color: '#1a1200', fontSize: 15, fontWeight: '600' },
 });
 
 const styles = StyleSheet.create({
   safe:           { flex: 1, backgroundColor: '#0c0c1a' },
-  screenTitle:    { fontSize: 20, fontWeight: '', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
+  screenTitle:    { fontSize: 20, fontWeight: '600', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
   scroll:         { paddingHorizontal: 16, paddingBottom: 108 },
-  tabScroll:      { maxHeight: 48, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  tabContent:     { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
-  tab:            { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)' },
-  tabActive:      { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
+  tabScroll:      { maxHeight: 48, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
+  tabContent:     { paddingHorizontal: 16, gap: 8, alignItems: '' },
+  tab:            { flexDirection: '', alignItems: '', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: '(200,180,255,0.18)' },
+  tabActive:      { backgroundColor: '(255,136,204,0.15)', borderColor: '#ff88cc' },
   tabText:        { fontSize: 12, color: '#eeeeff' },
-  tabTextActive:  { fontSize: 12, color: '#ff88cc', fontWeight: '' },
-  subTabRow:      { flexDirection: 'row', gap: 8, marginTop: 12, marginBottom: 4 },
-  subTab:         { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)' },
-  subTabActive:   { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: '#eeeeff' },
+  tabTextActive:  { fontSize: 12, color: '#ff88cc', fontWeight: '600' },
+  subTabRow:      { flexDirection: '', gap: 8, marginTop: 12, marginBottom: 4 },
+  subTab:         { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, borderWidth: 0.5, borderColor: '(200,180,255,0.18)' },
+  subTabActive:   { backgroundColor: '(255,255,255,0.05)', borderColor: '#eeeeff' },
   subTabText:     { fontSize: 11, color: '#eeeeff' },
   subTabTextActive:{ fontSize: 11, color: '#eeeeff' },
-  addBtn:         { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 10, borderWidth: 0.5, borderColor: '#ff88cc', padding: 12, marginTop: 12, marginBottom: 8 },
-  addBtnText:     { fontSize: 14, color: '#ff88cc', fontWeight: '' },
-  castCard:       { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 8 },
-  castAvatar:     { width: 40, height: 40, borderRadius: 20, backgroundColor: '#aa88ff'Dim, justifyContent: 'center', alignItems: 'center' },
-  castAvatarText: { fontSize: 14, fontWeight: '', color: '#aa88ff' },
-  castName:       { fontSize: 14, fontWeight: '', color: '#eeeeff' },
+  addBtn:         { flexDirection: '', alignItems: '', gap: 8, backgroundColor: '(255,136,204,0.15)', borderRadius: 10, borderWidth: 0.5, borderColor: '#ff88cc', padding: 12, marginTop: 12, marginBottom: 8 },
+  addBtnText:     { fontSize: 14, color: '#ff88cc', fontWeight: '600' },
+  castCard:       { flexDirection: '', alignItems: '-start', gap: 10, backgroundColor: '(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 12, marginBottom: 8 },
+  castAvatar:     { width: 40, height: 40, borderRadius: 20, backgroundColor: '(170,136,255,0.15)', justifyContent: '', alignItems: '' },
+  castAvatarText: { fontSize: 14, fontWeight: '600', color: '#aa88ff' },
+  castName:       { fontSize: 14, fontWeight: '600', color: '#eeeeff' },
   castSub:        { fontSize: 11, color: '#eeeeff', marginTop: 2 },
   castWage:       { fontSize: 12, color: '#ff88cc', marginTop: 3 },
   castComment:    { fontSize: 12, color: '#eeeeff', marginTop: 4, lineHeight: 16 },
   iconBtn:        { padding: 4 },
-  salaryCard:     { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 8 },
-  salaryHeader:   { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  salaryRows:     { marginTop: 10, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: 'rgba(200,180,255,0.18)' },
-  totalPay:       { fontSize: 16, fontWeight: '', color: '#ff88cc' },
-  allowanceItem:  { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  monthNav:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, paddingVertical: 10 },
+  salaryCard:     { backgroundColor: '(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 12, marginBottom: 8 },
+  salaryHeader:   { flexDirection: '', alignItems: '', gap: 10 },
+  salaryRows:     { marginTop: 10, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: '(200,180,255,0.18)' },
+  totalPay:       { fontSize: 16, fontWeight: '600', color: '#ff88cc' },
+  allowanceItem:  { flexDirection: '', alignItems: '', gap: 8, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
+  monthNav:       { flexDirection: '', alignItems: '', justifyContent: '', gap: 16, paddingVertical: 10 },
   monthBtn:       { padding: 6 },
-  monthLabel:     { fontSize: 15, color: '#eeeeff', fontWeight: '', minWidth: 90, textAlign: 'center' },
-  empty:          { fontSize: 13, color: '#eeeeff', paddingVertical: 20, textAlign: 'center' },
-  todayBlock:     { backgroundColor: 'rgba(78,203,138,0.08)', borderRadius: 12, borderWidth: 0.5, borderColor: '#80d8b0', padding: 12, marginBottom: 12 },
-  todayTitle:     { fontSize: 13, fontWeight: '', color: '#80d8b0', marginBottom: 8 },
-  todayRow:       { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
-  todayCastName:  { fontSize: 13, fontWeight: '', color: '#eeeeff', flex: 1 },
+  monthLabel:     { fontSize: 15, color: '#eeeeff', fontWeight: '600', minWidth: 90, textAlign: '' },
+  empty:          { fontSize: 13, color: '#eeeeff', paddingVertical: 20, textAlign: '' },
+  todayBlock:     { backgroundColor: '(78,203,138,0.08)', borderRadius: 12, borderWidth: 0.5, borderColor: '#80d8b0', padding: 12, marginBottom: 12 },
+  todayTitle:     { fontSize: 13, fontWeight: '600', color: '#80d8b0', marginBottom: 8 },
+  todayRow:       { flexDirection: '', alignItems: '', gap: 8, paddingVertical: 4 },
+  todayCastName:  { fontSize: 13, fontWeight: '600', color: '#eeeeff', flex: 1 },
   todayTime:      { fontSize: 12, color: '#80d8b0' },
-  ondutyBadge:    { backgroundColor: 'rgba(78,203,138,0.2)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-  ondutyBadgeText:{ fontSize: 10, color: '#80d8b0', fontWeight: '' },
-  showAllBtn:     { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, alignItems: 'center', marginTop: 8 },
+  ondutyBadge:    { backgroundColor: '(78,203,138,0.2)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  ondutyBadgeText:{ fontSize: 10, color: '#80d8b0', fontWeight: '600' },
+  showAllBtn:     { backgroundColor: '(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 12, alignItems: '', marginTop: 8 },
   showAllBtnText: { fontSize: 13, color: '#eeeeff', fontWeight: '500' },
-  filterChip:     { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', backgroundColor: 'rgba(255,255,255,0.05)', marginRight: 8 },
-  filterChipActive:{ backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
+  filterChip:     { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', backgroundColor: '(255,255,255,0.05)', marginRight: 8 },
+  filterChipActive:{ backgroundColor: '(255,136,204,0.15)', borderColor: '#ff88cc' },
   filterChipText: { fontSize: 12, color: '#eeeeff' },
-  filterChipTextActive: { color: '#ff88cc', fontWeight: '' },
-  customerCard:   { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 14, marginBottom: 8 },
-  customerName:   { fontSize: 15, fontWeight: '', color: '#eeeeff' },
+  filterChipTextActive: { color: '#ff88cc', fontWeight: '600' },
+  customerCard:   { flexDirection: '', alignItems: '-start', backgroundColor: '(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 14, marginBottom: 8 },
+  customerName:   { fontSize: 15, fontWeight: '600', color: '#eeeeff' },
   customerVisit:  { fontSize: 12, color: '#eeeeff', marginBottom: 3 },
   customerMemo:   { fontSize: 12, color: '#eeeeff' },
-  castTagBadge:   { backgroundColor: '#aa88ff'Dim, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
-  castTagText:    { fontSize: 11, color: '#aa88ff', fontWeight: '' },
-  visitCountBadge:{ backgroundColor: 'rgba(0,212,255,0.15)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
-  visitCountText: { fontSize: 11, color: '#00d4ff', fontWeight: '' },
+  castTagBadge:   { backgroundColor: '(170,136,255,0.15)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
+  castTagText:    { fontSize: 11, color: '#aa88ff', fontWeight: '600' },
+  visitCountBadge:{ backgroundColor: '(0,212,255,0.15)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
+  visitCountText: { fontSize: 11, color: '#00d4ff', fontWeight: '600' },
 });
 
 const cStyles = StyleSheet.create({
-  cal:          { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 4 },
-  calHeader:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  calTitle:     { fontSize: 14, fontWeight: '', color: '#eeeeff' },
-  calDayRow:    { flexDirection: 'row', marginBottom: 6 },
-  calDayLabel:  { flex: 1, textAlign: 'center', fontSize: 10, color: '#eeeeff', fontWeight: '600' },
-  calGrid:      { flexDirection: 'row', flexWrap: 'wrap' },
-  calCell:      { width: '.28%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 6 },
+  cal:          { backgroundColor: '(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 12, marginBottom: 4 },
+  calHeader:    { flexDirection: '', alignItems: '', justifyContent: '-between', marginBottom: 10 },
+  calTitle:     { fontSize: 14, fontWeight: '600', color: '#eeeeff' },
+  calDayRow:    { flexDirection: '', marginBottom: 6 },
+  calDayLabel:  { flex: 1, textAlign: '', fontSize: 10, color: '#eeeeff', fontWeight: '600' },
+  calGrid:      { flexDirection: '', flexWrap: '' },
+  calCell:      { width: '.28%', aspectRatio: 1, justifyContent: '', alignItems: '', borderRadius: 6 },
   calCellSel:   { backgroundColor: '#ff88cc' },
-  calCellToday: { backgroundColor: '#aa88ff'Dim },
+  calCellToday: { backgroundColor: '(170,136,255,0.15)' },
   calDay:       { fontSize: 13, color: '#eeeeff' },
-  calDaySel:    { color: '#1a1200', fontWeight: '' },
-  calDayToday:  { color: '#aa88ff', fontWeight: '' },
-  counterBtn:   { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', justifyContent: 'center', alignItems: 'center' },
-  counterBtnText:{ fontSize: 20, color: '#eeeeff', fontWeight: '' },
-  counterValue: { fontSize: 16, color: '#ff88cc', fontWeight: '', minWidth: 60, textAlign: 'center' },
+  calDaySel:    { color: '#1a1200', fontWeight: '600' },
+  calDayToday:  { color: '#aa88ff', fontWeight: '600' },
+  counterBtn:   { width: 40, height: 40, borderRadius: 20, backgroundColor: '(255,255,255,0.05)', borderWidth: 0.5, borderColor: '(200,180,255,0.18)', justifyContent: '', alignItems: '' },
+  counterBtnText:{ fontSize: 20, color: '#eeeeff', fontWeight: '600' },
+  counterValue: { fontSize: 16, color: '#ff88cc', fontWeight: '600', minWidth: 60, textAlign: '' },
 });

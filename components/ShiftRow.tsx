@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '../constants/theme';
 
-type Status = 'approved' | 'pending' | 'off';
+type Status = '' | '' | '';
 
 type Props = {
   name: string;
@@ -10,9 +10,9 @@ type Props = {
 };
 
 const STATUS_MAP: Record<Status, { label: string; color: string; bg: string; border: string }> = {
-  approved: { label: '承認済み', color: Colors.green,  bg: 'rgba(78,203,138,0.1)',  border: 'rgba(78,203,138,0.3)' },
-  pending:  { label: '承認待ち', color: Colors.gold,   bg: 'rgba(201,168,76,0.1)',  border: 'rgba(201,168,76,0.3)' },
-  off:      { label: '休み',     color: Colors.text3,  bg: 'rgba(90,88,104,0.2)',   border: Colors.border },
+  approved: { label: '承認済み', color: Colors.green,  bg: '(78,203,138,0.1)',  border: '(78,203,138,0.3)' },
+  pending:  { label: '承認待ち', color: Colors.gold,   bg: '(201,168,76,0.1)',  border: '(201,168,76,0.3)' },
+  off:      { label: '休み',     color: Colors.text3,  bg: '(90,88,104,0.2)',   border: Colors.border },
 };
 
 export function ShiftRow({ name, time, status }: Props) {
@@ -32,14 +32,14 @@ export function ShiftRow({ name, time, status }: Props) {
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: '',
+    justifyContent: '-between',
+    alignItems: '',
     paddingVertical: 8,
     borderBottomWidth: 0.5,
     borderBottomColor: Colors.border,
   },
-  name:      { fontSize: 12, fontWeight: '', color: Colors.text },
+  name:      { fontSize: 12, fontWeight: '600', color: Colors.text },
   time:      { fontSize: 10, color: Colors.text2, marginTop: 2 },
   badge:     { borderRadius: 10, borderWidth: 0.5, paddingHorizontal: 8, paddingVertical: 3 },
   badgeText: { fontSize: 10 },

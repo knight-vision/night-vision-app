@@ -1,8 +1,8 @@
 import {
   ScrollView, View, Text, StyleSheet, ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState, useCallback } from 'react';
+import { SafeAreaView } from '-native-safe-area-context';
+import { useEffect, useState, useCallback } from '';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, fmtYen , useColors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
@@ -11,7 +11,7 @@ import { StatCard } from '../../components/StatCard';
 import { SectionCard } from '../../components/SectionCard';
 import { MonthCalendar } from '../../components/MonthCalendar';
 import { PunyTouchable } from '../../components/PunyTouchable';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from '-router';
 
 // ── オーナー向け ──────────────────────────────────────────────
 function OwnerResultsView({ shopId }: { shopId: string }) {
@@ -116,7 +116,7 @@ function CastPerformanceTab({ castId, shopId }: { castId: string; shopId: string
 }
 
 // ── キャスト向け：給与タブ（日/週/月） ───────────────────────
-type PayPeriod = 'daily' | 'weekly' | 'monthly';
+type PayPeriod = '' | '' | '';
 
 function getDateStr(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
@@ -135,7 +135,7 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
 }) {
   const now = new Date();
   const initDate = initialDate || getDateStr(now);
-  const [period, setPeriod] = useState<PayPeriod>(initialPeriod || 'monthly');
+  const [period, setPeriod] = useState<PayPeriod>(initialPeriod || '');
   const [refDate, setRefDate] = useState(initDate);
   const [refMonth, setRefMonth] = useState(initDate.slice(0, 7));
   const [shifts, setShifts] = useState<any[]>([]);
@@ -191,10 +191,10 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
     let targetShifts: any[] = [];
     let targetAllows: any[] = [];
 
-    if (period === 'daily') {
+    if (period === '') {
       targetShifts = shifts.filter((s: any) => s.date === refDate);
       targetAllows = allowances.filter((a: any) => a.date === refDate);
-    } else if (period === 'weekly') {
+    } else if (period === '') {
       const week = getWeekDates(refDate);
       targetShifts = shifts.filter((s: any) => week.includes(s.date));
       targetAllows = allowances.filter((a: any) => week.includes(a.date));
@@ -226,12 +226,12 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
   const { targetShifts, targetAllows, totalHours, basePay, allowTotal, deductTotal, total } = calcPay();
 
   const PERIODS: { key: PayPeriod; label: string }[] = [
-    { key: 'daily', label: '日' },
-    { key: 'weekly', label: '週' },
-    { key: 'monthly', label: '月' },
+    { key: '', label: '日' },
+    { key: '', label: '週' },
+    { key: '', label: '月' },
   ];
 
-  const weekDates = period === 'weekly' ? getWeekDates(refDate) : [];
+  const weekDates = period === '' ? getWeekDates(refDate) : [];
 
   return (
     <>
@@ -246,7 +246,7 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
       </View>
 
       {/* ナビゲーション */}
-      {period === 'daily' && (
+      {period === '' && (
         <>
           <View style={styles.navRow}>
             <PunyTouchable onPress={() => setRefDate(addDay(refDate, -1))} style={styles.navBtn} scaleTo={0.92} haptic="light">
@@ -268,7 +268,7 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
           />
         </>
       )}
-      {period === 'weekly' && (
+      {period === '' && (
         <View style={styles.navRow}>
           <PunyTouchable onPress={() => setRefDate(addDay(refDate, -7))} style={styles.navBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-back" size={18} color={Colors.text2} />
@@ -279,7 +279,7 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
           </PunyTouchable>
         </View>
       )}
-      {period === 'monthly' && (
+      {period === '' && (
         <View style={styles.navRow}>
           <PunyTouchable onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()-1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}`); }} style={styles.navBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-back" size={18} color={Colors.text2} />
@@ -366,28 +366,28 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
 // ── キャスト向けメインビュー（給与 / 実績タブ） ─────────────
 function CastResultsView({ castId, shopId }: { castId: string; shopId: string }) {
   const params = useLocalSearchParams<{ date?: string }>();
-  const incomingDate = typeof params.date === 'string' ? params.date : undefined;
+  const incomingDate = typeof params.date === '' ? params.date : undefined;
   // 日付パラメータが渡された場合は給与タブ＋日表示に
-  const [tab, setTab] = useState<'pay' | 'perf'>('pay');
+  const [tab, setTab] = useState<'' | ''>('');
 
   return (
     <>
       <View style={styles.segmentWrap}>
-        <PunyTouchable onPress={() => setTab('pay')} scaleTo={0.96} haptic="light"
-          style={[styles.segmentBtn, tab === 'pay' && styles.segmentBtnActive]}>
-          <Ionicons name="wallet-outline" size={14} color={tab === 'pay' ? Colors.gold : Colors.text3} />
-          <Text style={[styles.segmentText, tab === 'pay' && styles.segmentTextActive]}>給与</Text>
+        <PunyTouchable onPress={() => setTab('')} scaleTo={0.96} haptic="light"
+          style={[styles.segmentBtn, tab === '' && styles.segmentBtnActive]}>
+          <Ionicons name="wallet-outline" size={14} color={tab === '' ? Colors.gold : Colors.text3} />
+          <Text style={[styles.segmentText, tab === '' && styles.segmentTextActive]}>給与</Text>
         </PunyTouchable>
-        <PunyTouchable onPress={() => setTab('perf')} scaleTo={0.96} haptic="light"
-          style={[styles.segmentBtn, tab === 'perf' && styles.segmentBtnActive]}>
-          <Ionicons name="trophy-outline" size={14} color={tab === 'perf' ? Colors.gold : Colors.text3} />
-          <Text style={[styles.segmentText, tab === 'perf' && styles.segmentTextActive]}>実績</Text>
+        <PunyTouchable onPress={() => setTab('')} scaleTo={0.96} haptic="light"
+          style={[styles.segmentBtn, tab === '' && styles.segmentBtnActive]}>
+          <Ionicons name="trophy-outline" size={14} color={tab === '' ? Colors.gold : Colors.text3} />
+          <Text style={[styles.segmentText, tab === '' && styles.segmentTextActive]}>実績</Text>
         </PunyTouchable>
       </View>
-      {tab === 'pay'  && <CastPayTab  castId={castId} shopId={shopId}
+      {tab === ''  && <CastPayTab  castId={castId} shopId={shopId}
         initialDate={incomingDate}
-        initialPeriod={incomingDate ? 'daily' : 'monthly'} />}
-      {tab === 'perf' && <CastPerformanceTab castId={castId} shopId={shopId} />}
+        initialPeriod={incomingDate ? '' : ''} />}
+      {tab === '' && <CastPerformanceTab castId={castId} shopId={shopId} />}
     </>
   );
 }
@@ -398,12 +398,12 @@ export default function ResultsScreen() {
   const { role, shopId, castId } = useAuthStore();
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['']}>
       <Text style={styles.screenTitle}>給与・実績</Text>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {role === 'owner' && shopId
+        {role === '' && shopId
           ? <OwnerResultsView shopId={shopId} />
-          : role === 'cast' && castId && shopId
+          : role === '' && castId && shopId
           ? <CastResultsView castId={castId} shopId={shopId} />
           : <Text style={styles.emptyText}>データを取得できませんでした</Text>
         }
@@ -414,49 +414,49 @@ export default function ResultsScreen() {
 
 const styles = StyleSheet.create({
   safe:              { flex: 1, backgroundColor: '#0c0c1a' },
-  screenTitle:       { fontSize: 20, fontWeight: '', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
+  screenTitle:       { fontSize: 20, fontWeight: '600', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   scroll:            { paddingHorizontal: 16, paddingBottom: 108 },
-  emptyText:         { color: '#aaaacc', textAlign: 'center', marginTop: 40 },
-  statGrid:          { flexDirection: 'row', gap: 10, marginBottom: 0 },
-  rankRow:           { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  rankNum:           { fontSize: 13, fontWeight: '', color: '#aaaacc', width: 24 },
-  castAvatar:        { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
-  castAvatarText:    { fontSize: 12, fontWeight: '' },
+  emptyText:         { color: '#aaaacc', textAlign: '', marginTop: 40 },
+  statGrid:          { flexDirection: '', gap: 10, marginBottom: 0 },
+  rankRow:           { flexDirection: '', alignItems: '', gap: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
+  rankNum:           { fontSize: 13, fontWeight: '600', color: '#aaaacc', width: 24 },
+  castAvatar:        { width: 32, height: 32, borderRadius: 16, justifyContent: '', alignItems: '' },
+  castAvatarText:    { fontSize: 12, fontWeight: '600' },
   rankName:          { fontSize: 13, color: '#eeeeff' },
-  rankSales:         { fontSize: 13, fontWeight: '', color: '#eeeeff' },
-  barRow:            { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 },
+  rankSales:         { fontSize: 13, fontWeight: '600', color: '#eeeeff' },
+  barRow:            { flexDirection: '', alignItems: '', gap: 8, paddingVertical: 6 },
   barLabel:          { width: 32, fontSize: 11, color: '#aaaacc' },
-  barTrack:          { flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' },
+  barTrack:          { flex: 1, height: 6, backgroundColor: '(255,255,255,0.05)', borderRadius: 3, overflow: '' },
   barFill:           { height: '%', backgroundColor: '#ff88cc', borderRadius: 3 },
-  barVal:            { width: 72, fontSize: 11, color: '#aaaacc', textAlign: 'right' },
+  barVal:            { width: 72, fontSize: 11, color: '#aaaacc', textAlign: '' },
   // 給与/実績セグメント
-  segmentWrap:       { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: 3, marginBottom: 16, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.15)' },
-  segmentBtn:        { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 9, borderRadius: 11 },
-  segmentBtnActive:  { backgroundColor: 'rgba(255,136,204,0.18)', borderWidth: 0.5, borderColor: 'rgba(255,136,204,0.5)' },
-  segmentText:       { fontSize: 13, color: '#666688', fontWeight: '' },
-  segmentTextActive: { color: '#ff88cc', fontWeight: '' },
+  segmentWrap:       { flexDirection: '', backgroundColor: '(255,255,255,0.05)', borderRadius: 14, padding: 3, marginBottom: 16, borderWidth: 0.5, borderColor: '(200,180,255,0.15)' },
+  segmentBtn:        { flex: 1, flexDirection: '', alignItems: '', justifyContent: '', gap: 6, paddingVertical: 9, borderRadius: 11 },
+  segmentBtnActive:  { backgroundColor: '(255,136,204,0.18)', borderWidth: 0.5, borderColor: '(255,136,204,0.5)' },
+  segmentText:       { fontSize: 13, color: '#666688', fontWeight: '600' },
+  segmentTextActive: { color: '#ff88cc', fontWeight: '600' },
   // 期間ピル
-  periodRow:         { flexDirection: 'row', gap: 6, marginBottom: 12 },
-  periodPill:        { paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', backgroundColor: 'rgba(255,255,255,0.04)' },
-  periodPillActive:  { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
-  periodPillText:    { fontSize: 12, color: '#666688', fontWeight: '' },
-  periodPillTextActive: { color: '#ff88cc', fontWeight: '' },
+  periodRow:         { flexDirection: '', gap: 6, marginBottom: 12 },
+  periodPill:        { paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', backgroundColor: '(255,255,255,0.04)' },
+  periodPillActive:  { backgroundColor: '(255,136,204,0.15)', borderColor: '#ff88cc' },
+  periodPillText:    { fontSize: 12, color: '#666688', fontWeight: '600' },
+  periodPillTextActive: { color: '#ff88cc', fontWeight: '600' },
   // ナビ
-  navRow:            { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 12 },
+  navRow:            { flexDirection: '', alignItems: '', justifyContent: '', gap: 16, marginBottom: 12 },
   navBtn:            { padding: 6 },
-  navLabel:          { fontSize: 14, color: '#eeeeff', fontWeight: '', minWidth: 140, textAlign: 'center' },
+  navLabel:          { fontSize: 14, color: '#eeeeff', fontWeight: '600', minWidth: 140, textAlign: '' },
   // 給与カード
-  payCard:           { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 16, marginBottom: 16 },
-  payRow:            { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
+  payCard:           { backgroundColor: '(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 16, marginBottom: 16 },
+  payRow:            { flexDirection: '', justifyContent: '-between', alignItems: '', paddingVertical: 7, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
   payLabel:          { fontSize: 13, color: '#aaaacc' },
-  payValue:          { fontSize: 13, color: '#eeeeff', fontWeight: '' },
-  payTotalRow:       { borderBottomWidth: 0, marginTop: 6, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(200,180,255,0.18)' },
-  payTotalLabel:     { fontSize: 15, fontWeight: '', color: '#eeeeff' },
-  payTotalValue:     { fontSize: 22, fontWeight: '', color: '#ff88cc' },
+  payValue:          { fontSize: 13, color: '#eeeeff', fontWeight: '600' },
+  payTotalRow:       { borderBottomWidth: 0, marginTop: 6, paddingTop: 12, borderTopWidth: 1, borderTopColor: '(200,180,255,0.18)' },
+  payTotalLabel:     { fontSize: 15, fontWeight: '600', color: '#eeeeff' },
+  payTotalValue:     { fontSize: 22, fontWeight: '600', color: '#ff88cc' },
   // シフト明細
-  shiftDetailRow:    { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)', gap: 8 },
+  shiftDetailRow:    { flexDirection: '', alignItems: '', paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)', gap: 8 },
   shiftDetailDate:   { fontSize: 12, color: '#aaaacc', width: 72 },
   shiftDetailTime:   { fontSize: 12, color: '#eeeeff', flex: 1 },
-  shiftDetailHrs:    { fontSize: 12, color: '#666688', width: 36, textAlign: 'right' },
-  shiftDetailPay:    { fontSize: 13, fontWeight: '', width: 64, textAlign: 'right' },
+  shiftDetailHrs:    { fontSize: 12, color: '#666688', width: 36, textAlign: '' },
+  shiftDetailPay:    { fontSize: 13, fontWeight: '600', width: 64, textAlign: '' },
 });

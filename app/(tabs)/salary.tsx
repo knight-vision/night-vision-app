@@ -3,15 +3,15 @@ import { PunyTouchable } from '../../components/PunyTouchable';
 import {
   ScrollView, View, Text, StyleSheet,
   TextInput, Alert, ActivityIndicator, Modal,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect, useCallback } from 'react';
+} from '-native';
+import { SafeAreaView } from '-native-safe-area-context';
+import { useState, useEffect, useCallback } from '';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, fmtYen } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 
-type SalaryTab = 'summary' | 'allowance' | 'presets';
+type SalaryTab = '' | '' | '';
 
 // ── 月次サマリー ──────────────────────────────────────────────
 function SalarySummary({ shopId, month }: { shopId: string; month: string }) {
@@ -140,8 +140,8 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
     setSaving(true);
     try {
       await fetch(`${API_BASE}/cast-allowances`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: '',
+        headers: { '-Type': '/json' },
         body: JSON.stringify({ shop_id: shopId, cast_id: castId, date, label, sign, amount: Number(amount) }),
       });
       setModalVisible(false);
@@ -151,12 +151,12 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
 
   const handleDelete = (id: string) => {
     Alert.alert('削除確認', 'この手当・控除を削除しますか？', [
-      { text: 'キャンセル', style: 'cancel' },
-      { text: '削除', style: 'destructive', onPress: async () => {
+      { text: 'キャンセル', style: '' },
+      { text: '削除', style: '', onPress: async () => {
         try {
           await fetch(`${API_BASE}/cast-allowances`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
+            method: '',
+            headers: { '-Type': '/json' },
             body: JSON.stringify({ id }),
           });
           load();
@@ -238,10 +238,10 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
             <TextInput style={modal.input} value={label} onChangeText={setLabel} placeholder="例: 交通費" placeholderTextColor={Colors.text3} />
 
             <Text style={modal.label}>種別 *</Text>
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+            <View style={{ flexDirection: '', gap: 8, marginBottom: 12 }}>
               {(['+', '-'] as const).map(s => (
                 <PunyTouchable key={s} onPress={() => setSign(s)} scaleTo={0.92} haptic="light"
-                  style={[modal.chip, sign === s && { backgroundColor: s === '+' ? 'rgba(78,203,138,0.15)' : 'rgba(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
+                  style={[modal.chip, sign === s && { backgroundColor: s === '+' ? '(78,203,138,0.15)' : '(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
                   <Text style={[modal.chipText, sign === s && { color: s === '+' ? Colors.green : Colors.red }]}>
                     {s === '+' ? '手当' : '控除'}
                   </Text>
@@ -291,10 +291,10 @@ function PresetManagement({ shopId }: { shopId: string }) {
     if (!name || !amount) { Alert.alert('エラー', '名前と金額を入力してください'); return; }
     setSaving(true);
     try {
-      const method = editTarget ? 'PATCH' : 'POST';
+      const method = editTarget ? '' : '';
       await fetch(`${API_BASE}/allowance-presets`, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { '-Type': '/json' },
         body: JSON.stringify(editTarget
           ? { id: editTarget.id, name, sign, amount: Number(amount) }
           : { shop_id: shopId, name, sign, amount: Number(amount) }),
@@ -306,12 +306,12 @@ function PresetManagement({ shopId }: { shopId: string }) {
 
   const handleDelete = (id: string, pName: string) => {
     Alert.alert('削除確認', `「${pName}」を削除しますか？`, [
-      { text: 'キャンセル', style: 'cancel' },
-      { text: '削除', style: 'destructive', onPress: async () => {
+      { text: 'キャンセル', style: '' },
+      { text: '削除', style: '', onPress: async () => {
         try {
           await fetch(`${API_BASE}/allowance-presets`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
+            method: '',
+            headers: { '-Type': '/json' },
             body: JSON.stringify({ id }),
           });
           load();
@@ -363,10 +363,10 @@ function PresetManagement({ shopId }: { shopId: string }) {
             <Text style={modal.label}>項目名 *</Text>
             <TextInput style={modal.input} value={name} onChangeText={setName} placeholder="例: 交通費" placeholderTextColor={Colors.text3} />
             <Text style={modal.label}>種別 *</Text>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ flexDirection: '', gap: 8 }}>
               {(['+', '-'] as const).map(s => (
                 <PunyTouchable key={s} onPress={() => setSign(s)} scaleTo={0.92} haptic="light"
-                  style={[modal.chip, sign === s && { backgroundColor: s === '+' ? 'rgba(78,203,138,0.15)' : 'rgba(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
+                  style={[modal.chip, sign === s && { backgroundColor: s === '+' ? '(78,203,138,0.15)' : '(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
                   <Text style={[modal.chipText, sign === s && { color: s === '+' ? Colors.green : Colors.red }]}>
                     {s === '+' ? '手当' : '控除'}
                   </Text>
@@ -388,14 +388,14 @@ function PresetManagement({ shopId }: { shopId: string }) {
 // ── メイン ──────────────────────────────────────────────────────
 export default function SalaryScreen() {
   const { shopId } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<SalaryTab>('summary');
+  const [activeTab, setActiveTab] = useState<SalaryTab>('');
   const now = new Date();
   const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '')}`);
 
   const TABS: { key: SalaryTab; label: string; icon: string }[] = [
-    { key: 'summary',   label: '月次サマリー', icon: 'wallet-outline' },
-    { key: 'allowance', label: '手当・控除',   icon: 'cash-outline' },
-    { key: 'presets',   label: 'プリセット',   icon: 'bookmark-outline' },
+    { key: '',   label: '月次サマリー', icon: '-outline' },
+    { key: '', label: '手当・控除',   icon: '-outline' },
+    { key: '',   label: 'プリセット',   icon: '-outline' },
   ];
 
   const changeMonth = (delta: number) => {
@@ -407,7 +407,7 @@ export default function SalaryScreen() {
   if (!shopId) return null;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['']}>
       <View style={styles.topRow}>
         <Text style={styles.screenTitle}>給与管理</Text>
         <View style={styles.monthNav}>
@@ -432,9 +432,9 @@ export default function SalaryScreen() {
       </ScrollView>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {activeTab === 'summary'   && <SalarySummary shopId={shopId} month={month} />}
-        {activeTab === 'allowance' && <AllowanceManagement shopId={shopId} month={month} />}
-        {activeTab === 'presets'   && <PresetManagement shopId={shopId} />}
+        {activeTab === ''   && <SalarySummary shopId={shopId} month={month} />}
+        {activeTab === '' && <AllowanceManagement shopId={shopId} month={month} />}
+        {activeTab === ''   && <PresetManagement shopId={shopId} />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -442,49 +442,49 @@ export default function SalaryScreen() {
 
 const modal = StyleSheet.create({
   container:    { flex: 1, backgroundColor: '#0c0c1a' },
-  header:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  closeBtn:     { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  title:        { fontSize: 16, fontWeight: '', color: '#eeeeff' },
+  header:       { flexDirection: '', alignItems: '', justifyContent: '-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
+  closeBtn:     { width: 36, height: 36, justifyContent: '', alignItems: '' },
+  title:        { fontSize: 16, fontWeight: '600', color: '#eeeeff' },
   label:        { fontSize: 12, color: '#eeeeff', marginBottom: 6 },
-  input:        { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, color: '#eeeeff', fontSize: 14, marginBottom: 4 },
-  chip:         { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', marginRight: 8 },
-  chipActive:   { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
+  input:        { backgroundColor: '(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 12, color: '#eeeeff', fontSize: 14, marginBottom: 4 },
+  chip:         { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', marginRight: 8 },
+  chipActive:   { backgroundColor: '(255,136,204,0.15)', borderColor: '#ff88cc' },
   chipText:     { fontSize: 13, color: '#eeeeff' },
   chipTextActive:{ color: '#ff88cc' },
-  submitBtn:    { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 12 },
-  submitText:   { color: '#1a1200', fontSize: 15, fontWeight: '' },
+  submitBtn:    { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: '', alignItems: '', marginTop: 12 },
+  submitText:   { color: '#1a1200', fontSize: 15, fontWeight: '600' },
 });
 
 const styles = StyleSheet.create({
   safe:          { flex: 1, backgroundColor: '#0c0c1a' },
-  topRow:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  screenTitle:   { fontSize: 20, fontWeight: '', color: '#eeeeff' },
-  monthNav:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  topRow:        { flexDirection: '', alignItems: '', justifyContent: '-between', paddingHorizontal: 16, paddingVertical: 12 },
+  screenTitle:   { fontSize: 20, fontWeight: '600', color: '#eeeeff' },
+  monthNav:      { flexDirection: '', alignItems: '', gap: 4 },
   monthBtn:      { padding: 6 },
-  monthLabel:    { fontSize: 14, color: '#eeeeff', fontWeight: '', minWidth: 80, textAlign: 'center' },
+  monthLabel:    { fontSize: 14, color: '#eeeeff', fontWeight: '600', minWidth: 80, textAlign: '' },
   scroll:        { paddingHorizontal: 16, paddingBottom: 108 },
-  tabScroll:     { maxHeight: 48, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  tabContent:    { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
-  tab:           { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)' },
-  tabActive:     { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
+  tabScroll:     { maxHeight: 48, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
+  tabContent:    { paddingHorizontal: 16, gap: 8, alignItems: '' },
+  tab:           { flexDirection: '', alignItems: '', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: '(200,180,255,0.18)' },
+  tabActive:     { backgroundColor: '(255,136,204,0.15)', borderColor: '#ff88cc' },
   tabText:       { fontSize: 12, color: '#eeeeff' },
-  tabTextActive: { fontSize: 12, color: '#ff88cc', fontWeight: '' },
-  addBtn:        { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 10, borderWidth: 0.5, borderColor: '#ff88cc', padding: 12, marginTop: 12, marginBottom: 8 },
-  addBtnText:    { fontSize: 14, color: '#ff88cc', fontWeight: '' },
-  salaryCard:    { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 14, marginBottom: 10, marginTop: 8 },
-  salaryHeader:  { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
-  castAvatar:    { width: 38, height: 38, borderRadius: 19, backgroundColor: '#aa88ff'Dim, justifyContent: 'center', alignItems: 'center' },
-  castAvatarText:{ fontSize: 14, fontWeight: '', color: '#aa88ff' },
-  castName:      { fontSize: 14, fontWeight: '', color: '#eeeeff' },
+  tabTextActive: { fontSize: 12, color: '#ff88cc', fontWeight: '600' },
+  addBtn:        { flexDirection: '', alignItems: '', gap: 8, backgroundColor: '(255,136,204,0.15)', borderRadius: 10, borderWidth: 0.5, borderColor: '#ff88cc', padding: 12, marginTop: 12, marginBottom: 8 },
+  addBtnText:    { fontSize: 14, color: '#ff88cc', fontWeight: '600' },
+  salaryCard:    { backgroundColor: '(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 14, marginBottom: 10, marginTop: 8 },
+  salaryHeader:  { flexDirection: '', alignItems: '', gap: 10, marginBottom: 10 },
+  castAvatar:    { width: 38, height: 38, borderRadius: 19, backgroundColor: '(170,136,255,0.15)', justifyContent: '', alignItems: '' },
+  castAvatarText:{ fontSize: 14, fontWeight: '600', color: '#aa88ff' },
+  castName:      { fontSize: 14, fontWeight: '600', color: '#eeeeff' },
   castSub:       { fontSize: 11, color: '#eeeeff', marginTop: 2 },
   totalPay:      { fontSize: 16, fontWeight: '600', color: '#ff88cc' },
-  salaryRows:    { gap: 5, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: 'rgba(200,180,255,0.18)' },
-  salaryRow:     { flexDirection: 'row', justifyContent: 'space-between' },
+  salaryRows:    { gap: 5, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: '(200,180,255,0.18)' },
+  salaryRow:     { flexDirection: '', justifyContent: '-between' },
   salaryRowLabel:{ fontSize: 12, color: '#eeeeff' },
-  salaryRowValue:{ fontSize: 12, color: '#eeeeff', fontWeight: '' },
-  allowanceItem: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  allowanceLabel:{ fontSize: 13, fontWeight: '', color: '#eeeeff' },
+  salaryRowValue:{ fontSize: 12, color: '#eeeeff', fontWeight: '600' },
+  allowanceItem: { flexDirection: '', alignItems: '', gap: 8, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
+  allowanceLabel:{ fontSize: 13, fontWeight: '600', color: '#eeeeff' },
   allowanceSub:  { fontSize: 11, color: '#eeeeff', marginTop: 2 },
   allowanceAmount:{ fontSize: 14, fontWeight: '600' },
-  empty:         { fontSize: 13, color: '#eeeeff', paddingVertical: 20, textAlign: 'center' },
+  empty:         { fontSize: 13, color: '#eeeeff', paddingVertical: 20, textAlign: '' },
 });

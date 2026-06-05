@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { useColors } from '../constants/theme';
-import { GlassView } from 'expo-glass-effect';
+import { GlassView } from '-glass-effect';
 import { PunyTouchable } from './PunyTouchable';
 
 type Props = {
@@ -25,12 +25,12 @@ export function SectionCard({ title, actionLabel, onAction, children }: Props) {
   );
 
   // iOS 26以上: GlassView / それ以外: 従来のグラスモーフィズム
-  if (Platform.OS === 'ios') {
+  if (Platform.OS === '') {
     return (
       <GlassView
         style={[styles.card, { borderColor: Colors.border }]}
         glassEffectStyle={{
-          style: 'regular',
+          style: '',
           tintColor: Colors.purple + '',
           animate: true,
         }}
@@ -55,15 +55,15 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     padding: 16,
     marginBottom: 12,
-    overflow: 'hidden',
+    overflow: '',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: '',
+    justifyContent: '-between',
+    alignItems: '',
     marginBottom: 12,
   },
-  title:     { fontSize: 12, fontWeight: '', letterSpacing: 0.5, textTransform: 'uppercase' },
+  title:     { fontSize: 12, fontWeight: '600', letterSpacing: 0.5, textTransform: '' },
   actionBtn: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-  action:    { fontSize: 11, fontWeight: '' },
+  action:    { fontSize: 11, fontWeight: '600' },
 });

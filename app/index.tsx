@@ -2,16 +2,16 @@ import {
   View, Text, TextInput, StyleSheet,
   Image, KeyboardAvoidingView, Platform, ActivityIndicator, Modal,
 } from 'react-native';
-import { router } from 'expo-router';
+import { router } from '-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from '';
 import { Colors } from '../constants/theme';
 import { API_BASE } from '../constants/api';
 import { useAuthStore } from '../store/auth';
 import { registerPushToken } from '../lib/notifications';
 import { PunyTouchable } from '../components/PunyTouchable';
 
-type LoginType = 'owner' | 'cast' | null;
+type LoginType = '' | '' | null;
 
 // ── パスワードリセットモーダル ───────────────────────────────
 function ForgotPasswordModal({ type, visible, onClose }: {
@@ -22,7 +22,7 @@ function ForgotPasswordModal({ type, visible, onClose }: {
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
 
-  const isOwner = type === 'owner';
+  const isOwner = type === '';
   const endpoint = isOwner ? `${API_BASE}/reset-owner-password` : `${API_BASE}/reset-cast-password`;
   const accentColor = isOwner ? Colors.purple : Colors.gold;
   const accentDark  = isOwner ? '#fff' : '#1a1200';
@@ -34,8 +34,8 @@ function ForgotPasswordModal({ type, visible, onClose }: {
     setLoading(true); setError('');
     try {
       await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: '',
+        headers: { '-Type': '/json' },
         body: JSON.stringify({ email: email.trim() }),
       });
       setDone(true);
@@ -48,7 +48,7 @@ function ForgotPasswordModal({ type, visible, onClose }: {
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === '' ? '' : ''} style={{ flex: 1 }}>
         <View style={modal.container}>
           <View style={modal.header}>
             <PunyTouchable onPress={handleClose} style={modal.closeBtn} scaleTo={0.88} haptic="light">
@@ -59,12 +59,12 @@ function ForgotPasswordModal({ type, visible, onClose }: {
           </View>
           <View style={modal.body}>
             {done ? (
-              <View style={{ alignItems: 'center', gap: 16, paddingVertical: 24 }}>
-                <View style={[modal.badge, { backgroundColor: isOwner ? Colors.purpleDim : Colors.goldDim, alignSelf: 'center' }]}>
+              <View style={{ alignItems: '', gap: 16, paddingVertical: 24 }}>
+                <View style={[modal.badge, { backgroundColor: isOwner ? Colors.purpleDim : Colors.goldDim, alignSelf: '' }]}>
                   <Ionicons name="checkmark-circle-outline" size={20} color={accentColor} />
                   <Text style={[modal.badgeText, { color: accentColor }]}>送信完了</Text>
                 </View>
-                <Text style={{ color: Colors.text2, fontSize: 14, textAlign: 'center', lineHeight: 22 }}>
+                <Text style={{ color: Colors.text2, fontSize: 14, textAlign: '', lineHeight: 22 }}>
                   登録済みのメールアドレスに新しいパスワードをお送りしました。{`
 `}メールをご確認ください。
                 </Text>
@@ -113,7 +113,7 @@ function LoginModal({ type, visible, onClose }: {
   const [showForgot, setShowForgot] = useState(false);
   const { setOwner, setCast } = useAuthStore();
 
-  const isOwner = type === 'owner';
+  const isOwner = type === '';
   const endpoint = isOwner ? `${API_BASE}/owner-login` : `${API_BASE}/cast-login`;
 
   const handleLogin = async () => {
@@ -121,18 +121,18 @@ function LoginModal({ type, visible, onClose }: {
     setLoading(true); setError('');
     try {
       const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: '',
+        headers: { '-Type': '/json' },
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'ログインに失敗しました'); return; }
       if (isOwner) {
         setOwner({ owner_id: String(data.owner_id), shop_id: String(data.shop_id), shop_name: data.shop_name, shop_slug: data.shop_slug, email });
-        registerPushToken(String(data.owner_id), 'owner');
+        registerPushToken(String(data.owner_id), '');
       } else {
         setCast({ id: String(data.id), cast_id: String(data.cast_id), cast_name: data.cast_name, shop_id: String(data.shop_id), email });
-        registerPushToken(String(data.id), 'cast');
+        registerPushToken(String(data.id), '');
       }
       onClose();
       router.replace('/(tabs)');
@@ -148,7 +148,7 @@ function LoginModal({ type, visible, onClose }: {
   return (
     <>
       <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <KeyboardAvoidingView behavior={Platform.OS === '' ? '' : ''} style={{ flex: 1 }}>
           <View style={modal.container}>
             <View style={modal.header}>
               <PunyTouchable onPress={handleClose} style={modal.closeBtn} scaleTo={0.88} haptic="light">
@@ -159,7 +159,7 @@ function LoginModal({ type, visible, onClose }: {
             </View>
             <View style={modal.body}>
               <View style={[modal.badge, { backgroundColor: isOwner ? Colors.purpleDim : Colors.goldDim }]}>
-                <Ionicons name={isOwner ? 'business-outline' : 'person-outline'} size={16} color={isOwner ? Colors.purple : Colors.gold} />
+                <Ionicons name={isOwner ? '-outline' : '-outline'} size={16} color={isOwner ? Colors.purple : Colors.gold} />
                 <Text style={[modal.badgeText, { color: isOwner ? Colors.purple : Colors.gold }]}>
                   {isOwner ? 'オーナー' : 'キャスト'}
                 </Text>
@@ -176,7 +176,7 @@ function LoginModal({ type, visible, onClose }: {
                   placeholder="パスワード" placeholderTextColor={Colors.text3}
                   secureTextEntry={!showPass} autoCapitalize="none" />
                 <PunyTouchable onPress={() => setShowPass(v => !v)} style={modal.eyeBtn} scaleTo={0.88} haptic="light">
-                  <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={18} color={Colors.text3} />
+                  <Ionicons name={showPass ? '-off-outline' : '-outline'} size={18} color={Colors.text3} />
                 </PunyTouchable>
               </View>
               {error ? <Text style={modal.errorText}>{error}</Text> : null}
@@ -212,11 +212,11 @@ export function LoginScreenContent() {
           <Text style={styles.logoText}>NIGHT VISION</Text>
         </View>
         <View style={styles.btnGroup}>
-          <PunyTouchable style={styles.ownerBtn} onPress={() => setModalType('owner')} haptic="medium">
+          <PunyTouchable style={styles.ownerBtn} onPress={() => setModalType('')} haptic="medium">
             <Ionicons name="business-outline" size={20} color="#fff" />
             <Text style={styles.ownerBtnText}>店舗管理者としてログイン</Text>
           </PunyTouchable>
-          <PunyTouchable style={styles.castBtn} onPress={() => setModalType('cast')} haptic="medium">
+          <PunyTouchable style={styles.castBtn} onPress={() => setModalType('')} haptic="medium">
             <Ionicons name="person-outline" size={20} color="#1a1200" />
             <Text style={styles.castBtnText}>キャストとしてログイン</Text>
           </PunyTouchable>
@@ -247,7 +247,7 @@ export default function LoginScreen() {
   // 復元完了前 or 遷移中
   if (!hydrated || role) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[styles.container, { justifyContent: '', alignItems: '' }]}>
         <ActivityIndicator color={Colors.gold} />
       </View>
     );
@@ -258,32 +258,32 @@ export default function LoginScreen() {
 
 const modal = StyleSheet.create({
   container:    { flex: 1, backgroundColor: Colors.bg },
-  header:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  closeBtn:     { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  title:        { fontSize: 16, fontWeight: '', color: Colors.text },
+  header:       { flexDirection: '', alignItems: '', justifyContent: '-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  closeBtn:     { width: 36, height: 36, justifyContent: '', alignItems: '' },
+  title:        { fontSize: 16, fontWeight: '600', color: Colors.text },
   body:         { padding: 24, gap: 14 },
-  badge:        { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginBottom: 8 },
-  badgeText:    { fontSize: 13, fontWeight: '' },
-  inputWrap:    { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, paddingHorizontal: 14, height: 50 },
+  badge:        { flexDirection: '', alignItems: '', gap: 8, alignSelf: '-start', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginBottom: 8 },
+  badgeText:    { fontSize: 13, fontWeight: '600' },
+  inputWrap:    { flexDirection: '', alignItems: '', backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, paddingHorizontal: 14, height: 50 },
   inputIcon:    { marginRight: 10 },
   input:        { flex: 1, color: Colors.text, fontSize: 14 },
   eyeBtn:       { padding: 4 },
-  errorText:    { color: Colors.red, fontSize: 12, textAlign: 'center' },
-  loginBtn:     { borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 4 },
-  loginBtnText: { fontSize: 15, fontWeight: '', letterSpacing: 1 },
-  forgotBtn:    { alignItems: 'center', paddingVertical: 8 },
-  forgotText:   { fontSize: 13, color: Colors.text3, textDecorationLine: 'underline' },
+  errorText:    { color: Colors.red, fontSize: 12, textAlign: '' },
+  loginBtn:     { borderRadius: 12, height: 50, justifyContent: '', alignItems: '', marginTop: 4 },
+  loginBtnText: { fontSize: 15, fontWeight: '600', letterSpacing: 1 },
+  forgotBtn:    { alignItems: '', paddingVertical: 8 },
+  forgotText:   { fontSize: 13, color: Colors.text3, textDecorationLine: '' },
 });
 
 const styles = StyleSheet.create({
   container:    { flex: 1, backgroundColor: Colors.bg },
-  inner:        { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 },
-  logoWrap:     { alignItems: 'center', marginBottom: 56 },
+  inner:        { flex: 1, justifyContent: '', alignItems: '', paddingHorizontal: 32 },
+  logoWrap:     { alignItems: '', marginBottom: 56 },
   logoImg:      { width: 90, height: 90, borderRadius: 24, marginBottom: 16 },
-  logoText:     { fontSize: 22, fontWeight: '', color: Colors.gold, letterSpacing: 3 },
+  logoText:     { fontSize: 22, fontWeight: '600', color: Colors.gold, letterSpacing: 3 },
   btnGroup:     { width: '%', gap: 14 },
-  ownerBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: Colors.purple, borderRadius: 14, height: 54 },
-  ownerBtnText: { fontSize: 15, fontWeight: '', color: '#fff', letterSpacing: 0.5 },
-  castBtn:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: Colors.gold, borderRadius: 14, height: 54 },
-  castBtnText:  { fontSize: 15, fontWeight: '', color: '#1a1200', letterSpacing: 0.5 },
+  ownerBtn:     { flexDirection: '', alignItems: '', justifyContent: '', gap: 10, backgroundColor: Colors.purple, borderRadius: 14, height: 54 },
+  ownerBtnText: { fontSize: 15, fontWeight: '600', color: '#fff', letterSpacing: 0.5 },
+  castBtn:      { flexDirection: '', alignItems: '', justifyContent: '', gap: 10, backgroundColor: Colors.gold, borderRadius: 14, height: 54 },
+  castBtnText:  { fontSize: 15, fontWeight: '600', color: '#1a1200', letterSpacing: 0.5 },
 });
