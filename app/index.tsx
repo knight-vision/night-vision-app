@@ -181,10 +181,10 @@ function LoginModal({ type, visible, onClose }: {
               </View>
               {error ? <Text style={modal.errorText}>{error}</Text> : null}
               <PunyTouchable
-                style={[modal.loginBtn, { backgroundColor: isOwner ? Colors.gold : Colors.purple }]}
+                style={[modal.loginBtn, { backgroundColor: isOwner ? Colors.purple : Colors.gold }]}
                 onPress={handleLogin} disabled={loading} haptic="success">
                 {loading
-                  ? <ActivityIndicator color={isOwner ? '#1a1200' : '#fff'} />
+                  ? <ActivityIndicator color={isOwner ? '#fff' : '#1a1200'} />
                   : <Text style={[modal.loginBtnText, { color: isOwner ? '#fff' : '#1a1200' }]}>ログイン</Text>
                 }
               </PunyTouchable>
