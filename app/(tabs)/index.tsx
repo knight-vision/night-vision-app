@@ -1,9 +1,9 @@
 import { ScrollView, View, Text, StyleSheet, ActivityIndicator, FlatList, Dimensions } from 'react-native';
-import { useFocusEffect } from '-router';
+import { useFocusEffect } from 'expo-router';
 import { PunyTouchable } from '../../components/PunyTouchable';
-import { SafeAreaView } from '-native-safe-area-context';
-import { useEffect, useState, useCallback } from '';
-import { useRouter } from '-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'expo-router';
 import { Colors, fmtYen , useColors } from '../../constants/theme';
 import { useThemeStore } from '../../store/theme';
 import { API_BASE } from '../../constants/api';
@@ -102,7 +102,7 @@ function WeeklyShiftTable({
                     <View key={s.id} style={[
                       wt.shiftChip,
                       isPending
-                        ? { borderColor: color + '', backgroundColor: color + '', borderStyle: '' }
+                        ? { borderColor: color + '', backgroundColor: color + 'd', borderStyle: 'dashed' }
                         : { borderColor: color + '', backgroundColor: color + '' },
                       isMe && !isPending && { borderColor: color, borderWidth: 1.5, backgroundColor: color + '' },
                     ]}>
@@ -203,11 +203,11 @@ function OwnerHome() {
   }, [shopId]));
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
-  if (!data) return <Text style={{ color: Colors.text2, textAlign: '', marginTop: 40 }}>データを取得できませんでした</Text>;
+  if (!data) return <Text style={{ color: Colors.text2, textAlign: 'center', marginTop: 40 }}>データを取得できませんでした</Text>;
 
   // 希望シフトをWeeklyShiftTable互換に変換（キャストごとに色付け）
   const reqAsShifts = allRequests
-    .filter((r: any) => r.status === '' && reqWeekDates.includes(r.date));
+    .filter((r: any) => r.status === 'pending' && reqWeekDates.includes(r.date));
 
   const WeekNav = ({ base, setBase }: { base: Date; setBase: (d: Date) => void }) => (
     <View style={wt.weekNav}>
@@ -271,7 +271,7 @@ function OwnerHome() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.castName}>{c.name}</Text>
-                <Text style={styles.castRole}>{i === 0 ? '.1 キャスト' : 'キャスト'}</Text>
+                <Text style={styles.castRole}>{i === 0 ? 'No.1 キャスト' : 'キャスト'}</Text>
               </View>
               <Text style={[styles.castSales, { color: i === 0 ? Colors.gold : Colors.text }]}>{fmtYen(c.total)}</Text>
             </View>
@@ -301,7 +301,7 @@ function OwnerHome() {
 // 希望シフトをWeeklyShiftTable互換の形式に変換
 function requestsToShifts(requests: any[], castId: string) {
   return requests
-    .filter((r: any) => r.status === '')
+    .filter((r: any) => r.status === 'pending')
     .map((r: any) => ({ ...r, cast_id: castId, id: r.id ?? r.date }));
 }
 
@@ -441,10 +441,10 @@ function CastHome() {
 export default function HomeScreen() {
   const { role } = useAuthStore();
   return (
-    <SafeAreaView style={styles.safe} edges={['']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <Text style={styles.screenTitle}>ホーム</Text>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} style={{ backgroundColor: '' }}>
-        {role === '' ? <OwnerHome /> : <CastHome />}
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} style={{ backgroundColor: 'transparent' }}>
+        {role === 'owner' ? <OwnerHome /> : <CastHome />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -452,51 +452,51 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   safe:           { flex: 1, backgroundColor: Colors.bg },
-  screenTitle:    { fontSize: 20, fontWeight: '600', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
+  screenTitle:    { fontSize: 20, fontWeight: '', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   scroll:         { paddingHorizontal: 16, paddingBottom: 108 },
-  statGrid:       { flexDirection: '', gap: 10 },
-  castRow:        { flexDirection: '', alignItems: '', gap: 12, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  castAvatar:     { width: 36, height: 36, borderRadius: 18, justifyContent: '', alignItems: '' },
-  castAvatarText: { fontSize: 14, fontWeight: '600' },
-  castName:       { fontSize: 14, fontWeight: '600', color: Colors.text },
+  statGrid:       { flexDirection: 'row', gap: 10 },
+  castRow:        { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  castAvatar:     { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
+  castAvatarText: { fontSize: 14, fontWeight: '' },
+  castName:       { fontSize: 14, fontWeight: '', color: Colors.text },
   castRole:       { fontSize: 11, color: Colors.text3, marginTop: 1 },
-  castSales:      { fontSize: 14, fontWeight: '600' },
-  barRow:         { flexDirection: '', alignItems: '', gap: 8, paddingVertical: 6 },
-  barDay:         { width: 24, fontSize: 11, color: Colors.text2, textAlign: '' },
-  barTrack:       { flex: 1, height: 6, backgroundColor: Colors.surface2, borderRadius: 3, overflow: '' },
+  castSales:      { fontSize: 14, fontWeight: '' },
+  barRow:         { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 },
+  barDay:         { width: 24, fontSize: 11, color: Colors.text2, textAlign: 'center' },
+  barTrack:       { flex: 1, height: 6, backgroundColor: Colors.surface2, borderRadius: 3, overflow: 'hidden' },
   barFill:        { height: '%', backgroundColor: Colors.gold, borderRadius: 3 },
-  barVal:         { width: 72, fontSize: 11, color: Colors.text2, textAlign: '' },
+  barVal:         { width: 72, fontSize: 11, color: Colors.text2, textAlign: 'right' },
 });
 
 const wt = StyleSheet.create({
-  weekNav:       { flexDirection: '', alignItems: '', justifyContent: '-between', marginBottom: 10, paddingHorizontal: 2 },
-  weekNavBtn:    { flexDirection: '', alignItems: '', gap: 4, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20, backgroundColor: '(255,255,255,0.06)', borderWidth: 0.5, borderColor: '(200,180,255,0.2)' },
-  weekNavText:   { fontSize: 12, color: Colors.text2, fontWeight: '600', letterSpacing: 0.3 },
-  weekRange:     { fontSize: 13, color: Colors.text, fontWeight: '600', letterSpacing: 0.5 },
+  weekNav:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, paddingHorizontal: 2 },
+  weekNavBtn:    { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.2)' },
+  weekNavText:   { fontSize: 12, color: Colors.text2, fontWeight: '', letterSpacing: 0.3 },
+  weekRange:     { fontSize: 13, color: Colors.text, fontWeight: '', letterSpacing: 0.5 },
 
   // 横スクロールコンテナ
-  scrollContent: { flexDirection: '', gap: DAY_COL_GAP, paddingBottom: 4, paddingHorizontal: 2 },
+  scrollContent: { flexDirection: 'row', gap: DAY_COL_GAP, paddingBottom: 4, paddingHorizontal: 2 },
 
   // 各日カラム
   dayCol:        { width: DAY_COL_WIDTH, height: 142 },
 
   // 日付ヘッダー
-  dayHeader:     { alignItems: '', paddingVertical: 6, paddingHorizontal: 4, borderRadius: 10, marginBottom: 4, backgroundColor: '(255,255,255,0.04)', borderWidth: 0.5, borderColor: '(200,180,255,0.12)', height: 52 },
-  dayHeaderToday:{ backgroundColor: '(232,180,200,0.14)', borderColor: '(232,180,200,0.5)' },
-  dayOfWeek:     { fontSize: 11, fontWeight: '600', letterSpacing: 0.5 },
-  dayNum:        { fontSize: 16, color: Colors.text, fontWeight: '600', marginTop: 2, letterSpacing: -0.5 },
+  dayHeader:     { alignItems: 'center', paddingVertical: 6, paddingHorizontal: 4, borderRadius: 10, marginBottom: 4, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.12)', height: 52 },
+  dayHeaderToday:{ backgroundColor: 'rgba(232,180,200,0.14)', borderColor: 'rgba(232,180,200,0.5)' },
+  dayOfWeek:     { fontSize: 11, fontWeight: '', letterSpacing: 0.5 },
+  dayNum:        { fontSize: 16, color: Colors.text, fontWeight: '', marginTop: 2, letterSpacing: -0.5 },
   todayDot:      { width: 5, height: 5, borderRadius: 3, backgroundColor: Colors.gold, marginTop: 4 },
 
   // シフト表示エリア
-  dayBody:       { backgroundColor: '(255,255,255,0.03)', borderRadius: 10, paddingVertical: 6, paddingHorizontal: 5, gap: 4, flex: 1, borderWidth: 0.5, borderColor: '(200,180,255,0.08)', alignItems: '', overflow: '', justifyContent: '-start' },
-  dayBodyToday:  { borderColor: '(232,180,200,0.2)' },
+  dayBody:       { backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, paddingVertical: 6, paddingHorizontal: 5, gap: 4, flex: 1, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.08)', alignItems: 'center', overflow: 'hidden', justifyContent: 'flex-start' },
+  dayBodyToday:  { borderColor: 'rgba(232,180,200,0.2)' },
 
-  emptyMark:     { fontSize: 16, color: '(255,255,255,0.12)', marginTop: 14, fontWeight: '600' },
+  emptyMark:     { fontSize: 16, color: 'rgba(255,255,255,0.12)', marginTop: 14, fontWeight: '' },
 
   // シフトチップ（横スクロール版・縦長）
-  shiftChip:     { flexDirection: '', alignItems: '', gap: 4, width: '%', paddingVertical: 5, paddingHorizontal: 6, borderRadius: 8, borderWidth: 0.5 },
+  shiftChip:     { flexDirection: 'row', alignItems: 'center', gap: 4, width: '%', paddingVertical: 5, paddingHorizontal: 6, borderRadius: 8, borderWidth: 0.5 },
   chipDot:       { width: 4, height: 4, borderRadius: 2, flexShrink: 0 },
-  chipName:      { fontSize: 10, fontWeight: '600', letterSpacing: 0.2 },
-  chipTime:      { fontSize: 9, color: Colors.text3, fontWeight: '600', marginTop: 1 },
-  moreText:      { fontSize: 9, color: Colors.text3, fontWeight: '600', marginTop: 2 },
+  chipName:      { fontSize: 10, fontWeight: '', letterSpacing: 0.2 },
+  chipTime:      { fontSize: 9, color: Colors.text3, fontWeight: '', marginTop: 1 },
+  moreText:      { fontSize: 9, color: Colors.text3, fontWeight: '', marginTop: 2 },
 });

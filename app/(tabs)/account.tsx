@@ -2,10 +2,10 @@ import {
   ScrollView, View, Text, StyleSheet,
   Modal, TextInput, Alert, ActivityIndicator, Switch,
 } from 'react-native';
-import { SafeAreaView } from '-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from '-router';
-import { useState } from '';
+import { router } from 'expo-router';
+import { useState } from 'react';
 import { useColors } from '../../constants/theme';
 import { useAuthStore } from '../../store/auth';
 import { API_BASE } from '../../constants/api';
@@ -27,10 +27,10 @@ function ChangePasswordModal({ visible, onClose, userId, role }: {
     if (newPass.length < 6) { Alert.alert('エラー', 'パスワードは6文字以上にしてください'); return; }
     setLoading(true);
     try {
-      const endpoint = role === '' ? `${API_BASE}/owner-account-update` : `${API_BASE}/cast-account-update`;
+      const endpoint = role === 'owner' ? `${API_BASE}/owner-account-update` : `${API_BASE}/cast-account-update`;
       const res = await fetch(endpoint, {
-        method: '',
-        headers: { '-Type': '/json' },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: userId, current_password: current, new_password: newPass }),
       });
       const data = await res.json();
@@ -85,10 +85,10 @@ function ChangeEmailModal({ visible, onClose, userId, role, currentEmail }: {
     if (!newEmail.includes('@')) { Alert.alert('エラー', '正しいメールアドレスを入力してください'); return; }
     setLoading(true);
     try {
-      const endpoint = role === '' ? `${API_BASE}/owner-account-update` : `${API_BASE}/cast-account-update`;
+      const endpoint = role === 'owner' ? `${API_BASE}/owner-account-update` : `${API_BASE}/cast-account-update`;
       const res = await fetch(endpoint, {
-        method: '',
-        headers: { '-Type': '/json' },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: userId, current_password: password, new_email: newEmail }),
       });
       const data = await res.json();
@@ -140,17 +140,17 @@ export default function AccountScreen() {
 
   const handleLogout = () => {
     Alert.alert('ログアウト', 'ログアウトしますか？', [
-      { text: 'キャンセル', style: '' },
-      { text: 'ログアウト', style: '', onPress: () => logout() },
+      { text: 'キャンセル', style: 'cancel' },
+      { text: 'ログアウト', style: 'destructive', onPress: () => logout() },
     ]);
   };
 
-  const roleLabel = role === '' ? 'オーナー' : 'キャスト';
-  const roleColor = role === '' ? Colors.gold : Colors.purple;
-  const roleBg    = role === '' ? Colors.goldDim : Colors.purpleDim;
+  const roleLabel = role === 'owner' ? 'オーナー' : 'キャスト';
+  const roleColor = role === 'owner' ? Colors.gold : Colors.purple;
+  const roleBg    = role === 'owner' ? Colors.goldDim : Colors.purpleDim;
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: Colors.bg }]} edges={['']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: Colors.bg }]} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={[styles.screenTitle, { color: Colors.text }]}>アカウント</Text>
 
@@ -176,7 +176,7 @@ export default function AccountScreen() {
           <View>
             <Text style={[styles.profileName, { color: Colors.text }]}>{name}</Text>
             {email && <Text style={[styles.profileEmail, { color: Colors.text3 }]}>{email}</Text>}
-            {shopName && role === '' && <Text style={[styles.shopName, { color: Colors.text3 }]}>{shopName}</Text>}
+            {shopName && role === 'owner' && <Text style={[styles.shopName, { color: Colors.text3 }]}>{shopName}</Text>}
             <View style={[styles.roleBadge, { backgroundColor: roleBg, borderColor: roleColor + '' }]}>
               <Text style={[styles.roleBadgeText, { color: roleColor }]}>{roleLabel}</Text>
             </View>
@@ -239,7 +239,7 @@ export default function AccountScreen() {
         {/* その他 */}
         <GlassCard style={styles.menuGroup}>
           <PunyTouchable style={[styles.menuItem, { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}
-            onPress={() => Alert.alert('お問い合わせ', '.night.vision@gmail.com\nまでご連絡ください')}>
+            onPress={() => Alert.alert('お問い合わせ', 'kushiro.night.vision@gmail.com\nまでご連絡ください')}>
             <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="help-circle-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1 }}>
               <Text style={[styles.menuLabel, { color: Colors.text }]}>ヘルプ・お問い合わせ</Text>
@@ -267,33 +267,33 @@ export default function AccountScreen() {
 
 const modal = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0d0d18' },
-  header:    { flexDirection: '', alignItems: '', justifyContent: '-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: '(200,180,255,0.18)' },
-  closeBtn:  { width: 36, height: 36, justifyContent: '', alignItems: '' },
-  title:     { fontSize: 16, fontWeight: '600', color: '#f8f4ff' },
+  header:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
+  closeBtn:  { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
+  title:     { fontSize: 16, fontWeight: '', color: '#f8f4ff' },
   body:      { padding: 20, gap: 8 },
   label:     { fontSize: 12, color: '#b8b0cc', marginTop: 8 },
-  input:     { backgroundColor: '(255,255,255,0.07)', borderRadius: 10, borderWidth: 0.5, borderColor: '(200,180,255,0.18)', padding: 12, color: '#f8f4ff', fontSize: 14 },
-  submitBtn: { borderRadius: 12, height: 50, justifyContent: '', alignItems: '', marginTop: 16 },
-  submitText: { color: '#1a1200', fontSize: 15, fontWeight: '600' },
+  input:     { backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, color: '#f8f4ff', fontSize: 14 },
+  submitBtn: { borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 16 },
+  submitText: { color: '#1a1200', fontSize: 15, fontWeight: '' },
 });
 
 const styles = StyleSheet.create({
   safe:              { flex: 1 },
   scroll:            { paddingHorizontal: 16, paddingBottom: 108 },
-  screenTitle:       { fontSize: 20, fontWeight: '600', paddingVertical: 16 },
-  profileCard:       { flexDirection: '', alignItems: '', gap: 14, borderRadius: 14, borderWidth: 0.5, padding: 16, marginBottom: 20 },
-  profileAvatar:     { width: 52, height: 52, borderRadius: 26, borderWidth: 1.5, justifyContent: '', alignItems: '' },
-  profileAvatarText: { fontSize: 18, fontWeight: '600' },
-  profileName:       { fontSize: 16, fontWeight: '600', marginBottom: 2 },
+  screenTitle:       { fontSize: 20, fontWeight: '', paddingVertical: 16 },
+  profileCard:       { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 14, borderWidth: 0.5, padding: 16, marginBottom: 20 },
+  profileAvatar:     { width: 52, height: 52, borderRadius: 26, borderWidth: 1.5, justifyContent: 'center', alignItems: 'center' },
+  profileAvatarText: { fontSize: 18, fontWeight: '' },
+  profileName:       { fontSize: 16, fontWeight: '', marginBottom: 2 },
   profileEmail:      { fontSize: 11, marginBottom: 2 },
   shopName:          { fontSize: 11, marginBottom: 5 },
-  roleBadge:         { borderRadius: 8, borderWidth: 0.5, paddingHorizontal: 8, paddingVertical: 2, alignSelf: '-start' },
+  roleBadge:         { borderRadius: 8, borderWidth: 0.5, paddingHorizontal: 8, paddingVertical: 2, alignSelf: 'flex-start' },
   roleBadgeText:     { fontSize: 10 },
   menuGroup:         { borderRadius: 12, borderWidth: 0.5, marginBottom: 12 },
-  menuItem:          { flexDirection: '', alignItems: '', padding: 14, gap: 12 },
-  menuIconWrap:      { width: 32, height: 32, borderRadius: 8, justifyContent: '', alignItems: '' },
-  menuLabel:         { fontSize: 13, fontWeight: '600' },
+  menuItem:          { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
+  menuIconWrap:      { width: 32, height: 32, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+  menuLabel:         { fontSize: 13, fontWeight: '' },
   menuSub:           { fontSize: 11, marginTop: 1 },
-  logoutBtn:         { flexDirection: '', alignItems: '', justifyContent: '', gap: 8, borderRadius: 12, borderWidth: 0.5, borderColor: '(224,92,106,0.25)', padding: 16, marginTop: 8 },
-  logoutText:        { fontSize: 14, fontWeight: '600' },
+  logoutBtn:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(224,92,106,0.25)', padding: 16, marginTop: 8 },
+  logoutText:        { fontSize: 14, fontWeight: '' },
 });

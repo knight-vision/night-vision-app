@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { useColors } from '../constants/theme';
-import { GlassView } from '-glass-effect';
+import { GlassView } from 'expo-glass-effect';
 
 type Props = {
   label: string;
@@ -23,12 +23,12 @@ export function StatCard({ label, value, sub, subColor, valueColor }: Props) {
     </>
   );
 
-  if (Platform.OS === '') {
+  if (Platform.OS === 'ios') {
     return (
       <GlassView
         style={[styles.card, { borderColor: Colors.borderGlow }]}
         glassEffectStyle={{
-          style: '',
+          style: 'regular',
           tintColor: Colors.purple + '',
           animate: true,
         }}
@@ -46,8 +46,8 @@ export function StatCard({ label, value, sub, subColor, valueColor }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card:  { flex: 1, borderRadius: 16, borderWidth: 0.5, padding: 14, overflow: '' },
-  label: { fontSize: 11, marginBottom: 6, fontWeight: '600', letterSpacing: 0.3 },
-  value: { fontSize: 20, fontWeight: '600', letterSpacing: -0.3 },
+  card:  { flex: 1, borderRadius: 16, borderWidth: 0.5, padding: 14, overflow: 'hidden' },
+  label: { fontSize: 11, marginBottom: 6, fontWeight: '', letterSpacing: 0.3 },
+  value: { fontSize: 20, fontWeight: '', letterSpacing: -0.3 },
   sub:   { fontSize: 11, marginTop: 3 },
 });
