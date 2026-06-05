@@ -24,8 +24,8 @@ function ForgotPasswordModal({ type, visible, onClose }: {
 
   const isOwner = type === 'owner';
   const endpoint = isOwner ? `${API_BASE}/reset-owner-password` : `${API_BASE}/reset-cast-password`;
-  const accentColor = isOwner ? Colors.gold : Colors.purple;
-  const accentDark  = isOwner ? '#1a1200' : '#fff';
+  const accentColor = isOwner ? Colors.purple : Colors.gold;
+  const accentDark  = isOwner ? '#fff' : '#1a1200';
 
   const handleClose = () => { setEmail(''); setError(''); setDone(false); onClose(); };
 
@@ -60,7 +60,7 @@ function ForgotPasswordModal({ type, visible, onClose }: {
           <View style={modal.body}>
             {done ? (
               <View style={{ alignItems: 'center', gap: 16, paddingVertical: 24 }}>
-                <View style={[modal.badge, { backgroundColor: isOwner ? Colors.goldDim : Colors.purpleDim, alignSelf: 'center' }]}>
+                <View style={[modal.badge, { backgroundColor: isOwner ? Colors.purpleDim : Colors.goldDim, alignSelf: 'center' }]}>
                   <Ionicons name="checkmark-circle-outline" size={20} color={accentColor} />
                   <Text style={[modal.badgeText, { color: accentColor }]}>送信完了</Text>
                 </View>
@@ -158,9 +158,9 @@ function LoginModal({ type, visible, onClose }: {
               <View style={{ width: 36 }} />
             </View>
             <View style={modal.body}>
-              <View style={[modal.badge, { backgroundColor: isOwner ? Colors.goldDim : Colors.purpleDim }]}>
-                <Ionicons name={isOwner ? 'business-outline' : 'person-outline'} size={16} color={isOwner ? Colors.gold : Colors.purple} />
-                <Text style={[modal.badgeText, { color: isOwner ? Colors.gold : Colors.purple }]}>
+              <View style={[modal.badge, { backgroundColor: isOwner ? Colors.purpleDim : Colors.goldDim }]}>
+                <Ionicons name={isOwner ? 'business-outline' : 'person-outline'} size={16} color={isOwner ? Colors.purple : Colors.gold} />
+                <Text style={[modal.badgeText, { color: isOwner ? Colors.purple : Colors.gold }]}>
                   {isOwner ? 'オーナー' : 'キャスト'}
                 </Text>
               </View>
@@ -185,7 +185,7 @@ function LoginModal({ type, visible, onClose }: {
                 onPress={handleLogin} disabled={loading} haptic="success">
                 {loading
                   ? <ActivityIndicator color={isOwner ? '#1a1200' : '#fff'} />
-                  : <Text style={[modal.loginBtnText, { color: isOwner ? '#1a1200' : '#fff' }]}>ログイン</Text>
+                  : <Text style={[modal.loginBtnText, { color: isOwner ? '#fff' : '#1a1200' }]}>ログイン</Text>
                 }
               </PunyTouchable>
               {/* パスワードを忘れた方 */}
@@ -213,11 +213,11 @@ export function LoginScreenContent() {
         </View>
         <View style={styles.btnGroup}>
           <PunyTouchable style={styles.ownerBtn} onPress={() => setModalType('owner')} haptic="medium">
-            <Ionicons name="business-outline" size={20} color="#1a1200" />
+            <Ionicons name="business-outline" size={20} color="#fff" />
             <Text style={styles.ownerBtnText}>店舗管理者としてログイン</Text>
           </PunyTouchable>
           <PunyTouchable style={styles.castBtn} onPress={() => setModalType('cast')} haptic="medium">
-            <Ionicons name="person-outline" size={20} color="#fff" />
+            <Ionicons name="person-outline" size={20} color="#1a1200" />
             <Text style={styles.castBtnText}>キャストとしてログイン</Text>
           </PunyTouchable>
         </View>
@@ -282,8 +282,8 @@ const styles = StyleSheet.create({
   logoImg:      { width: 90, height: 90, borderRadius: 24, marginBottom: 16 },
   logoText:     { fontSize: 22, fontWeight: '600', color: Colors.gold, letterSpacing: 3 },
   btnGroup:     { width: '100%', gap: 14 },
-  ownerBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: Colors.gold, borderRadius: 14, height: 54 },
-  ownerBtnText: { fontSize: 15, fontWeight: '600', color: '#1a1200', letterSpacing: 0.5 },
-  castBtn:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: Colors.purple, borderRadius: 14, height: 54 },
-  castBtnText:  { fontSize: 15, fontWeight: '600', color: '#fff', letterSpacing: 0.5 },
+  ownerBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: Colors.purple, borderRadius: 14, height: 54 },
+  ownerBtnText: { fontSize: 15, fontWeight: '600', color: '#fff', letterSpacing: 0.5 },
+  castBtn:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: Colors.gold, borderRadius: 14, height: 54 },
+  castBtnText:  { fontSize: 15, fontWeight: '600', color: '#1a1200', letterSpacing: 0.5 },
 });
