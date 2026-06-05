@@ -44,7 +44,7 @@ function shortDate(s: string) {
   return { dm: `${d.getMonth()+1}/${d.getDate()}`, w, dow: d.getDay() };
 }
 
-// ── 週間シフト表（オーナー・キャスト共通） ─────────────────
+// ── 週間シフト表（横並び・曜日が列） ───────────────────────
 function WeeklyShiftTable({
   weekDates, allConfirmed, casts, highlightCastId, onDayPress,
 }: {
@@ -56,7 +56,7 @@ function WeeklyShiftTable({
 }) {
   const todayStr = getDateStr(new Date());
   return (
-    <View style={wt.wrap}>
+    <View style={wt.gridRow}>
       {weekDates.map(date => {
         const { dm, w, dow } = shortDate(date);
         const dayShifts = allConfirmed
@@ -64,37 +64,44 @@ function WeeklyShiftTable({
           .sort((a: any, b: any) => (a.start_time || '').localeCompare(b.start_time || ''));
         const isToday = date === todayStr;
         return (
-          <PunyTouchable key={date} scaleTo={0.98} haptic="light"
-            onPress={() => onDayPress?.(date)}>
-            <View style={[wt.row, isToday && wt.rowToday]}>
-              <View style={wt.dateCol}>
-                <Text style={[wt.dayOfWeek, dow === 0 && { color: '#f08098' }, dow === 6 && { color: '#a8c4f0' }, isToday && { color: Colors.gold, fontWeight: '700' }]}>{w}</Text>
-                <Text style={[wt.dayNum, isToday && { color: Colors.gold }]}>{dm}</Text>
-              </View>
-              <View style={wt.shiftsCol}>
+          <PunyTouchable key={date} scaleTo={0.96} haptic="light"
+            onPress={() => onDayPress?.(date)}
+            style={wt.dayCol}>
+            <View style={[wt.dayCell, isToday && wt.dayCellToday]}>
+              <Text style={[
+                wt.colDayOfWeek,
+                dow === 0 && { color: '#f08098' },
+                dow === 6 && { color: '#a8c4f0' },
+                isToday && { color: Colors.gold, fontWeight: '700' },
+              ]}>{w}</Text>
+              <Text style={[wt.colDayNum, isToday && { color: Colors.gold }]}>{dm}</Text>
+              <View style={wt.colShifts}>
                 {dayShifts.length === 0 ? (
-                  <Text style={wt.emptyText}>—</Text>
+                  <Text style={wt.colEmpty}>—</Text>
                 ) : (
-                  dayShifts.map((s: any) => {
+                  dayShifts.slice(0, 4).map((s: any) => {
                     const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
                     const color = ci >= 0 ? CAST_COLORS[ci % CAST_COLORS.length] : Colors.gold;
-                    const castName = casts.find((c: any) => String(c.id) === String(s.cast_id))?.name || s.casts?.name || 'キャスト';
+                    const castName = casts.find((c: any) => String(c.id) === String(s.cast_id))?.name || s.casts?.name || '?';
                     const isMe = highlightCastId && String(s.cast_id) === highlightCastId;
                     return (
-                      <View key={s.id} style={[wt.shiftChip,
+                      <View key={s.id} style={[
+                        wt.colChip,
                         { backgroundColor: color + '22', borderColor: color },
                         isMe && { borderWidth: 1.5 },
                       ]}>
-                        <View style={[wt.castDot, { backgroundColor: color }]} />
-                        <Text style={[wt.castName, { color }]}>
-                          {castName}{isMe ? '（自分）' : ''}
+                        <Text style={[wt.colChipName, { color }]} numberOfLines={1}>
+                          {castName.slice(0, 3)}
                         </Text>
-                        <Text style={wt.shiftTime}>
-                          {(s.start_time || '').slice(0,5)}〜{(s.end_time || '').slice(0,5)}
+                        <Text style={wt.colChipTime} numberOfLines={1}>
+                          {(s.start_time || '').slice(0,5)}
                         </Text>
                       </View>
                     );
                   })
+                )}
+                {dayShifts.length > 4 && (
+                  <Text style={wt.colMore}>+{dayShifts.length - 4}</Text>
                 )}
               </View>
             </View>
@@ -310,16 +317,17 @@ const wt = StyleSheet.create({
   weekNavText:    { fontSize: 12, color: Colors.text2, fontWeight: '500' },
   weekRange:      { fontSize: 13, color: Colors.text, fontWeight: '600' },
 
-  wrap:           { },
-  row:            { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  rowToday:       { backgroundColor: 'rgba(232,180,200,0.06)' },
-  dateCol:        { width: 50, alignItems: 'center', paddingTop: 4 },
-  dayOfWeek:      { fontSize: 10, color: Colors.text3, fontWeight: '500' },
-  dayNum:         { fontSize: 14, color: Colors.text, fontWeight: '700', marginTop: 1 },
-  shiftsCol:      { flex: 1, gap: 4, paddingLeft: 4 },
-  emptyText:      { fontSize: 12, color: Colors.text3, paddingVertical: 8, paddingLeft: 4 },
-  shiftChip:      { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6, paddingHorizontal: 8, borderRadius: 8, borderWidth: 0.5 },
-  castDot:        { width: 7, height: 7, borderRadius: 3.5 },
-  castName:       { fontSize: 12, fontWeight: '600', flex: 1 },
-  shiftTime:      { fontSize: 11, color: Colors.text2, fontWeight: '500' },
+  // 横並び週間表
+  gridRow:        { flexDirection: 'row', gap: 3 },
+  dayCol:         { flex: 1 },
+  dayCell:        { backgroundColor: Colors.surface2, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 3, alignItems: 'center', minHeight: 140, borderWidth: 0.5, borderColor: Colors.border },
+  dayCellToday:   { backgroundColor: 'rgba(232,180,200,0.12)', borderColor: Colors.gold },
+  colDayOfWeek:   { fontSize: 10, color: Colors.text3, fontWeight: '500' },
+  colDayNum:      { fontSize: 13, color: Colors.text, fontWeight: '700', marginTop: 1, marginBottom: 6 },
+  colShifts:      { gap: 3, width: '100%', alignItems: 'center' },
+  colEmpty:       { fontSize: 11, color: Colors.text3, marginTop: 8 },
+  colChip:        { paddingVertical: 3, paddingHorizontal: 4, borderRadius: 5, borderWidth: 0.5, width: '100%', alignItems: 'center' },
+  colChipName:    { fontSize: 9, fontWeight: '600' },
+  colChipTime:    { fontSize: 8, color: Colors.text2, fontWeight: '500', marginTop: 1 },
+  colMore:        { fontSize: 9, color: Colors.text3, marginTop: 2 },
 });
