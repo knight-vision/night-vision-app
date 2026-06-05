@@ -418,10 +418,10 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                     <Text style={[styles.reqCastName, { color }]}>{req.casts?.name}</Text>
                     <Text style={styles.reqTime}>{req.start_time?.slice(0,5)}〜{req.end_time?.slice(0,5)}</Text>
                     {req.note ? <Text style={styles.reqNote}>📝{req.note}</Text> : null}
-                    <PunyTouchable style={styles.approveBtn} onPress={() = scaleTo={0.95} haptic="light"> addToDraft(selectedDate, String(req.cast_id))}>
+                    <PunyTouchable style={styles.approveBtn} onPress={() => addToDraft(selectedDate, String(req.cast_id))}>
                       <Text style={styles.approveBtnText}>確定へ</Text>
                     </PunyTouchable>
-                    <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> handleDeleteRequest(req.id)} style={styles.deleteReqBtn}>
+                    <PunyTouchable onPress={() => handleDeleteRequest(req.id)} style={styles.deleteReqBtn}>
                       <Ionicons name="trash-outline" size={14} color={Colors.red} />
                     </PunyTouchable>
                   </View>
@@ -440,7 +440,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                 const color = getCastColor(ci);
                 return (
                   <PunyTouchable key={cast.id}
-                    onPress={() = scaleTo={0.95} haptic="light"> selected ? removeFromDraft(selectedDate, String(cast.id)) : addToDraft(selectedDate, String(cast.id))}
+                    onPress={() => selected ? removeFromDraft(selectedDate, String(cast.id)) : addToDraft(selectedDate, String(cast.id))}
                     style={[styles.castSelectBtn, {
                       backgroundColor: selected ? color : Colors.surface2,
                       borderColor: selected ? color : hasReq ? color + '88' : Colors.border,
@@ -489,10 +489,10 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                   <View key={s.id} style={styles.confirmedRow}>
                     <Text style={[styles.confirmedName, { color }]}>{s.casts?.name}</Text>
                     <Text style={styles.confirmedTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
-                    <PunyTouchable style={styles.changeTimeBtn} onPress={() = scaleTo={0.95} haptic="light"> addToDraft(selectedDate, String(s.cast_id))}>
+                    <PunyTouchable style={styles.changeTimeBtn} onPress={() => addToDraft(selectedDate, String(s.cast_id))}>
                       <Text style={styles.changeTimeBtnText}>時間変更</Text>
                     </PunyTouchable>
-                    <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> Alert.alert('削除確認', `${s.casts?.name}のシフトを削除しますか？`, [
+                    <PunyTouchable onPress={() => Alert.alert('削除確認', `${s.casts?.name}のシフトを削除しますか？`, [
                       { text: 'キャンセル', style: 'cancel' },
                       { text: '削除', style: 'destructive', onPress: () => handleDeleteConfirmed(String(s.cast_id), selectedDate) },
                     ])} style={styles.deleteConfBtn}>
@@ -719,7 +719,7 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
       <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setModalVisible(false)} style={styles.modalClose}>
+            <PunyTouchable onPress={() => setModalVisible(false)} style={styles.modalClose}>
               <Ionicons name="close" size={22} color={Colors.text2} />
             </PunyTouchable>
             <Text style={styles.modalTitle}>シフト希望を提出</Text>

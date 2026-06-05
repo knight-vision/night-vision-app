@@ -429,7 +429,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
 
   return (
     <View>
-      <PunyTouchable style={styles.addBtn} onPress={() = scaleTo={0.95} haptic="light"> { setCastId(casts[0]?.id || ''); setDate(new Date().toISOString().slice(0,10)); setLabel(''); setSign('+'); setAmount(''); setModalVisible(true); }}>
+      <PunyTouchable style={styles.addBtn} onPress={() => { setCastId(casts[0]?.id || ''); setDate(new Date().toISOString().slice(0,10)); setLabel(''); setSign('+'); setAmount(''); setModalVisible(true); }}>
         <Ionicons name="add-circle-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>手当・控除を追加</Text>
       </PunyTouchable>
@@ -565,7 +565,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
           <PunyTouchable onPress={() => { setEditTarget(p); setName(p.name); setSign(p.sign); setAmount(String(p.amount)); setModalVisible(true); }} style={styles.iconBtn} scaleTo={0.88} haptic="light">
             <Ionicons name="create-outline" size={16} color={Colors.text2} />
           </PunyTouchable>
-          <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> {
+          <PunyTouchable onPress={() => {
             Alert.alert('削除', `「${p.name}」を削除しますか？`, [
               { text: 'キャンセル', style: 'cancel' },
               { text: '削除', style: 'destructive', onPress: async () => {
@@ -700,7 +700,7 @@ function ResultsSection({ shopId }: { shopId: string }) {
       ))}
 
       {!loading && castTotals.length > 3 && (
-        <PunyTouchable style={styles.showAllBtn} onPress={() = scaleTo={0.95} haptic="light"> setShowAll(v => !v)}>
+        <PunyTouchable style={styles.showAllBtn} onPress={() => setShowAll(v => !v)}>
           <Text style={styles.showAllBtnText}>{showAll ? '▲ 折りたたむ' : `▼ 全員表示（${castTotals.length}名）`}</Text>
         </PunyTouchable>
       )}
@@ -729,11 +729,11 @@ function DatePickerC({ value, onChange }: { value: string; onChange: (d: string)
   return (
     <View style={cStyles.cal}>
       <View style={cStyles.calHeader}>
-        <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> { const d = new Date(y, m-2, 1); setY(d.getFullYear()); setM(d.getMonth()+1); }}>
+        <PunyTouchable onPress={() => { const d = new Date(y, m-2, 1); setY(d.getFullYear()); setM(d.getMonth()+1); }}>
           <Ionicons name="chevron-back" size={16} color={Colors.text2} />
         </PunyTouchable>
         <Text style={cStyles.calTitle}>{y}年{m}月</Text>
-        <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> { const d = new Date(y, m, 1); setY(d.getFullYear()); setM(d.getMonth()+1); }}>
+        <PunyTouchable onPress={() => { const d = new Date(y, m, 1); setY(d.getFullYear()); setM(d.getMonth()+1); }}>
           <Ionicons name="chevron-forward" size={16} color={Colors.text2} />
         </PunyTouchable>
       </View>
@@ -747,7 +747,7 @@ function DatePickerC({ value, onChange }: { value: string; onChange: (d: string)
           const sel = ds === value;
           const today = ds === getDateStrC(new Date());
           return (
-            <PunyTouchable key={ds} onPress={() = scaleTo={0.95} haptic="light"> onChange(ds)}
+            <PunyTouchable key={ds} onPress={() => onChange(ds)}
               style={[cStyles.calCell, sel && cStyles.calCellSel, today && !sel && cStyles.calCellToday]}>
               <Text style={[cStyles.calDay, sel && cStyles.calDaySel, today && !sel && cStyles.calDayToday]}>{day}</Text>
             </PunyTouchable>
@@ -856,7 +856,7 @@ function CustomerSection({ shopId }: { shopId: string }) {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
         {[{ id: '', name: '全員' }, ...casts].map((c: any) => (
-          <PunyTouchable key={c.id} onPress={() = scaleTo={0.95} haptic="light"> setFilterCast(c.id)}
+          <PunyTouchable key={c.id} onPress={() => setFilterCast(c.id)}
             style={[styles.filterChip, filterCast === c.id && styles.filterChipActive]}>
             <Text style={[styles.filterChipText, filterCast === c.id && styles.filterChipTextActive]}>{c.name}</Text>
           </PunyTouchable>
@@ -930,11 +930,11 @@ function CustomerSection({ shopId }: { shopId: string }) {
 
             <Text style={modal.label}>来店回数</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-              <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setVisitCount(v => String(Math.max(1, Number(v) - 1)))} style={cStyles.counterBtn}>
+              <PunyTouchable onPress={() => setVisitCount(v => String(Math.max(1, Number(v) - 1)))} style={cStyles.counterBtn}>
                 <Text style={cStyles.counterBtnText}>−</Text>
               </PunyTouchable>
               <Text style={cStyles.counterValue}>{visitCount}回目</Text>
-              <PunyTouchable onPress={() = scaleTo={0.95} haptic="light"> setVisitCount(v => String(Number(v) + 1))} style={cStyles.counterBtn}>
+              <PunyTouchable onPress={() => setVisitCount(v => String(Number(v) + 1))} style={cStyles.counterBtn}>
                 <Text style={cStyles.counterBtnText}>＋</Text>
               </PunyTouchable>
             </View>
@@ -980,7 +980,7 @@ export default function ManageScreen() {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabScroll} contentContainerStyle={styles.tabContent}>
         {TABS.map(tab => (
           <PunyTouchable key={tab.key} style={[styles.tab, activeTab === tab.key && styles.tabActive]}
-            onPress={() = scaleTo={0.95} haptic="light"> setActiveTab(tab.key)}>
+            onPress={() => setActiveTab(tab.key)}>
             <Ionicons name={tab.icon as any} size={14} color={activeTab === tab.key ? Colors.gold : Colors.text3} />
             <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>{tab.label}</Text>
           </PunyTouchable>
