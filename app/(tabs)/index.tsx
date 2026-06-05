@@ -129,29 +129,49 @@ function OwnerHome() {
   const { shopId } = useAuthStore();
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
-  const [allConfirmed, setAllConfirmed] = useState<any[]>([]);
+  // 月ごとのシフトキャッシュ: "YYYY-M" => shift[]
+  const [shiftCache, setShiftCache] = useState<Record<string, any[]>>({});
   const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const now = new Date();
   const [weekBase, setWeekBase] = useState(now);
   const weekDates = getWeekDates(weekBase);
+  const y = weekBase.getFullYear();
+  const m = weekBase.getMonth() + 1;
+  const cacheKey = `${y}-${m}`;
+  const allConfirmed = shiftCache[cacheKey] ?? [];
 
+  // 初回のみ: ダッシュボード・キャスト・当月シフト
   useEffect(() => {
     if (!shopId) return;
     setLoading(true);
-    const y = weekBase.getFullYear();
-    const m = weekBase.getMonth() + 1;
+    const iy = now.getFullYear(), im = now.getMonth() + 1;
+    const key = `${iy}-${im}`;
     Promise.all([
       fetch(`${API_BASE}/owner/dashboard-summary?shop_id=${shopId}`).then(r => r.json()).catch(() => null),
-      fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${y}&month=${m}`).then(r => r.json()).catch(() => ({})),
+      fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${iy}&month=${im}`).then(r => r.json()).catch(() => ({})),
       fetch(`${API_BASE}/casts?shop_id=${shopId}`).then(r => r.json()).catch(() => []),
     ]).then(([d, sd, cd]) => {
       setData(d);
-      setAllConfirmed(Array.isArray(sd) ? sd : (sd?.confirmed || []));
+      const shifts = Array.isArray(sd) ? sd : (sd?.confirmed || []);
+      setShiftCache({ [key]: shifts });
       setCasts(Array.isArray(cd) ? cd : []);
     }).finally(() => setLoading(false));
-  }, [shopId, weekBase]);
+  }, [shopId]);
+
+  // 週移動で月が変わった場合のみ追加フェッチ（ローディングなし）
+  useEffect(() => {
+    if (!shopId || shiftCache[cacheKey] !== undefined) return;
+    fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${y}&month=${m}`)
+      .then(r => r.json())
+      .then(sd => {
+        const shifts = Array.isArray(sd) ? sd : (sd?.confirmed || []);
+        setShiftCache(prev => ({ ...prev, [cacheKey]: shifts }));
+      }).catch(() => {
+        setShiftCache(prev => ({ ...prev, [cacheKey]: [] }));
+      });
+  }, [shopId, cacheKey]);
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
   if (!data) return <Text style={{ color: Colors.text2, textAlign: 'center', marginTop: 40 }}>データを取得できませんでした</Text>;
@@ -235,28 +255,47 @@ function CastHome() {
   const router = useRouter();
   const now = new Date();
   const [weekBase, setWeekBase] = useState(now);
-  const [allConfirmed, setAllConfirmed] = useState<any[]>([]);
+  // 月ごとのシフトキャッシュ: "YYYY-M" => shift[]
+  const [shiftCache, setShiftCache] = useState<Record<string, any[]>>({});
   const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const weekDates = getWeekDates(weekBase);
   const y = weekBase.getFullYear();
   const m = weekBase.getMonth() + 1;
+  const cacheKey = `${y}-${m}`;
+  const allConfirmed = shiftCache[cacheKey] ?? [];
 
+  // 初回のみ: キャスト一覧・当月シフト
   useEffect(() => {
     if (!shopId) return;
     setLoading(true);
+    const iy = now.getFullYear(), im = now.getMonth() + 1;
+    const key = `${iy}-${im}`;
     Promise.all([
-      fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${y}&month=${m}`),
+      fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${iy}&month=${im}`),
       fetch(`${API_BASE}/casts?shop_id=${shopId}`),
     ]).then(async ([r1, r2]) => {
       const d1 = await r1.json();
-      const confirmed = Array.isArray(d1) ? d1 : (d1?.confirmed || []);
-      setAllConfirmed(confirmed);
+      const shifts = Array.isArray(d1) ? d1 : (d1?.confirmed || []);
+      setShiftCache({ [key]: shifts });
       const d2 = await r2.json();
       setCasts(Array.isArray(d2) ? d2 : []);
     }).catch(() => {}).finally(() => setLoading(false));
-  }, [shopId, y, m]);
+  }, [shopId]);
+
+  // 週移動で月が変わった場合のみ追加フェッチ（ローディングなし）
+  useEffect(() => {
+    if (!shopId || shiftCache[cacheKey] !== undefined) return;
+    fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${y}&month=${m}`)
+      .then(r => r.json())
+      .then(sd => {
+        const shifts = Array.isArray(sd) ? sd : (sd?.confirmed || []);
+        setShiftCache(prev => ({ ...prev, [cacheKey]: shifts }));
+      }).catch(() => {
+        setShiftCache(prev => ({ ...prev, [cacheKey]: [] }));
+      });
+  }, [shopId, cacheKey]);
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
 
