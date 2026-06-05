@@ -13,7 +13,7 @@ import { MonthCalendar } from '../../components/MonthCalendar';
 import { useRouter } from 'expo-router';
 
 const CAST_COLORS = ['#ff6b9d','#00d4ff','#ffd700','#a855f7','#00e5a0','#ff9500','#00c7be','#ff3b30','#34aadc','#4cd964'];
-const HOURS = Array.from({ length: 31 }, (_, i) => i);
+const HOURS = Array.from({ length: 48 }, (_, i) => i);
 const MINUTES = ['00', '10', '20', '30', '40', '50'];
 const CAL_DAYS = ['月', '火', '水', '木', '金', '土', '日'];
 
@@ -97,16 +97,17 @@ function DrumColumn({ items, selectedIndex, onSelect }: {
 }
 
 // iOSドラムロール風時間選択
-function TimeSelector({ value, onChange, label, minHour, minMinute }: {
+function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
   value: string; onChange: (v: string) => void; label?: string;
   minHour?: number;   // この時刻以降のみ選択可（HOURSのindex単位、未指定なら制限なし）
   minMinute?: number; // minHourと同時刻の場合のみ有効
+  maxHour?: number;   // この時刻まで選択可（HOURSのindex単位、未指定なら制限なし）
 }) {
   const [modalVisible, setModalVisible] = useState(false);
 
   const toHourIndex = (v: string): number => {
     const raw = parseInt(v.split(':')[0], 10);
-    return isNaN(raw) ? 20 : Math.max(0, Math.min(raw, 30));
+    return isNaN(raw) ? 20 : Math.max(0, Math.min(raw, 47));
   };
   const toMinIndex = (v: string): number => {
     const raw = v.split(':')[1]?.slice(0, 2) ?? '00';
@@ -116,9 +117,11 @@ function TimeSelector({ value, onChange, label, minHour, minMinute }: {
 
   // 選択可能な時間を絞り込む
   const visibleHours = useMemo(() => {
-    if (minHour === undefined) return HOURS;
-    return HOURS.filter(h => h >= HOURS[minHour]);
-  }, [minHour]);
+    let hours = HOURS;
+    if (minHour !== undefined) hours = hours.filter(h => h >= HOURS[minHour]);
+    if (maxHour !== undefined) hours = hours.filter(h => h <= HOURS[maxHour]);
+    return hours;
+  }, [minHour, maxHour]);
   const visibleMinutes = useMemo(() => {
     if (minMinute === undefined) return MINUTES;
     return MINUTES.slice(minMinute);
@@ -459,8 +462,16 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
               <View key={entry.cast_id} style={[styles.timeSetBlock, { backgroundColor: color + '11', borderColor: color + '44' }]}>
                 <Text style={[styles.timeSetName, { color }]}>{cast?.name}</Text>
                 <View style={{ gap: 8 }}>
-                  <TimeSelector value={entry.start_time} onChange={v => updateDraftTime(selectedDate, entry.cast_id, 'start_time', v)} label="開始" />
-                  <TimeSelector value={entry.end_time} onChange={v => updateDraftTime(selectedDate, entry.cast_id, 'end_time', v)} label="終了" />
+                  <TimeSelector value={entry.start_time} onChange={v => updateDraftTime(selectedDate, entry.cast_id, 'start_time', v)} label="開始" maxHour={23} />
+                  <TimeSelector
+                    value={entry.end_time}
+                    onChange={v => updateDraftTime(selectedDate, entry.cast_id, 'end_time', v)}
+                    label="終了"
+                    minHour={(() => {
+                      const sh = parseInt(entry.start_time.split(':')[0], 10);
+                      return HOURS.indexOf(sh);
+                    })()}
+                  />
                 </View>
               </View>
             );
@@ -737,7 +748,7 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
             <Text style={[styles.modalLabel, { marginTop: 8 }]}>選択日: <Text style={{ color: Colors.gold }}>{selDate}</Text></Text>
 
             <Text style={[styles.modalLabel, { marginTop: 16 }]}>開始時間</Text>
-            <TimeSelector value={startTime} onChange={setStartTime} label="開始" />
+            <TimeSelector value={startTime} onChange={setStartTime} label="開始" maxHour={23} />
 
             <Text style={[styles.modalLabel, { marginTop: 16 }]}>終了時間</Text>
             <TimeSelector
