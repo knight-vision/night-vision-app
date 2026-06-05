@@ -1,5 +1,5 @@
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  View, Text, TextInput, StyleSheet,
   Image, KeyboardAvoidingView, Platform, ActivityIndicator, Modal,
 } from 'react-native';
 import { router } from 'expo-router';

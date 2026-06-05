@@ -1,6 +1,5 @@
 import {
   ScrollView, View, Text, StyleSheet, ActivityIndicator,
-  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState, useCallback } from 'react';

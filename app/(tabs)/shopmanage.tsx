@@ -1,5 +1,6 @@
+import { PunyTouchable } from '../../components/PunyTouchable';
 import {
-  ScrollView, View, Text, StyleSheet, TouchableOpacity,
+  ScrollView, View, Text, StyleSheet,
   TextInput, Alert, ActivityIndicator, Switch, Linking, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
