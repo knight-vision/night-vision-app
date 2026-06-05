@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, ActivityIndicator, FlatList, Dimensions } from 'react-native';
 import { PunyTouchable } from '../../components/PunyTouchable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
@@ -44,7 +44,10 @@ function shortDate(s: string) {
   return { dm: `${d.getMonth()+1}/${d.getDate()}`, w, dow: d.getDay() };
 }
 
-// ── 週間シフト表（横並び・曜日が列） ───────────────────────
+// ── 週間シフト表（横スクロール・洗練デザイン） ──────────────
+const DAY_COL_WIDTH = 88;
+const DAY_COL_GAP = 6;
+
 function WeeklyShiftTable({
   weekDates, allConfirmed, casts, highlightCastId, onDayPress,
 }: {
@@ -56,59 +59,68 @@ function WeeklyShiftTable({
 }) {
   const todayStr = getDateStr(new Date());
   return (
-    <View style={wt.gridRow}>
-      {weekDates.map(date => {
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={wt.scrollContent}
+    >
+      {weekDates.map((date, idx) => {
         const { dm, w, dow } = shortDate(date);
         const dayShifts = allConfirmed
           .filter((s: any) => s.date === date)
           .sort((a: any, b: any) => (a.start_time || '').localeCompare(b.start_time || ''));
         const isToday = date === todayStr;
+        const isSun = dow === 0;
+        const isSat = dow === 6;
+        const dayColor = isSun ? '#f08098' : isSat ? '#a8c4f0' : Colors.text2;
+
         return (
           <PunyTouchable key={date} scaleTo={0.96} haptic="light"
             onPress={() => onDayPress?.(date)}
             style={wt.dayCol}>
-            <View style={[wt.dayCell, isToday && wt.dayCellToday]}>
-              <Text style={[
-                wt.colDayOfWeek,
-                dow === 0 && { color: '#f08098' },
-                dow === 6 && { color: '#a8c4f0' },
-                isToday && { color: Colors.gold, fontWeight: '700' },
-              ]}>{w}</Text>
-              <Text style={[wt.colDayNum, isToday && { color: Colors.gold }]}>{dm}</Text>
-              <View style={wt.colShifts}>
-                {dayShifts.length === 0 ? (
-                  <Text style={wt.colEmpty}>—</Text>
-                ) : (
-                  dayShifts.slice(0, 4).map((s: any) => {
-                    const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
-                    const color = ci >= 0 ? CAST_COLORS[ci % CAST_COLORS.length] : Colors.gold;
-                    const castName = casts.find((c: any) => String(c.id) === String(s.cast_id))?.name || s.casts?.name || '?';
-                    const isMe = highlightCastId && String(s.cast_id) === highlightCastId;
-                    return (
-                      <View key={s.id} style={[
-                        wt.colChip,
-                        { backgroundColor: color + '22', borderColor: color },
-                        isMe && { borderWidth: 1.5 },
-                      ]}>
-                        <Text style={[wt.colChipName, { color }]} numberOfLines={1}>
-                          {castName.slice(0, 3)}
+            {/* ヘッダー */}
+            <View style={[wt.dayHeader, isToday && wt.dayHeaderToday]}>
+              <Text style={[wt.dayOfWeek, { color: isToday ? Colors.gold : dayColor }]}>{w}</Text>
+              <Text style={[wt.dayNum, isToday && { color: Colors.gold }]}>{dm}</Text>
+              {isToday && <View style={wt.todayDot} />}
+            </View>
+            {/* シフトリスト */}
+            <View style={[wt.dayBody, isToday && wt.dayBodyToday]}>
+              {dayShifts.length === 0 ? (
+                <Text style={wt.emptyMark}>—</Text>
+              ) : (
+                dayShifts.slice(0, 4).map((s: any) => {
+                  const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
+                  const color = ci >= 0 ? CAST_COLORS[ci % CAST_COLORS.length] : Colors.gold;
+                  const castName = casts.find((c: any) => String(c.id) === String(s.cast_id))?.name || s.casts?.name || '?';
+                  const isMe = highlightCastId && String(s.cast_id) === highlightCastId;
+                  return (
+                    <View key={s.id} style={[
+                      wt.shiftChip,
+                      { borderColor: color + '80', backgroundColor: color + '18' },
+                      isMe && { borderColor: color, borderWidth: 1.5, backgroundColor: color + '28' },
+                    ]}>
+                      <View style={[wt.chipDot, { backgroundColor: color }]} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={[wt.chipName, { color }]} numberOfLines={1}>
+                          {castName.slice(0, 4)}
                         </Text>
-                        <Text style={wt.colChipTime} numberOfLines={1}>
-                          {(s.start_time || '').slice(0,5)}
+                        <Text style={wt.chipTime} numberOfLines={1}>
+                          {(s.start_time || '').slice(0, 5)}
                         </Text>
                       </View>
-                    );
-                  })
-                )}
-                {dayShifts.length > 4 && (
-                  <Text style={wt.colMore}>+{dayShifts.length - 4}</Text>
-                )}
-              </View>
+                    </View>
+                  );
+                })
+              )}
+              {dayShifts.length > 4 && (
+                <Text style={wt.moreText}>+{dayShifts.length - 4}人</Text>
+              )}
             </View>
           </PunyTouchable>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -312,22 +324,34 @@ const styles = StyleSheet.create({
 });
 
 const wt = StyleSheet.create({
-  weekNav:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 4 },
-  weekNavBtn:     { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, backgroundColor: Colors.surface2 },
-  weekNavText:    { fontSize: 12, color: Colors.text2, fontWeight: '500' },
-  weekRange:      { fontSize: 13, color: Colors.text, fontWeight: '600' },
+  weekNav:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, paddingHorizontal: 2 },
+  weekNavBtn:    { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.2)' },
+  weekNavText:   { fontSize: 12, color: Colors.text2, fontWeight: '600', letterSpacing: 0.3 },
+  weekRange:     { fontSize: 13, color: Colors.text, fontWeight: '700', letterSpacing: 0.5 },
 
-  // 横並び週間表
-  gridRow:        { flexDirection: 'row', gap: 3 },
-  dayCol:         { flex: 1 },
-  dayCell:        { backgroundColor: Colors.surface2, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 3, alignItems: 'center', minHeight: 140, borderWidth: 0.5, borderColor: Colors.border },
-  dayCellToday:   { backgroundColor: 'rgba(232,180,200,0.12)', borderColor: Colors.gold },
-  colDayOfWeek:   { fontSize: 10, color: Colors.text3, fontWeight: '500' },
-  colDayNum:      { fontSize: 13, color: Colors.text, fontWeight: '700', marginTop: 1, marginBottom: 6 },
-  colShifts:      { gap: 3, width: '100%', alignItems: 'center' },
-  colEmpty:       { fontSize: 11, color: Colors.text3, marginTop: 8 },
-  colChip:        { paddingVertical: 3, paddingHorizontal: 4, borderRadius: 5, borderWidth: 0.5, width: '100%', alignItems: 'center' },
-  colChipName:    { fontSize: 9, fontWeight: '600' },
-  colChipTime:    { fontSize: 8, color: Colors.text2, fontWeight: '500', marginTop: 1 },
-  colMore:        { fontSize: 9, color: Colors.text3, marginTop: 2 },
+  // 横スクロールコンテナ
+  scrollContent: { flexDirection: 'row', gap: DAY_COL_GAP, paddingBottom: 4, paddingHorizontal: 2 },
+
+  // 各日カラム
+  dayCol:        { width: DAY_COL_WIDTH },
+
+  // 日付ヘッダー
+  dayHeader:     { alignItems: 'center', paddingVertical: 8, paddingHorizontal: 4, borderRadius: 10, marginBottom: 4, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.12)' },
+  dayHeaderToday:{ backgroundColor: 'rgba(232,180,200,0.14)', borderColor: 'rgba(232,180,200,0.5)' },
+  dayOfWeek:     { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
+  dayNum:        { fontSize: 16, color: Colors.text, fontWeight: '800', marginTop: 2, letterSpacing: -0.5 },
+  todayDot:      { width: 5, height: 5, borderRadius: 3, backgroundColor: Colors.gold, marginTop: 4 },
+
+  // シフト表示エリア
+  dayBody:       { backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 5, gap: 5, minHeight: 80, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.08)', alignItems: 'center' },
+  dayBodyToday:  { borderColor: 'rgba(232,180,200,0.2)' },
+
+  emptyMark:     { fontSize: 16, color: 'rgba(255,255,255,0.12)', marginTop: 14, fontWeight: '300' },
+
+  // シフトチップ（横スクロール版・縦長）
+  shiftChip:     { flexDirection: 'row', alignItems: 'center', gap: 4, width: '100%', paddingVertical: 5, paddingHorizontal: 6, borderRadius: 8, borderWidth: 0.5 },
+  chipDot:       { width: 4, height: 4, borderRadius: 2, flexShrink: 0 },
+  chipName:      { fontSize: 10, fontWeight: '700', letterSpacing: 0.2 },
+  chipTime:      { fontSize: 9, color: Colors.text3, fontWeight: '500', marginTop: 1 },
+  moreText:      { fontSize: 9, color: Colors.text3, fontWeight: '500', marginTop: 2 },
 });
