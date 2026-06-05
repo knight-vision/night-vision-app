@@ -3,7 +3,8 @@ import { PunyTouchable } from '../../components/PunyTouchable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { Colors, fmtYen } from '../../constants/theme';
+import { Colors, fmtYen , useColors } from '../../constants/theme';
+import { useThemeStore } from '../../store/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 import { StatCard } from '../../components/StatCard';
@@ -49,6 +50,7 @@ const DAY_COL_WIDTH = 88;
 const DAY_COL_GAP = 6;
 
 function WeeklyShiftTable({
+  const Colors = useColors();
   weekDates, allConfirmed, casts, highlightCastId, onDayPress, isPending,
 }: {
   weekDates: string[];
@@ -132,6 +134,8 @@ function WeeklyShiftTable({
 type MonthCache = { confirmed: any[]; requests: any[] };
 
 function OwnerHome() {
+  const Colors = useColors();
+  const { themeId } = useThemeStore();
   const { shopId } = useAuthStore();
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
@@ -291,6 +295,8 @@ function requestsToShifts(requests: any[], castId: string) {
 
 // ── キャスト版 ────────────────────────────────────────────────
 function CastHome() {
+  const Colors = useColors();
+  const { themeId } = useThemeStore();
   const { castId, shopId } = useAuthStore();
   const router = useRouter();
   const now = new Date();

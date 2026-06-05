@@ -2,8 +2,11 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { setupNotificationListeners } from '../lib/notifications';
+import { useThemeStore, THEMES } from '../store/theme';
 
 export default function RootLayout() {
+  const themeId = useThemeStore((s) => s.themeId);
+  const bgColor = THEMES[themeId].bg;
   useEffect(() => {
     const cleanup = setupNotificationListeners();
     return cleanup;
@@ -11,7 +14,7 @@ export default function RootLayout() {
 
   return (
     <>
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#0d0d18' } }}>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: bgColor } }}>
         <Stack.Screen name="index" options={{ animation: 'none' }} />
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
       </Stack>

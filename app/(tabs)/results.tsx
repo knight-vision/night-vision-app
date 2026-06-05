@@ -5,7 +5,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, fmtYen } from '../../constants/theme';
+import { Colors, fmtYen , useColors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 import { StatCard } from '../../components/StatCard';
@@ -395,6 +395,7 @@ function CastResultsView({ castId, shopId }: { castId: string; shopId: string })
 
 // ── メイン ──────────────────────────────────────────────────
 export default function ResultsScreen() {
+  const Colors = useColors();
   const { role, shopId, castId } = useAuthStore();
 
   return (

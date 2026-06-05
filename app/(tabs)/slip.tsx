@@ -5,7 +5,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, fmtYen } from '../../constants/theme';
+import { Colors, fmtYen , useColors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 import { MonthCalendar } from '../../components/MonthCalendar';
@@ -591,6 +591,7 @@ function MenuManagement({ shopId }: { shopId: string }) {
 
 // ── メイン ──────────────────────────────────────────────────────
 export default function SlipScreen() {
+  const Colors = useColors();
   const { shopId } = useAuthStore();
   const [activeTab, setActiveTab] = useState<SlipTab>('input');
 

@@ -1,33 +1,41 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect } from 'react';
 import { useAuthStore } from '../../store/auth';
-import { Colors } from '../../constants/theme';
+import { useThemeStore } from '../../store/theme';
+import { useColors, syncColors } from '../../constants/theme';
 import { LoginScreenContent } from '../index';
 import * as Haptics from 'expo-haptics';
 
 export default function TabLayout() {
   const { role } = useAuthStore();
   const isOwner = role === 'owner';
+  const themeId = useThemeStore((s) => s.themeId);
 
-  // roleがなければログイン画面を条件レンダリング（router不要）
-  if (!role) {
-    return <LoginScreenContent />;
-  }
+  // テーマ変更時に Colors シングルトンを同期（StyleSheet.create 用）
+  useEffect(() => {
+    syncColors(themeId);
+  }, [themeId]);
 
-  const tabPressHaptic = () => {
-    Haptics.selectionAsync().catch(() => {});
-  };
+  const Colors = useColors();
+
+  if (!role) return <LoginScreenContent />;
+
+  const tabPressHaptic = () => { Haptics.selectionAsync().catch(() => {}); };
+
+  const tabBarBg =
+    themeId === 'neon'   ? 'rgba(12,12,26,0.96)' :
+    themeId === 'starry' ? 'rgba(10,0,24,0.96)'  :
+                           'rgba(13,13,24,0.95)';
 
   return (
     <Tabs
-      screenListeners={{
-        tabPress: () => tabPressHaptic(),
-      }}
+      screenListeners={{ tabPress: () => tabPressHaptic() }}
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: Colors.bg },
         tabBarStyle: {
-          backgroundColor: 'rgba(13,13,24,0.95)',
+          backgroundColor: tabBarBg,
           borderTopColor: Colors.border,
           borderTopWidth: 0.5,
           height: 88,
@@ -71,8 +79,8 @@ export default function TabLayout() {
         title: 'アカウント',
         tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />,
       }} />
-      <Tabs.Screen name="salary"  options={{ href: null }} />
-      <Tabs.Screen name="jobs"    options={{ href: null }} />
+      <Tabs.Screen name="salary" options={{ href: null }} />
+      <Tabs.Screen name="jobs"   options={{ href: null }} />
     </Tabs>
   );
 }

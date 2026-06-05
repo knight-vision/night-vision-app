@@ -6,7 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Colors } from '../../constants/theme';
+import { useColors } from '../../constants/theme';
+import { useThemeStore, ThemeId } from '../../store/theme';
 import { useAuthStore } from '../../store/auth';
 import { API_BASE } from '../../constants/api';
 import { PunyTouchable, haptic } from '../../components/PunyTouchable';
@@ -129,6 +130,8 @@ function ChangeEmailModal({ visible, onClose, userId, role, currentEmail }: {
 // ── メイン ────────────────────────────────────────────────────
 export default function AccountScreen() {
   const { name, role, shopName, userId, logout, email } = useAuthStore();
+  const Colors = useColors();
+  const { themeId, setTheme } = useThemeStore();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   // 通知設定（AsyncStorageで永続化）
@@ -199,6 +202,36 @@ export default function AccountScreen() {
             </View>
             <Ionicons name="chevron-forward" size={14} color={Colors.text3} />
           </PunyTouchable>
+        </View>
+
+        {/* テーマ設定 */}
+        <View style={styles.menuGroup}>
+          <View style={styles.menuItemCol}>
+            <View style={styles.menuIconWrap}><Ionicons name="color-palette-outline" size={18} color={Colors.purple} /></View>
+            <View style={{ flex: 1, marginBottom: 10 }}>
+              <Text style={styles.menuLabel}>テーマ</Text>
+              <Text style={styles.menuSub}>アプリの見た目を変更</Text>
+            </View>
+          </View>
+          <View style={styles.themeRow}>
+            {([
+              { id: 'default', label: 'クラシック', dot: '#e8b4c8', bg: '#0d0d18', desc: '落ち着いた深夜ネイビー' },
+              { id: 'starry',  label: '星屑',       dot: '#f0a8d8', bg: '#0a0018', desc: '深紫グラデ + 星空' },
+              { id: 'neon',    label: 'ネオン',     dot: '#ff88cc', bg: '#0c0c1a', desc: 'サイバーパンク発光' },
+            ] as const).map(({ id, label, dot, bg, desc }) => {
+              const active = themeId === id;
+              return (
+                <PunyTouchable key={id} scaleTo={0.94} haptic="light"
+                  onPress={() => setTheme(id as ThemeId)}
+                  style={[styles.themeCard, { backgroundColor: bg, borderColor: active ? dot : 'rgba(255,255,255,0.1)', borderWidth: active ? 1.5 : 0.5 }]}>
+                  <View style={[styles.themeDot, { backgroundColor: dot, shadowColor: dot, shadowOpacity: active ? 0.8 : 0, shadowRadius: 6, shadowOffset: { width:0, height:0 } }]} />
+                  <Text style={[styles.themeLabel, { color: active ? dot : 'rgba(255,255,255,0.6)' }]}>{label}</Text>
+                  <Text style={[styles.themeDesc, { color: active ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.3)' }]}>{desc}</Text>
+                  {active && <View style={[styles.themeCheck, { backgroundColor: dot }]}><Ionicons name="checkmark" size={10} color="#fff" /></View>}
+                </PunyTouchable>
+              );
+            })}
+          </View>
         </View>
 
         {/* 通知設定 */}

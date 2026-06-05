@@ -5,7 +5,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/theme';
+import { Colors, useColors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 import { PunyTouchable } from '../../components/PunyTouchable';
@@ -203,7 +203,8 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
 }
 
 // ── オーナー向けシフト管理 ──────────────────────────────────────
-function OwnerShiftView({ shopId }: { shopId: string }) {
+function OwnerShiftView({
+  const Colors = useColors(); shopId }: { shopId: string }) {
   const now = new Date();
   const [calYear, setCalYear] = useState(now.getFullYear());
   const [calMonth, setCalMonth] = useState(now.getMonth()); // 0-indexed
@@ -515,7 +516,8 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
 }
 
 // ── キャスト向けシフト希望提出 ──────────────────────────────────
-function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
+function CastShiftView({
+  const Colors = useColors(); castId, shopId }: { castId: string; shopId: string }) {
   const router = useRouter();
   const [view, setView] = useState<'me' | 'shop'>('me'); // タブ切り替え
   const [shifts, setShifts] = useState<any[]>([]);
