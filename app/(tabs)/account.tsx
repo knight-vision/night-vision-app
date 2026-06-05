@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useColors } from '../../constants/theme';
 import { useAuthStore } from '../../store/auth';
 import { API_BASE } from '../../constants/api';
+import { GlassCard } from '../../components/GlassCard';
 import { PunyTouchable, haptic } from '../../components/PunyTouchable';
 
 // ── パスワード変更モーダル ─────────────────────────────────────
