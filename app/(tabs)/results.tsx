@@ -119,7 +119,7 @@ function CastPerformanceTab({ castId, shopId }: { castId: string; shopId: string
 type PayPeriod = 'daily' | 'weekly' | 'monthly';
 
 function getDateStr(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
 }
 function getWeekDates(base: string) {
   const b = new Date(base + 'T00:00:00');
@@ -206,7 +206,7 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
     const hourlyWage = castInfo?.hourly_wage || 0;
     const totalHours = targetShifts.reduce((sum: number, s: any) => {
       const parseTime = (t: string) => {
-        const parts = (t || '00:00').split(':').map(Number);
+        const parts = (t || ':00').split(':').map(Number);
         return parts[0] * 60 + (parts[1] || 0);
       };
       const startMin = parseTime(s.start_time);
@@ -261,7 +261,7 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
           <MonthCalendar
             year={parseInt(refMonth.slice(0,4), 10)}
             month={parseInt(refMonth.slice(5,7), 10) - 1}
-            onMonthChange={(y, m) => setRefMonth(`${y}-${String(m+1).padStart(2,'0')}`)}
+            onMonthChange={(y, m) => setRefMonth(`${y}-${String(m+1).padStart(2,'')}`)}
             onDayPress={(d) => setRefDate(getDateStr(d))}
             initialSelected={new Date(refDate + 'T00:00:00')}
             events={shifts.map((s: any) => ({ date: s.date, color: '#ff88cc' }))}
@@ -281,11 +281,11 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
       )}
       {period === 'monthly' && (
         <View style={styles.navRow}>
-          <PunyTouchable onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()-1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }} style={styles.navBtn} scaleTo={0.92} haptic="light">
+          <PunyTouchable onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()-1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}`); }} style={styles.navBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-back" size={18} color={Colors.text2} />
           </PunyTouchable>
           <Text style={styles.navLabel}>{refMonth}</Text>
-          <PunyTouchable onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()+1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }} style={styles.navBtn} scaleTo={0.92} haptic="light">
+          <PunyTouchable onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()+1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}`); }} style={styles.navBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
           </PunyTouchable>
         </View>
@@ -325,7 +325,7 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
           {targetShifts.length > 0 && (
             <SectionCard title="シフト明細">
               {targetShifts.sort((a, b) => a.date.localeCompare(b.date)).map((s: any) => {
-                const pt = (t: string) => { const p = (t||'00:00').split(':').map(Number); return p[0]*60+(p[1]||0); };
+                const pt = (t: string) => { const p = (t||':00').split(':').map(Number); return p[0]*60+(p[1]||0); };
                 const sm2 = pt(s.start_time), em2 = pt(s.end_time);
                 const hrs = Math.max(0, (em2 >= sm2 ? em2 - sm2 : em2 + 1440 - sm2) / 60);
                 return (
@@ -414,49 +414,49 @@ export default function ResultsScreen() {
 
 const styles = StyleSheet.create({
   safe:              { flex: 1, backgroundColor: '#0c0c1a' },
-  screenTitle:       { fontSize: 20, fontWeight: '500', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
+  screenTitle:       { fontSize: 20, fontWeight: '', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   scroll:            { paddingHorizontal: 16, paddingBottom: 108 },
   emptyText:         { color: '#aaaacc', textAlign: 'center', marginTop: 40 },
   statGrid:          { flexDirection: 'row', gap: 10, marginBottom: 0 },
   rankRow:           { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  rankNum:           { fontSize: 13, fontWeight: '700', color: '#aaaacc', width: 24 },
+  rankNum:           { fontSize: 13, fontWeight: '', color: '#aaaacc', width: 24 },
   castAvatar:        { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
-  castAvatarText:    { fontSize: 12, fontWeight: '600' },
+  castAvatarText:    { fontSize: 12, fontWeight: '' },
   rankName:          { fontSize: 13, color: '#eeeeff' },
-  rankSales:         { fontSize: 13, fontWeight: '600', color: '#eeeeff' },
+  rankSales:         { fontSize: 13, fontWeight: '', color: '#eeeeff' },
   barRow:            { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 },
   barLabel:          { width: 32, fontSize: 11, color: '#aaaacc' },
   barTrack:          { flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' },
-  barFill:           { height: '100%', backgroundColor: '#ff88cc', borderRadius: 3 },
+  barFill:           { height: '%', backgroundColor: '#ff88cc', borderRadius: 3 },
   barVal:            { width: 72, fontSize: 11, color: '#aaaacc', textAlign: 'right' },
   // 給与/実績セグメント
   segmentWrap:       { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: 3, marginBottom: 16, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.15)' },
   segmentBtn:        { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 9, borderRadius: 11 },
   segmentBtnActive:  { backgroundColor: 'rgba(255,136,204,0.18)', borderWidth: 0.5, borderColor: 'rgba(255,136,204,0.5)' },
-  segmentText:       { fontSize: 13, color: '#666688', fontWeight: '500' },
-  segmentTextActive: { color: '#ff88cc', fontWeight: '700' },
+  segmentText:       { fontSize: 13, color: '#666688', fontWeight: '' },
+  segmentTextActive: { color: '#ff88cc', fontWeight: '' },
   // 期間ピル
   periodRow:         { flexDirection: 'row', gap: 6, marginBottom: 12 },
   periodPill:        { paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', backgroundColor: 'rgba(255,255,255,0.04)' },
   periodPillActive:  { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
-  periodPillText:    { fontSize: 12, color: '#666688', fontWeight: '500' },
-  periodPillTextActive: { color: '#ff88cc', fontWeight: '700' },
+  periodPillText:    { fontSize: 12, color: '#666688', fontWeight: '' },
+  periodPillTextActive: { color: '#ff88cc', fontWeight: '' },
   // ナビ
   navRow:            { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 12 },
   navBtn:            { padding: 6 },
-  navLabel:          { fontSize: 14, color: '#eeeeff', fontWeight: '500', minWidth: 140, textAlign: 'center' },
+  navLabel:          { fontSize: 14, color: '#eeeeff', fontWeight: '', minWidth: 140, textAlign: 'center' },
   // 給与カード
   payCard:           { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 16, marginBottom: 16 },
   payRow:            { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   payLabel:          { fontSize: 13, color: '#aaaacc' },
-  payValue:          { fontSize: 13, color: '#eeeeff', fontWeight: '500' },
+  payValue:          { fontSize: 13, color: '#eeeeff', fontWeight: '' },
   payTotalRow:       { borderBottomWidth: 0, marginTop: 6, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(200,180,255,0.18)' },
-  payTotalLabel:     { fontSize: 15, fontWeight: '700', color: '#eeeeff' },
-  payTotalValue:     { fontSize: 22, fontWeight: '900', color: '#ff88cc' },
+  payTotalLabel:     { fontSize: 15, fontWeight: '', color: '#eeeeff' },
+  payTotalValue:     { fontSize: 22, fontWeight: '', color: '#ff88cc' },
   // シフト明細
   shiftDetailRow:    { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)', gap: 8 },
   shiftDetailDate:   { fontSize: 12, color: '#aaaacc', width: 72 },
   shiftDetailTime:   { fontSize: 12, color: '#eeeeff', flex: 1 },
   shiftDetailHrs:    { fontSize: 12, color: '#666688', width: 36, textAlign: 'right' },
-  shiftDetailPay:    { fontSize: 13, fontWeight: '600', width: 64, textAlign: 'right' },
+  shiftDetailPay:    { fontSize: 13, fontWeight: '', width: 64, textAlign: 'right' },
 });

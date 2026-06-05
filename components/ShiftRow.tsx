@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: Colors.border,
   },
-  name:      { fontSize: 12, fontWeight: '500', color: Colors.text },
+  name:      { fontSize: 12, fontWeight: '', color: Colors.text },
   time:      { fontSize: 10, color: Colors.text2, marginTop: 2 },
   badge:     { borderRadius: 10, borderWidth: 0.5, paddingHorizontal: 8, paddingVertical: 3 },
   badgeText: { fontSize: 10 },

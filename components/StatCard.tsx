@@ -29,7 +29,7 @@ export function StatCard({ label, value, sub, subColor, valueColor }: Props) {
         style={[styles.card, { borderColor: Colors.borderGlow }]}
         glassEffectStyle={{
           style: 'regular',
-          tintColor: Colors.purple + '18',
+          tintColor: Colors.purple + '',
           animate: true,
         }}
       >
@@ -47,7 +47,7 @@ export function StatCard({ label, value, sub, subColor, valueColor }: Props) {
 
 const styles = StyleSheet.create({
   card:  { flex: 1, borderRadius: 16, borderWidth: 0.5, padding: 14, overflow: 'hidden' },
-  label: { fontSize: 11, marginBottom: 6, fontWeight: '500', letterSpacing: 0.3 },
-  value: { fontSize: 20, fontWeight: '600', letterSpacing: -0.3 },
+  label: { fontSize: 11, marginBottom: 6, fontWeight: '', letterSpacing: 0.3 },
+  value: { fontSize: 20, fontWeight: '', letterSpacing: -0.3 },
   sub:   { fontSize: 11, marginTop: 3 },
 });

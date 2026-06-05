@@ -15,11 +15,11 @@ import { useRouter } from 'expo-router';
 
 const CAST_COLORS = ['#ff6b9d','#00d4ff','#ffd700','#a855f7','#00e5a0','#ff9500','#00c7be','#ff3b30','#34aadc','#4cd964'];
 const HOURS = Array.from({ length: 48 }, (_, i) => i);
-const MINUTES = ['00', '10', '20', '30', '40', '50'];
+const MINUTES = ['', '', '', '', '', ''];
 const CAL_DAYS = ['月', '火', '水', '木', '金', '土', '日'];
 
 function getDateStr(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
 }
 function getWeekDates(base: string): string[] {
   const b = new Date(base + 'T00:00:00');
@@ -111,8 +111,8 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
     return isNaN(raw) ? 20 : Math.max(0, Math.min(raw, 47));
   };
   const toMinIndex = (v: string): number => {
-    const raw = v.split(':')[1]?.slice(0, 2) ?? '00';
-    const idx = MINUTES.indexOf(MINUTES.includes(raw) ? raw : '00');
+    const raw = v.split(':')[1]?.slice(0, 2) ?? '';
+    const idx = MINUTES.indexOf(MINUTES.includes(raw) ? raw : '');
     return idx >= 0 ? idx : 0;
   };
 
@@ -146,7 +146,7 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
       const mInVisible = visibleMinutes.indexOf(MINUTES[currentM]);
       setTempMIdx(mInVisible >= 0 ? mInVisible : 0);
     } else {
-      setTempMIdx(MINUTES.indexOf(MINUTES[currentM] || '00'));
+      setTempMIdx(MINUTES.indexOf(MINUTES[currentM] || ''));
     }
     setModalVisible(true);
   };
@@ -158,7 +158,7 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
         ? visibleMinutes[tempMIdx]
         : MINUTES[tempMIdx];
     // Supabase time型は0-23のみ。25時→1時に正規化（日付跨ぎを表現）
-    const h = String(selectedHourValue >= 24 ? selectedHourValue - 24 : selectedHourValue).padStart(2, '0');
+    const h = String(selectedHourValue >= 24 ? selectedHourValue - 24 : selectedHourValue).padStart(2, '');
     onChange(`${h}:${selectedMinuteValue}`);
     setModalVisible(false);
   };
@@ -260,8 +260,8 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
       ...prev,
       [date]: [...(prev[date] || []).filter(e => e.cast_id !== castId), {
         cast_id: castId,
-        start_time: req?.start_time?.slice(0, 5) || '20:00',
-        end_time: req?.end_time?.slice(0, 5) || '24:00',
+        start_time: req?.start_time?.slice(0, 5) || ':00',
+        end_time: req?.end_time?.slice(0, 5) || ':00',
       }],
     }));
   };
@@ -415,7 +415,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                 const ci = casts.findIndex((c: any) => String(c.id) === String(req.cast_id));
                 const color = getCastColor(ci);
                 return (
-                  <View key={req.id} style={[styles.reqRow, { backgroundColor: color + '11', borderColor: color + '33' }]}>
+                  <View key={req.id} style={[styles.reqRow, { backgroundColor: color + '', borderColor: color + '' }]}>
                     <Text style={[styles.reqCastName, { color }]}>{req.casts?.name}</Text>
                     <Text style={styles.reqTime}>{req.start_time?.slice(0,5)}〜{req.end_time?.slice(0,5)}</Text>
                     {req.note ? <Text style={styles.reqNote}>📝{req.note}</Text> : null}
@@ -444,7 +444,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
                     onPress={() => selected ? removeFromDraft(selectedDate, String(cast.id)) : addToDraft(selectedDate, String(cast.id))}
                     style={[styles.castSelectBtn, {
                       backgroundColor: selected ? color : Colors.surface2,
-                      borderColor: selected ? color : hasReq ? color + '88' : Colors.border,
+                      borderColor: selected ? color : hasReq ? color + '' : Colors.border,
                     }]}>
                     <Text style={[styles.castSelectBtnText, { color: selected ? '#fff' : hasReq ? color : Colors.text2 }]}>
                       {selected ? '✓ ' : ''}{cast.name}{hasReq && !selected ? ' 📩' : ''}
@@ -461,7 +461,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
             const ci = casts.findIndex((c: any) => String(c.id) === entry.cast_id);
             const color = getCastColor(ci);
             return (
-              <View key={entry.cast_id} style={[styles.timeSetBlock, { backgroundColor: color + '11', borderColor: color + '44' }]}>
+              <View key={entry.cast_id} style={[styles.timeSetBlock, { backgroundColor: color + '', borderColor: color + '' }]}>
                 <Text style={[styles.timeSetName, { color }]}>{cast?.name}</Text>
                 <View style={{ gap: 8 }}>
                   <TimeSelector value={entry.start_time} onChange={v => updateDraftTime(selectedDate, entry.cast_id, 'start_time', v)} label="開始" maxHour={23} />
@@ -528,8 +528,8 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selDate, setSelDate] = useState(getDateStr(new Date()));
-  const [startTime, setStartTime] = useState('20:00');
-  const [endTime, setEndTime] = useState('24:00');
+  const [startTime, setStartTime] = useState(':00');
+  const [endTime, setEndTime] = useState(':00');
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -646,7 +646,7 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
         month={calMonth - 1}
         onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m + 1); }}
         onDayPress={(d) => {
-          const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+          const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
           const todayStr = getDateStr(new Date());
           if (dateStr < todayStr) {
             Alert.alert('過去の日付', '過去の日にはシフト希望を出せません');
@@ -679,7 +679,7 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
                   <Text style={styles.shiftTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
                 </View>
                 <View style={{ backgroundColor: 'rgba(78,203,138,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, marginRight: 4 }}>
-                  <Text style={{ fontSize: 12, color: Colors.green, fontWeight: '600' }}>確定済み</Text>
+                  <Text style={{ fontSize: 12, color: Colors.green, fontWeight: '' }}>確定済み</Text>
                 </View>
                 <Text style={{ fontSize: 16, color: Colors.text3 }}>›</Text>
               </View>
@@ -733,7 +733,7 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
               month={calMonth - 1}
               onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m + 1); }}
               onDayPress={(d) => {
-                const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
                 const todayStr = getDateStr(new Date());
                 if (ds < todayStr) {
                   Alert.alert('過去の日付', '過去の日にはシフト希望を出せません');
@@ -764,7 +764,7 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
                 return HOURS.indexOf(sh);
               })()}
               minMinute={(() => {
-                const sm = startTime.split(':')[1] || '00';
+                const sm = startTime.split(':')[1] || '';
                 return MINUTES.indexOf(sm);
               })()}
             />
@@ -863,21 +863,21 @@ export default function ShiftScreen() {
 
 const ts = StyleSheet.create({
   btn:            { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', paddingHorizontal: 12, paddingVertical: 10 },
-  btnLabel:       { fontSize: 11, color: '#eeeeff'3, marginRight: 4 },
-  btnValue:       { fontSize: 14, color: '#ff88cc', fontWeight: '600', flex: 1 },
+  btnLabel:       { fontSize: 11, color: '#eeeeff', marginRight: 4 },
+  btnValue:       { fontSize: 14, color: '#ff88cc', fontWeight: '', flex: 1 },
   overlay:        { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.55)' },
   sheet:          { backgroundColor: '#0c0c1a', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 34 },
   sheetHeader:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  sheetCancel:    { fontSize: 15, color: '#eeeeff'2 },
+  sheetCancel:    { fontSize: 15, color: '#eeeeff' },
   sheetTitle:     { fontSize: 15, fontWeight: '600', color: '#eeeeff' },
-  sheetDone:      { fontSize: 15, color: '#ff88cc', fontWeight: '700' },
+  sheetDone:      { fontSize: 15, color: '#ff88cc', fontWeight: '' },
   drumRow:        { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0c0c1a' },
   drumItem:       { height: ITEM_H, justifyContent: 'center', alignItems: 'center' },
   drumItemActive: { backgroundColor: 'rgba(255,136,204,0.15)' },
-  drumText:       { fontSize: 18, color: '#eeeeff'3 },
-  drumTextActive: { fontSize: 20, color: '#ff88cc', fontWeight: '700' },
-  drumSep:        { fontSize: 22, color: '#eeeeff'2, fontWeight: '600', paddingHorizontal: 4, marginBottom: 4 },
-  selectorLine:   { position: 'absolute', left: 0, right: 0, top: ITEM_H * Math.floor(VISIBLE / 2), height: ITEM_H, borderTopWidth: 0.5, borderBottomWidth: 0, borderColor: 'rgba(200,180,255,0.18)', backgroundColor: 'rgba(255,255,255,0.05)'2, zIndex: 0 },
+  drumText:       { fontSize: 18, color: '#eeeeff' },
+  drumTextActive: { fontSize: 20, color: '#ff88cc', fontWeight: '' },
+  drumSep:        { fontSize: 22, color: '#eeeeff', fontWeight: '600', paddingHorizontal: 4, marginBottom: 4 },
+  selectorLine:   { position: 'absolute', left: 0, right: 0, top: ITEM_H * Math.floor(VISIBLE / 2), height: ITEM_H, borderTopWidth: 0.5, borderBottomWidth: 0, borderColor: 'rgba(200,180,255,0.18)', backgroundColor: 'rgba(255,255,255,0.05)', zIndex: 0 },
 });
 
 const styles = StyleSheet.create({
@@ -885,95 +885,95 @@ const styles = StyleSheet.create({
   subTabRow:        { flexDirection: 'row', gap: 8, marginBottom: 14 },
   subTab:           { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)' },
   subTabActive:     { backgroundColor: '#aa88ff'Dim, borderColor: '#aa88ff' },
-  subTabText:       { fontSize: 13, color: '#eeeeff'2, fontWeight: '500' },
-  subTabTextActive: { color: '#aa88ff', fontWeight: '700' },
+  subTabText:       { fontSize: 13, color: '#eeeeff', fontWeight: '500' },
+  subTabTextActive: { color: '#aa88ff', fontWeight: '' },
 
   // 店舗全体ビュー
   shopDayCard:      { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 14, marginTop: 4 },
-  shopDayDate:      { fontSize: 14, fontWeight: '600', color: '#eeeeff', marginBottom: 10 },
-  shopDayEmpty:     { fontSize: 12, color: '#eeeeff'3, textAlign: 'center', paddingVertical: 12 },
-  shopShiftRow:     { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, paddingHorizontal: 12, borderLeftWidth: 3, backgroundColor: 'rgba(255,255,255,0.05)'2, borderRadius: 8, marginBottom: 6 },
+  shopDayDate:      { fontSize: 14, fontWeight: '', color: '#eeeeff', marginBottom: 10 },
+  shopDayEmpty:     { fontSize: 12, color: '#eeeeff', textAlign: 'center', paddingVertical: 12 },
+  shopShiftRow:     { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, paddingHorizontal: 12, borderLeftWidth: 3, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 8, marginBottom: 6 },
   shopCastDot:      { width: 8, height: 8, borderRadius: 4 },
   shopCastName:     { fontSize: 13, fontWeight: '600', flex: 1 },
-  shopShiftTime:    { fontSize: 12, color: '#eeeeff'2, fontWeight: '500' },
+  shopShiftTime:    { fontSize: 12, color: '#eeeeff', fontWeight: '500' },
   safe:              { flex: 1, backgroundColor: '#0c0c1a' },
   summaryCard:       { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12 },
-  summaryLabel:      { fontSize: 11, color: '#eeeeff'3, marginBottom: 4 },
+  summaryLabel:      { fontSize: 11, color: '#eeeeff', marginBottom: 4 },
   summaryValue:      { fontSize: 20, fontWeight: '700', marginBottom: 4 },
-  summaryDetail:     { fontSize: 11, color: '#eeeeff'2, marginTop: 2 },
+  summaryDetail:     { fontSize: 11, color: '#eeeeff', marginTop: 2 },
   screenTitle:       { fontSize: 20, fontWeight: '500', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   scroll:            { paddingHorizontal: 16, paddingBottom: 108 },
   weekNav:           { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   weekBtn:           { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
-  weekBtnText:       { fontSize: 13, color: '#eeeeff'2 },
+  weekBtnText:       { fontSize: 13, color: '#eeeeff' },
   weekLabel:         { fontSize: 14, fontWeight: '600', color: '#eeeeff' },
-  todayBtn:          { alignSelf: 'flex-end', backgroundColor: 'rgba(255,255,255,0.05)'2, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, marginBottom: 12 },
-  todayBtnText:      { fontSize: 12, color: '#eeeeff'2 },
+  todayBtn:          { alignSelf: 'flex-end', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, marginBottom: 12 },
+  todayBtnText:      { fontSize: 12, color: '#eeeeff' },
   confirmBtn:        { backgroundColor: '#ff88cc', borderRadius: 12, height: 48, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  confirmBtnText:    { color: '#1a1200', fontSize: 15, fontWeight: '700' },
+  confirmBtnText:    { color: '#1a1200', fontSize: 15, fontWeight: '' },
   dateBlock:         { borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   dateRow:           { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, padding: 12 },
   dateRowToday:      { backgroundColor: 'rgba(201,168,76,0.05)' },
   dateRowSelected:   { backgroundColor: 'rgba(155,127,232,0.08)' },
-  dateLabel:         { fontSize: 14, fontWeight: '600', color: '#eeeeff', minWidth: 100 },
+  dateLabel:         { fontSize: 14, fontWeight: '', color: '#eeeeff', minWidth: 100 },
   todayBadge:        { backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 },
-  todayBadgeText:    { fontSize: 10, color: '#ff88cc', fontWeight: '600' },
+  todayBadgeText:    { fontSize: 10, color: '#ff88cc', fontWeight: '' },
   pendingBadge:      { backgroundColor: 'rgba(155,127,232,0.2)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, fontSize: 11, color: '#aa88ff' } as any,
   castChip:          { borderRadius: 8, borderWidth: 1, paddingHorizontal: 8, paddingVertical: 4 },
-  castChipText:      { fontSize: 12, fontWeight: '700' },
+  castChipText:      { fontSize: 12, fontWeight: '' },
   datePanel:         { backgroundColor: 'rgba(255,255,255,0.05)', padding: 14, gap: 12 },
   panelSection:      { gap: 8 },
-  panelSectionTitle: { fontSize: 11, fontWeight: '700', color: '#eeeeff'3, textTransform: 'uppercase', letterSpacing: 0.5 },
+  panelSectionTitle: { fontSize: 11, fontWeight: '', color: '#eeeeff', textTransform: 'uppercase', letterSpacing: 0.5 },
   reqRow:            { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, borderRadius: 10, borderWidth: 0.5, flexWrap: 'wrap' },
-  reqCastName:       { fontSize: 13, fontWeight: '700', minWidth: 48 },
-  reqTime:           { fontSize: 12, color: '#eeeeff'2 },
-  reqNote:           { fontSize: 11, color: '#eeeeff'3, flex: 1 },
+  reqCastName:       { fontSize: 13, fontWeight: '', minWidth: 48 },
+  reqTime:           { fontSize: 12, color: '#eeeeff' },
+  reqNote:           { fontSize: 11, color: '#eeeeff', flex: 1 },
   approveBtn:        { backgroundColor: 'rgba(78,203,138,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 0.5, borderColor: '#80d8b0' },
-  approveBtnText:    { fontSize: 12, color: '#80d8b0', fontWeight: '600' },
+  approveBtnText:    { fontSize: 12, color: '#80d8b0', fontWeight: '' },
   deleteReqBtn:      { padding: 4 },
   castSelectRow:     { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   castSelectBtn:     { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5 },
-  castSelectBtnText: { fontSize: 13, fontWeight: '600' },
+  castSelectBtnText: { fontSize: 13, fontWeight: '' },
   timeSetBlock:      { borderRadius: 12, borderWidth: 0.5, padding: 12, gap: 8 },
-  timeSetName:       { fontSize: 14, fontWeight: '700' },
+  timeSetName:       { fontSize: 14, fontWeight: '' },
   timeSetRow:        { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  timeSetLabel:      { fontSize: 11, color: '#eeeeff'3, marginBottom: 4 },
-  timeSetSep:        { color: '#eeeeff'3, fontSize: 16, marginTop: 16 },
+  timeSetLabel:      { fontSize: 11, color: '#eeeeff', marginBottom: 4 },
+  timeSetSep:        { color: '#eeeeff', fontSize: 16, marginTop: 16 },
   confirmedRow:      { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 },
-  confirmedName:     { fontSize: 13, fontWeight: '700', minWidth: 48 },
-  confirmedTime:     { fontSize: 12, color: '#eeeeff'2, flex: 1 },
+  confirmedName:     { fontSize: 13, fontWeight: '', minWidth: 48 },
+  confirmedTime:     { fontSize: 12, color: '#eeeeff', flex: 1 },
   changeTimeBtn:     { backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 0.5, borderColor: '#ff88cc' },
   changeTimeBtnText: { fontSize: 12, color: '#ff88cc' },
   deleteConfBtn:     { padding: 4 },
   // キャスト向けカレンダー
   calCard:           { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 14, marginBottom: 16 },
   calHeader:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  calTitle:          { fontSize: 15, fontWeight: '600', color: '#eeeeff' },
+  calTitle:          { fontSize: 15, fontWeight: '', color: '#eeeeff' },
   calDayRow:         { flexDirection: 'row', marginBottom: 8 },
-  calDayLabel:       { flex: 1, textAlign: 'center', fontSize: 11, color: '#eeeeff'3, fontWeight: '600' },
+  calDayLabel:       { flex: 1, textAlign: 'center', fontSize: 11, color: '#eeeeff', fontWeight: '600' },
   calGrid:           { flexDirection: 'row', flexWrap: 'wrap' },
-  calCell:           { width: '14.28%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 8 },
+  calCell:           { width: '.28%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 8 },
   calCellShift:      { backgroundColor: 'rgba(255,136,204,0.15)' },
   calCellToday:      { backgroundColor: '#aa88ff'Dim },
   calCellSelected:   { backgroundColor: '#ff88cc' },
   calDayNum:         { fontSize: 13, color: '#eeeeff' },
-  calDayNumShift:    { color: '#ff88cc', fontWeight: '600' },
-  calDayNumToday:    { color: '#aa88ff', fontWeight: '600' },
+  calDayNumShift:    { color: '#ff88cc', fontWeight: '' },
+  calDayNumToday:    { color: '#aa88ff', fontWeight: '' },
   addShiftBtn:       { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 12, borderWidth: 0.5, borderColor: '#ff88cc', padding: 14, marginBottom: 16 },
-  addShiftBtnText:   { fontSize: 14, color: '#ff88cc', fontWeight: '500' },
-  listSectionTitle:  { fontSize: 12, color: '#eeeeff'2, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, marginTop: 4 },
+  addShiftBtnText:   { fontSize: 14, color: '#ff88cc', fontWeight: '' },
+  listSectionTitle:  { fontSize: 12, color: '#eeeeff', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, marginTop: 4 },
   shiftItem:         { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  shiftDate:         { fontSize: 14, fontWeight: '500', color: '#eeeeff' },
-  shiftTime:         { fontSize: 12, color: '#eeeeff'2, marginTop: 2 },
+  shiftDate:         { fontSize: 14, fontWeight: '', color: '#eeeeff' },
+  shiftTime:         { fontSize: 12, color: '#eeeeff', marginTop: 2 },
   statusBadge:       { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 },
   statusText:        { fontSize: 12, fontWeight: '600' },
   // モーダル
   modalContainer:    { flex: 1, backgroundColor: '#0c0c1a' },
   modalHeader:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   modalClose:        { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  modalTitle:        { fontSize: 16, fontWeight: '500', color: '#eeeeff' },
-  modalLabel:        { fontSize: 12, color: '#eeeeff'2, marginBottom: 8 },
+  modalTitle:        { fontSize: 16, fontWeight: '', color: '#eeeeff' },
+  modalLabel:        { fontSize: 12, color: '#eeeeff', marginBottom: 8 },
   miniCalWrap:       { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12 },
   submitBtn:         { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 20 },
-  submitBtnText:     { color: '#1a1200', fontSize: 15, fontWeight: '600' },
+  submitBtnText:     { color: '#1a1200', fontSize: 15, fontWeight: '' },
 });

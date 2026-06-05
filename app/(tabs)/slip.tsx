@@ -20,7 +20,7 @@ const TAX_RATE = 0.1;
 const CAL_DAYS = ['月', '火', '水', '木', '金', '土', '日'];
 
 function getDateStr(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
 }
 function fmtDateLabel(ds: string) {
   const d = new Date(ds + 'T00:00:00');
@@ -39,7 +39,7 @@ function DatePicker({ value, onChange }: { value: string; onChange: (d: string) 
       month={month}
       onMonthChange={(y, m) => { setYear(y); setMonth(m); }}
       onDayPress={(d) => {
-        const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
         onChange(ds);
       }}
       initialSelected={initDate}
@@ -297,8 +297,8 @@ function SlipInput({ shopId }: { shopId: string }) {
         <View style={s.totalRow}><Text style={s.totalLabel}>小計</Text><Text style={s.totalValue}>{fmtYen(subtotal)}</Text></View>
         <View style={s.totalRow}><Text style={s.totalLabel}>消費税（10%）</Text><Text style={s.totalValue}>{fmtYen(tax)}</Text></View>
         <View style={[s.totalRow, { marginTop: 8, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: Colors.border }]}>
-          <Text style={{ fontSize: 15, fontWeight: '700', color: Colors.text }}>合計</Text>
-          <Text style={{ fontSize: 22, fontWeight: '900', color: Colors.gold }}>{fmtYen(total)}</Text>
+          <Text style={{ fontSize: 15, fontWeight: '', color: Colors.text }}>合計</Text>
+          <Text style={{ fontSize: 22, fontWeight: '', color: Colors.gold }}>{fmtYen(total)}</Text>
         </View>
       </View>
 
@@ -332,7 +332,7 @@ function SlipInput({ shopId }: { shopId: string }) {
                 <Text style={{ fontSize: 12, color: Colors.text3 }}>#{todaySlips.length - idx}</Text>
                 <View style={s.payBadge}><Text style={s.payBadgeText}>{slip.payment}</Text></View>
               </View>
-              <Text style={{ fontSize: 16, fontWeight: '700', color: Colors.gold }}>{fmtYen(slip.total)}</Text>
+              <Text style={{ fontSize: 16, fontWeight: '', color: Colors.gold }}>{fmtYen(slip.total)}</Text>
             </View>
             {castNames ? <Text style={s.slipCastText}>👤 {castNames}</Text> : null}
             <Text style={s.slipItemText}>{(slip.items || []).map((i: any) => `${i.name}×${i.qty}`).join('　')}</Text>
@@ -365,14 +365,14 @@ function ShopSales({ shopId }: { shopId: string }) {
   const [allSales, setAllSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const monthStr = `${year}-${String(month).padStart(2, '0')}`;
+  const monthStr = `${year}-${String(month).padStart(2, '')}`;
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       // 年次は12ヶ月分まとめて取得
       if (period === 'yearly') {
-        const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
+        const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '')}`);
         const results = await Promise.all(months.map(m => fetch(`${API_BASE}/daily-sales?shop_id=${shopId}&month=${m}`).then(r => r.json())));
         setAllSales(results.flat().filter(Array.isArray(results[0]) ? Boolean : Boolean));
       } else {
@@ -406,7 +406,7 @@ function ShopSales({ shopId }: { shopId: string }) {
     if (period === 'monthly') return allSales;
     // yearly: 月別集計
     return Array.from({ length: 12 }, (_, i) => {
-      const m = `${year}-${String(i + 1).padStart(2, '0')}`;
+      const m = `${year}-${String(i + 1).padStart(2, '')}`;
       const monthData = allSales.filter((s: any) => s.date?.startsWith(m));
       return {
         date: m,
@@ -629,88 +629,88 @@ export default function SlipScreen() {
 const cal = StyleSheet.create({
   wrap:           { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 14, marginBottom: 8 },
   header:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  title:          { fontSize: 15, fontWeight: '600', color: '#eeeeff' },
+  title:          { fontSize: 15, fontWeight: '', color: '#eeeeff' },
   dayRow:         { flexDirection: 'row', marginBottom: 8 },
-  dayLabel:       { flex: 1, textAlign: 'center', fontSize: 11, color: '#eeeeff'3, fontWeight: '600' },
+  dayLabel:       { flex: 1, textAlign: 'center', fontSize: 11, color: '#eeeeff', fontWeight: '600' },
   grid:           { flexDirection: 'row', flexWrap: 'wrap' },
-  cell:           { width: '14.28%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 8 },
+  cell:           { width: '.28%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 8 },
   cellSelected:   { backgroundColor: '#ff88cc' },
   cellToday:      { backgroundColor: '#aa88ff'Dim },
   dayNum:         { fontSize: 14, color: '#eeeeff' },
-  dayNumSelected: { color: '#1a1200', fontWeight: '700' },
-  dayNumToday:    { color: '#aa88ff', fontWeight: '600' },
+  dayNumSelected: { color: '#1a1200', fontWeight: '' },
+  dayNumToday:    { color: '#aa88ff', fontWeight: '' },
 });
 
 const s = StyleSheet.create({
   safe:             { flex: 1, backgroundColor: '#0c0c1a' },
-  screenTitle:      { fontSize: 20, fontWeight: '500', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
+  screenTitle:      { fontSize: 20, fontWeight: '', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   scroll:           { paddingHorizontal: 16, paddingBottom: 108 },
   tabScroll:        { maxHeight: 48, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   tabContent:       { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
   tab:              { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)' },
   tabActive:        { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
-  tabText:          { fontSize: 12, color: '#eeeeff'3 },
-  tabTextActive:    { fontSize: 12, color: '#ff88cc', fontWeight: '500' },
-  sectionTitle:     { fontSize: 13, color: '#eeeeff'2, fontWeight: '600', marginTop: 16, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
-  selectedDate:     { fontSize: 14, color: '#ff88cc', fontWeight: '600', marginBottom: 4 },
-  fieldLabel:       { fontSize: 11, color: '#eeeeff'3, marginBottom: 4 },
+  tabText:          { fontSize: 12, color: '#eeeeff' },
+  tabTextActive:    { fontSize: 12, color: '#ff88cc', fontWeight: '' },
+  sectionTitle:     { fontSize: 13, color: '#eeeeff', fontWeight: '600', marginTop: 16, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  selectedDate:     { fontSize: 14, color: '#ff88cc', fontWeight: '', marginBottom: 4 },
+  fieldLabel:       { fontSize: 11, color: '#eeeeff', marginBottom: 4 },
   input:            { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, color: '#eeeeff', fontSize: 14, marginBottom: 8 },
   payBtn:           { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', backgroundColor: 'rgba(255,255,255,0.05)' },
   payBtnActive:     { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
-  payBtnText:       { fontSize: 14, color: '#eeeeff'2, fontWeight: '500' },
-  payBtnTextActive: { color: '#ff88cc', fontWeight: '700' },
+  payBtnText:       { fontSize: 14, color: '#eeeeff', fontWeight: '500' },
+  payBtnTextActive: { color: '#ff88cc', fontWeight: '' },
   castEntryRow:     { flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'flex-start' },
   picker:           { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 4 },
   pickerOption:     { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, marginRight: 4 },
   pickerOptionActive:{ backgroundColor: 'rgba(255,136,204,0.15)' },
-  pickerOptionText: { fontSize: 13, color: '#eeeeff'2 },
-  pickerOptionTextActive: { color: '#ff88cc', fontWeight: '600' },
-  addRowBtn:        { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,255,255,0.05)'2, borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 10, marginBottom: 12 },
+  pickerOptionText: { fontSize: 13, color: '#eeeeff' },
+  pickerOptionTextActive: { color: '#ff88cc', fontWeight: '' },
+  addRowBtn:        { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 10, marginBottom: 12 },
   addRowBtnText:    { fontSize: 13, color: '#ff88cc' },
   itemBlock:        { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 8 },
-  presetChip:       { backgroundColor: 'rgba(255,255,255,0.05)'2, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, marginRight: 6, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)' },
-  presetChipText:   { fontSize: 12, color: '#eeeeff'2 },
+  presetChip:       { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, marginRight: 6, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)' },
+  presetChipText:   { fontSize: 12, color: '#eeeeff' },
   totalBlock:       { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 16, marginVertical: 12 },
   totalRow:         { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  totalLabel:       { fontSize: 13, color: '#eeeeff'2 },
-  totalValue:       { fontSize: 13, color: '#eeeeff', fontWeight: '500' },
+  totalLabel:       { fontSize: 13, color: '#eeeeff' },
+  totalValue:       { fontSize: 13, color: '#eeeeff', fontWeight: '' },
   saveBtn:          { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 8, marginBottom: 8 },
-  saveBtnText:      { color: '#1a1200', fontSize: 15, fontWeight: '600' },
+  saveBtnText:      { color: '#1a1200', fontSize: 15, fontWeight: '' },
   editBanner:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(201,168,76,0.1)', borderRadius: 10, borderWidth: 0.5, borderColor: '#ff88cc', padding: 12, marginBottom: 12 },
-  editBannerText:   { fontSize: 13, color: '#ff88cc', fontWeight: '600' },
+  editBannerText:   { fontSize: 13, color: '#ff88cc', fontWeight: '' },
   editCancelBtn:    { backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5 },
   historyHeader:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginTop: 16, marginBottom: 8 },
-  historyHeaderText:{ fontSize: 13, fontWeight: '600', color: '#eeeeff' },
+  historyHeaderText:{ fontSize: 13, fontWeight: '', color: '#eeeeff' },
   slipCard:         { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 8 },
-  payBadge:         { backgroundColor: 'rgba(255,255,255,0.05)'2, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
-  payBadgeText:     { fontSize: 11, color: '#eeeeff'2 },
-  slipCastText:     { fontSize: 12, color: '#eeeeff'2, marginBottom: 3 },
-  slipItemText:     { fontSize: 12, color: '#eeeeff'3, marginBottom: 3 },
-  slipMemoText:     { fontSize: 11, color: '#eeeeff'3, marginBottom: 6 },
+  payBadge:         { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
+  payBadgeText:     { fontSize: 11, color: '#eeeeff' },
+  slipCastText:     { fontSize: 12, color: '#eeeeff', marginBottom: 3 },
+  slipItemText:     { fontSize: 12, color: '#eeeeff', marginBottom: 3 },
+  slipMemoText:     { fontSize: 11, color: '#eeeeff', marginBottom: 6 },
   slipActions:      { flexDirection: 'row', gap: 8, marginTop: 8 },
-  slipEditBtn:      { flex: 1, backgroundColor: 'rgba(255,255,255,0.05)'2, borderRadius: 8, padding: 7, alignItems: 'center' },
-  slipEditBtnText:  { fontSize: 12, color: '#eeeeff'2 },
+  slipEditBtn:      { flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: 7, alignItems: 'center' },
+  slipEditBtnText:  { fontSize: 12, color: '#eeeeff' },
   slipDeleteBtn:    { backgroundColor: 'rgba(224,92,106,0.15)', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 7 },
   slipDeleteBtnText:{ fontSize: 12, color: '#f08098' },
   monthNav:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, paddingVertical: 12 },
   monthBtn:         { padding: 6 },
-  monthLabel:       { fontSize: 15, color: '#eeeeff', fontWeight: '500', minWidth: 90, textAlign: 'center' },
+  monthLabel:       { fontSize: 15, color: '#eeeeff', fontWeight: '', minWidth: 90, textAlign: 'center' },
   summaryRow:       { flexDirection: 'row', gap: 8, marginBottom: 8 },
   summaryCard:      { flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, alignItems: 'center' },
-  summaryLabel:     { fontSize: 11, color: '#eeeeff'3, marginBottom: 4 },
+  summaryLabel:     { fontSize: 11, color: '#eeeeff', marginBottom: 4 },
   summaryValue:     { fontSize: 13, fontWeight: '600' },
   dailyRow:         { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  dailyDate:        { fontSize: 12, color: '#eeeeff'2, width: 56 },
+  dailyDate:        { fontSize: 12, color: '#eeeeff', width: 56 },
   dailyTotal:       { fontSize: 14, fontWeight: '500', color: '#eeeeff' },
-  dailySub:         { fontSize: 11, color: '#eeeeff'3, marginTop: 2 },
+  dailySub:         { fontSize: 11, color: '#eeeeff', marginTop: 2 },
   dailyCost:        { fontSize: 13, fontWeight: '500' },
   menuForm:         { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 8 },
   menuItem:         { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   menuName:         { flex: 1, fontSize: 14, color: '#eeeeff' },
-  menuPrice:        { fontSize: 13, color: '#ff88cc', fontWeight: '500', marginRight: 8 },
-  empty:            { fontSize: 13, color: '#eeeeff'3, paddingVertical: 20, textAlign: 'center' },
+  menuPrice:        { fontSize: 13, color: '#ff88cc', fontWeight: '', marginRight: 8 },
+  empty:            { fontSize: 13, color: '#eeeeff', paddingVertical: 20, textAlign: 'center' },
   periodBtn:        { flex: 1, paddingVertical: 8, borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', alignItems: 'center' },
   periodBtnActive:  { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
-  periodBtnText:    { fontSize: 12, color: '#eeeeff'3 },
-  periodBtnTextActive: { color: '#ff88cc', fontWeight: '600' },
+  periodBtnText:    { fontSize: 12, color: '#eeeeff' },
+  periodBtnTextActive: { color: '#ff88cc', fontWeight: '' },
 });

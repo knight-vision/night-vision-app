@@ -51,14 +51,14 @@ export default function TabLayout() {
               style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               glassEffectStyle={{
                 style: 'regular',
-                tintColor: Colors.purple + '22',
+                tintColor: Colors.purple + '',
                 animate: true,
               }}
             />
           ) : null,
         tabBarActiveTintColor: Colors.gold,
         tabBarInactiveTintColor: Colors.text3,
-        tabBarLabelStyle: { fontSize: 11, marginTop: 3, fontWeight: '500' },
+        tabBarLabelStyle: { fontSize: 11, marginTop: 3, fontWeight: '' },
       }}
     >
       <Tabs.Screen name="index" options={{

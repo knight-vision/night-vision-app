@@ -26,7 +26,7 @@ function autumnalEquinox(year: number): number {
 function buildHolidays(year: number): Map<string, string> {
   const h = new Map<string, string>();
   const add = (m: number, d: number, name: string) =>
-    h.set(`${year}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`, name);
+    h.set(`${year}-${String(m).padStart(2, '')}-${String(d).padStart(2, '')}`, name);
 
   add(1, 1, '元日');
   add(1, nthMonday(year, 1, 2), '成人の日');
@@ -49,7 +49,7 @@ function buildHolidays(year: number): Map<string, string> {
     const d = new Date(k);
     if (d.getDay() === 0) {
       const next = new Date(d); next.setDate(next.getDate() + 1);
-      const nk = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
+      const nk = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '')}-${String(next.getDate()).padStart(2, '')}`;
       if (!h.has(nk)) h.set(nk, '振替休日');
     }
   }
@@ -59,8 +59,8 @@ function buildHolidays(year: number): Map<string, string> {
     if (d.getDay() === 0) continue;
     const prev = new Date(d); prev.setDate(d.getDate() - 1);
     const next = new Date(d); next.setDate(d.getDate() + 1);
-    const pk = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-${String(prev.getDate()).padStart(2, '0')}`;
-    const nk = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
+    const pk = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '')}-${String(prev.getDate()).padStart(2, '')}`;
+    const nk = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '')}-${String(next.getDate()).padStart(2, '')}`;
     if (h.has(pk) && h.has(nk) && !h.has(k)) h.set(k, '国民の休日');
   }
   return h;
@@ -70,7 +70,7 @@ const holidayCache = new Map<number, Map<string, string>>();
 export function getHoliday(date: Date): string | undefined {
   const y = date.getFullYear();
   if (!holidayCache.has(y)) holidayCache.set(y, buildHolidays(y));
-  const k = `${y}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const k = `${y}-${String(date.getMonth() + 1).padStart(2, '')}-${String(date.getDate()).padStart(2, '')}`;
   return holidayCache.get(y)!.get(k);
 }
 
@@ -85,7 +85,7 @@ function buildCalendarDays(year: number, month: number): (Date | null)[] {
 }
 
 function toDateKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '')}-${String(date.getDate()).padStart(2, '')}`;
 }
 
 function sameDay(a: Date, b: Date): boolean {
@@ -223,26 +223,26 @@ const CELL_W = (SCREEN_W - 48) / 7;
 const styles = StyleSheet.create({
   container:           { paddingHorizontal: 8, paddingBottom: 8, backgroundColor: Colors.surface, borderRadius: 16, borderWidth: 0.5, borderColor: Colors.border, marginBottom: 12 },
   header:              { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 4 },
-  monthLabel:          { fontSize: 16, fontWeight: '600', color: Colors.text, letterSpacing: 0.5 },
+  monthLabel:          { fontSize: 16, fontWeight: '', color: Colors.text, letterSpacing: 0.5 },
   navBtn:              { padding: 8, borderRadius: 20 },
   navBtnText:          { fontSize: 22, color: Colors.text2, lineHeight: 24 },
   weekRow:             { flexDirection: 'row', paddingBottom: 6, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  weekday:             { width: CELL_W, textAlign: 'center', fontSize: 11, color: Colors.text3, fontWeight: '500' },
+  weekday:             { width: CELL_W, textAlign: 'center', fontSize: 11, color: Colors.text3, fontWeight: '' },
   sun:                 { color: '#f08098' },
   sat:                 { color: '#a8c4f0' },
   grid:                { paddingTop: 2 },
   gridRow:             { flexDirection: 'row' },
   cell:                { width: CELL_W, alignItems: 'center', paddingVertical: 4 },
-  holidayText:         { fontSize: 7, color: '#f08098', fontWeight: '500', width: CELL_W - 2, textAlign: 'center', height: 10 },
+  holidayText:         { fontSize: 7, color: '#f08098', fontWeight: '', width: CELL_W - 2, textAlign: 'center', height: 10 },
   holidayPlaceholder:  { height: 10 },
   dayCircle:           { width: 30, height: 30, alignItems: 'center', justifyContent: 'center', borderRadius: 15 },
   todayCircle:         { backgroundColor: Colors.gold },
   selCircle:           { backgroundColor: Colors.purpleDim, borderWidth: 1, borderColor: Colors.purple },
-  dayNum:              { fontSize: 13, color: Colors.text, fontWeight: '400' },
+  dayNum:              { fontSize: 13, color: Colors.text, fontWeight: '' },
   sunText:             { color: '#f08098' },
   satText:             { color: '#a8c4f0' },
-  todayText:           { color: '#1a1200', fontWeight: '700' },
-  selText:             { color: Colors.purple, fontWeight: '700' },
+  todayText:           { color: '#1a1200', fontWeight: '' },
+  selText:             { color: Colors.purple, fontWeight: '' },
   dots:                { flexDirection: 'row', gap: 2, marginTop: 3, height: 5, alignItems: 'center' },
   dot:                 { width: 4, height: 4, borderRadius: 2 },
 });

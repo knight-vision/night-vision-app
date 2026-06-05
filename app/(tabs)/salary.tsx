@@ -390,7 +390,7 @@ export default function SalaryScreen() {
   const { shopId } = useAuthStore();
   const [activeTab, setActiveTab] = useState<SalaryTab>('summary');
   const now = new Date();
-  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
+  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '')}`);
 
   const TABS: { key: SalaryTab; label: string; icon: string }[] = [
     { key: 'summary',   label: '月次サマリー', icon: 'wallet-outline' },
@@ -401,7 +401,7 @@ export default function SalaryScreen() {
   const changeMonth = (delta: number) => {
     const d = new Date(month + '-01');
     d.setMonth(d.getMonth() + delta);
-    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '')}`);
   };
 
   if (!shopId) return null;
@@ -444,47 +444,47 @@ const modal = StyleSheet.create({
   container:    { flex: 1, backgroundColor: '#0c0c1a' },
   header:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   closeBtn:     { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  title:        { fontSize: 16, fontWeight: '500', color: '#eeeeff' },
-  label:        { fontSize: 12, color: '#eeeeff'2, marginBottom: 6 },
+  title:        { fontSize: 16, fontWeight: '', color: '#eeeeff' },
+  label:        { fontSize: 12, color: '#eeeeff', marginBottom: 6 },
   input:        { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, color: '#eeeeff', fontSize: 14, marginBottom: 4 },
   chip:         { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', marginRight: 8 },
   chipActive:   { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
-  chipText:     { fontSize: 13, color: '#eeeeff'3 },
+  chipText:     { fontSize: 13, color: '#eeeeff' },
   chipTextActive:{ color: '#ff88cc' },
   submitBtn:    { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 12 },
-  submitText:   { color: '#1a1200', fontSize: 15, fontWeight: '600' },
+  submitText:   { color: '#1a1200', fontSize: 15, fontWeight: '' },
 });
 
 const styles = StyleSheet.create({
   safe:          { flex: 1, backgroundColor: '#0c0c1a' },
   topRow:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  screenTitle:   { fontSize: 20, fontWeight: '500', color: '#eeeeff' },
+  screenTitle:   { fontSize: 20, fontWeight: '', color: '#eeeeff' },
   monthNav:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   monthBtn:      { padding: 6 },
-  monthLabel:    { fontSize: 14, color: '#eeeeff', fontWeight: '500', minWidth: 80, textAlign: 'center' },
+  monthLabel:    { fontSize: 14, color: '#eeeeff', fontWeight: '', minWidth: 80, textAlign: 'center' },
   scroll:        { paddingHorizontal: 16, paddingBottom: 108 },
   tabScroll:     { maxHeight: 48, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   tabContent:    { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
   tab:           { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)' },
   tabActive:     { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
-  tabText:       { fontSize: 12, color: '#eeeeff'3 },
-  tabTextActive: { fontSize: 12, color: '#ff88cc', fontWeight: '500' },
+  tabText:       { fontSize: 12, color: '#eeeeff' },
+  tabTextActive: { fontSize: 12, color: '#ff88cc', fontWeight: '' },
   addBtn:        { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 10, borderWidth: 0.5, borderColor: '#ff88cc', padding: 12, marginTop: 12, marginBottom: 8 },
-  addBtnText:    { fontSize: 14, color: '#ff88cc', fontWeight: '500' },
+  addBtnText:    { fontSize: 14, color: '#ff88cc', fontWeight: '' },
   salaryCard:    { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 14, marginBottom: 10, marginTop: 8 },
   salaryHeader:  { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
   castAvatar:    { width: 38, height: 38, borderRadius: 19, backgroundColor: '#aa88ff'Dim, justifyContent: 'center', alignItems: 'center' },
-  castAvatarText:{ fontSize: 14, fontWeight: '500', color: '#aa88ff' },
-  castName:      { fontSize: 14, fontWeight: '500', color: '#eeeeff' },
-  castSub:       { fontSize: 11, color: '#eeeeff'3, marginTop: 2 },
+  castAvatarText:{ fontSize: 14, fontWeight: '', color: '#aa88ff' },
+  castName:      { fontSize: 14, fontWeight: '', color: '#eeeeff' },
+  castSub:       { fontSize: 11, color: '#eeeeff', marginTop: 2 },
   totalPay:      { fontSize: 16, fontWeight: '600', color: '#ff88cc' },
   salaryRows:    { gap: 5, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: 'rgba(200,180,255,0.18)' },
   salaryRow:     { flexDirection: 'row', justifyContent: 'space-between' },
-  salaryRowLabel:{ fontSize: 12, color: '#eeeeff'3 },
-  salaryRowValue:{ fontSize: 12, color: '#eeeeff', fontWeight: '500' },
+  salaryRowLabel:{ fontSize: 12, color: '#eeeeff' },
+  salaryRowValue:{ fontSize: 12, color: '#eeeeff', fontWeight: '' },
   allowanceItem: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
-  allowanceLabel:{ fontSize: 13, fontWeight: '500', color: '#eeeeff' },
-  allowanceSub:  { fontSize: 11, color: '#eeeeff'3, marginTop: 2 },
+  allowanceLabel:{ fontSize: 13, fontWeight: '', color: '#eeeeff' },
+  allowanceSub:  { fontSize: 11, color: '#eeeeff', marginTop: 2 },
   allowanceAmount:{ fontSize: 14, fontWeight: '600' },
-  empty:         { fontSize: 13, color: '#eeeeff'3, paddingVertical: 20, textAlign: 'center' },
+  empty:         { fontSize: 13, color: '#eeeeff', paddingVertical: 20, textAlign: 'center' },
 });

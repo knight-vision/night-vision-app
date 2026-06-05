@@ -34,7 +34,7 @@ function CastManagement({ shopId }: { shopId: string }) {
   const [saving, setSaving] = useState(false);
 
   const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'')}-${String(today.getDate()).padStart(2,'')}`;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -256,13 +256,13 @@ type SalarySubTab = 'summary' | 'allowance' | 'presets';
 
 function SalarySection({ shopId }: { shopId: string }) {
   const now = new Date();
-  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
+  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '')}`);
   const [subTab, setSubTab] = useState<SalarySubTab>('summary');
 
   const changeMonth = (delta: number) => {
     const d = new Date(month + '-01');
     d.setMonth(d.getMonth() + delta);
-    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '')}`);
   };
 
   const SUB_TABS: { key: SalarySubTab; label: string }[] = [
@@ -369,7 +369,7 @@ function SalRow({ label, value, color }: { label: string; value: string; color?:
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
       <Text style={{ fontSize: 12, color: Colors.text3 }}>{label}</Text>
-      <Text style={{ fontSize: 12, color: color || Colors.text, fontWeight: '500' }}>{value}</Text>
+      <Text style={{ fontSize: 12, color: color || Colors.text, fontWeight: '' }}>{value}</Text>
     </View>
   );
 }
@@ -443,7 +443,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
               <Text style={styles.castName}>{a.label}</Text>
               <Text style={styles.castSub}>{cast?.name || ''} · {a.date}</Text>
             </View>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: a.amount >= 0 ? Colors.green : Colors.red }}>
+            <Text style={{ fontSize: 14, fontWeight: '', color: a.amount >= 0 ? Colors.green : Colors.red }}>
               {a.amount >= 0 ? '+' : ''}{fmtYen(a.amount)}
             </Text>
             <PunyTouchable onPress={() => handleDelete(a.id)} style={styles.iconBtn} scaleTo={0.88} haptic="medium">
@@ -561,7 +561,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
             <Text style={styles.castName}>{p.name}</Text>
             <Text style={[styles.castSub, { color: p.sign === '+' ? Colors.green : Colors.red }]}>{p.sign === '+' ? '手当' : '控除'}</Text>
           </View>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: p.sign === '+' ? Colors.green : Colors.red }}>
+          <Text style={{ fontSize: 14, fontWeight: '', color: p.sign === '+' ? Colors.green : Colors.red }}>
             {p.sign === '+' ? '+' : '-'}{fmtYen(p.amount)}
           </Text>
           <PunyTouchable onPress={() => { setEditTarget(p); setName(p.name); setSign(p.sign); setAmount(String(p.amount)); setModalVisible(true); }} style={styles.iconBtn} scaleTo={0.88} haptic="light">
@@ -628,7 +628,7 @@ const SALES_TYPES = [
 
 function ResultsSection({ shopId }: { shopId: string }) {
   const now = new Date();
-  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
+  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '')}`);
   const [data, setData] = useState<any[]>([]);
   const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -636,7 +636,7 @@ function ResultsSection({ shopId }: { shopId: string }) {
   const changeMonth = (delta: number) => {
     const d = new Date(month + '-01');
     d.setMonth(d.getMonth() + delta);
-    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '')}`);
   };
 
   const load = useCallback(async () => {
@@ -685,7 +685,7 @@ function ResultsSection({ shopId }: { shopId: string }) {
       {!loading && displayed.map((cast: any, i: number) => (
         <View key={cast.id} style={styles.salaryCard}>
           <View style={styles.salaryHeader}>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: i === 0 ? Colors.gold : Colors.text2, width: 24 }}>#{i+1}</Text>
+            <Text style={{ fontSize: 14, fontWeight: '', color: i === 0 ? Colors.gold : Colors.text2, width: 24 }}>#{i+1}</Text>
             <View style={styles.castAvatar}><Text style={styles.castAvatarText}>{cast.name?.[0] || '?'}</Text></View>
             <Text style={[styles.castName, { flex: 1 }]}>{cast.name}</Text>
             <Text style={styles.totalPay}>{fmtYen(cast.total)}</Text>
@@ -694,7 +694,7 @@ function ResultsSection({ shopId }: { shopId: string }) {
             {SALES_TYPES.map(type => cast.byType[type.key] > 0 && (
               <View key={type.key} style={{ backgroundColor: Colors.surface2, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }}>
                 <Text style={{ fontSize: 10, color: Colors.text3 }}>{type.label}</Text>
-                <Text style={{ fontSize: 12, color: Colors.text, fontWeight: '500' }}>{fmtYen(cast.byType[type.key])}</Text>
+                <Text style={{ fontSize: 12, color: Colors.text, fontWeight: '' }}>{fmtYen(cast.byType[type.key])}</Text>
               </View>
             ))}
           </View>
@@ -717,7 +717,7 @@ function ResultsSection({ shopId }: { shopId: string }) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const CAL_DAYS_C = ['月','火','水','木','金','土','日'];
 function getDateStrC(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}-${String(d.getDate()).padStart(2,'')}`;
 }
 
 function DatePickerC({ value, onChange }: { value: string; onChange: (d: string) => void }) {
@@ -745,7 +745,7 @@ function DatePickerC({ value, onChange }: { value: string; onChange: (d: string)
       <View style={cStyles.calGrid}>
         {days.map((day, i) => {
           if (!day) return <View key={`p${i}`} style={cStyles.calCell} />;
-          const ds = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+          const ds = `${y}-${String(m).padStart(2,'')}-${String(day).padStart(2,'')}`;
           const sel = ds === value;
           const today = ds === getDateStrC(new Date());
           return (
@@ -762,7 +762,7 @@ function DatePickerC({ value, onChange }: { value: string; onChange: (d: string)
 
 function CustomerSection({ shopId }: { shopId: string }) {
   const now = new Date();
-  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`);
+  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'')}`);
   const [customers, setCustomers] = useState<any[]>([]);
   const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -772,14 +772,14 @@ function CustomerSection({ shopId }: { shopId: string }) {
   const [castId, setCastId] = useState('');
   const [memo, setMemo] = useState('');
   const [visitDate, setVisitDate] = useState(getDateStrC(now));
-  const [visitCount, setVisitCount] = useState('1');
+  const [visitCount, setVisitCount] = useState('');
   const [saving, setSaving] = useState(false);
   const [filterCast, setFilterCast] = useState('');
 
   const changeMonth = (delta: number) => {
     const d = new Date(month + '-01');
     d.setMonth(d.getMonth() + delta);
-    setMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'')}`);
   };
 
   const load = useCallback(async () => {
@@ -799,7 +799,7 @@ function CustomerSection({ shopId }: { shopId: string }) {
   const openAdd = () => {
     setEditTarget(null);
     setCustName(''); setCastId(''); setMemo('');
-    setVisitDate(getDateStrC(now)); setVisitCount('1');
+    setVisitDate(getDateStrC(now)); setVisitCount('');
     setModalVisible(true);
   };
 
@@ -1002,88 +1002,88 @@ const modal = StyleSheet.create({
   container:     { flex: 1, backgroundColor: '#0c0c1a' },
   header:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   closeBtn:      { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  title:         { fontSize: 16, fontWeight: '500', color: '#eeeeff' },
-  label:         { fontSize: 12, color: '#eeeeff'2, marginBottom: 6 },
+  title:         { fontSize: 16, fontWeight: '', color: '#eeeeff' },
+  label:         { fontSize: 12, color: '#eeeeff', marginBottom: 6 },
   input:         { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, color: '#eeeeff', fontSize: 14, marginBottom: 12 },
   chip:          { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', marginRight: 8 },
   chipActive:    { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
-  chipText:      { fontSize: 13, color: '#eeeeff'3 },
+  chipText:      { fontSize: 13, color: '#eeeeff' },
   chipTextActive:{ color: '#ff88cc' },
   submitBtn:     { backgroundColor: '#ff88cc', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 12 },
-  submitText:    { color: '#1a1200', fontSize: 15, fontWeight: '600' },
+  submitText:    { color: '#1a1200', fontSize: 15, fontWeight: '' },
 });
 
 const styles = StyleSheet.create({
   safe:           { flex: 1, backgroundColor: '#0c0c1a' },
-  screenTitle:    { fontSize: 20, fontWeight: '500', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
+  screenTitle:    { fontSize: 20, fontWeight: '', color: '#eeeeff', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
   scroll:         { paddingHorizontal: 16, paddingBottom: 108 },
   tabScroll:      { maxHeight: 48, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   tabContent:     { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
   tab:            { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)' },
   tabActive:      { backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
-  tabText:        { fontSize: 12, color: '#eeeeff'3 },
-  tabTextActive:  { fontSize: 12, color: '#ff88cc', fontWeight: '500' },
+  tabText:        { fontSize: 12, color: '#eeeeff' },
+  tabTextActive:  { fontSize: 12, color: '#ff88cc', fontWeight: '' },
   subTabRow:      { flexDirection: 'row', gap: 8, marginTop: 12, marginBottom: 4 },
   subTab:         { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)' },
-  subTabActive:   { backgroundColor: 'rgba(255,255,255,0.05)'2, borderColor: '#eeeeff'2 },
-  subTabText:     { fontSize: 11, color: '#eeeeff'3 },
+  subTabActive:   { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: '#eeeeff' },
+  subTabText:     { fontSize: 11, color: '#eeeeff' },
   subTabTextActive:{ fontSize: 11, color: '#eeeeff' },
   addBtn:         { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,136,204,0.15)', borderRadius: 10, borderWidth: 0.5, borderColor: '#ff88cc', padding: 12, marginTop: 12, marginBottom: 8 },
-  addBtnText:     { fontSize: 14, color: '#ff88cc', fontWeight: '500' },
+  addBtnText:     { fontSize: 14, color: '#ff88cc', fontWeight: '' },
   castCard:       { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 8 },
   castAvatar:     { width: 40, height: 40, borderRadius: 20, backgroundColor: '#aa88ff'Dim, justifyContent: 'center', alignItems: 'center' },
-  castAvatarText: { fontSize: 14, fontWeight: '500', color: '#aa88ff' },
-  castName:       { fontSize: 14, fontWeight: '500', color: '#eeeeff' },
-  castSub:        { fontSize: 11, color: '#eeeeff'3, marginTop: 2 },
+  castAvatarText: { fontSize: 14, fontWeight: '', color: '#aa88ff' },
+  castName:       { fontSize: 14, fontWeight: '', color: '#eeeeff' },
+  castSub:        { fontSize: 11, color: '#eeeeff', marginTop: 2 },
   castWage:       { fontSize: 12, color: '#ff88cc', marginTop: 3 },
-  castComment:    { fontSize: 12, color: '#eeeeff'2, marginTop: 4, lineHeight: 16 },
+  castComment:    { fontSize: 12, color: '#eeeeff', marginTop: 4, lineHeight: 16 },
   iconBtn:        { padding: 4 },
   salaryCard:     { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 8 },
   salaryHeader:   { flexDirection: 'row', alignItems: 'center', gap: 10 },
   salaryRows:     { marginTop: 10, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: 'rgba(200,180,255,0.18)' },
-  totalPay:       { fontSize: 16, fontWeight: '600', color: '#ff88cc' },
+  totalPay:       { fontSize: 16, fontWeight: '', color: '#ff88cc' },
   allowanceItem:  { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(200,180,255,0.18)' },
   monthNav:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, paddingVertical: 10 },
   monthBtn:       { padding: 6 },
-  monthLabel:     { fontSize: 15, color: '#eeeeff', fontWeight: '500', minWidth: 90, textAlign: 'center' },
-  empty:          { fontSize: 13, color: '#eeeeff'3, paddingVertical: 20, textAlign: 'center' },
+  monthLabel:     { fontSize: 15, color: '#eeeeff', fontWeight: '', minWidth: 90, textAlign: 'center' },
+  empty:          { fontSize: 13, color: '#eeeeff', paddingVertical: 20, textAlign: 'center' },
   todayBlock:     { backgroundColor: 'rgba(78,203,138,0.08)', borderRadius: 12, borderWidth: 0.5, borderColor: '#80d8b0', padding: 12, marginBottom: 12 },
-  todayTitle:     { fontSize: 13, fontWeight: '600', color: '#80d8b0', marginBottom: 8 },
+  todayTitle:     { fontSize: 13, fontWeight: '', color: '#80d8b0', marginBottom: 8 },
   todayRow:       { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
-  todayCastName:  { fontSize: 13, fontWeight: '600', color: '#eeeeff', flex: 1 },
+  todayCastName:  { fontSize: 13, fontWeight: '', color: '#eeeeff', flex: 1 },
   todayTime:      { fontSize: 12, color: '#80d8b0' },
   ondutyBadge:    { backgroundColor: 'rgba(78,203,138,0.2)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-  ondutyBadgeText:{ fontSize: 10, color: '#80d8b0', fontWeight: '700' },
+  ondutyBadgeText:{ fontSize: 10, color: '#80d8b0', fontWeight: '' },
   showAllBtn:     { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, alignItems: 'center', marginTop: 8 },
-  showAllBtnText: { fontSize: 13, color: '#eeeeff'2, fontWeight: '500' },
+  showAllBtnText: { fontSize: 13, color: '#eeeeff', fontWeight: '500' },
   filterChip:     { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', backgroundColor: 'rgba(255,255,255,0.05)', marginRight: 8 },
   filterChipActive:{ backgroundColor: 'rgba(255,136,204,0.15)', borderColor: '#ff88cc' },
-  filterChipText: { fontSize: 12, color: '#eeeeff'2 },
-  filterChipTextActive: { color: '#ff88cc', fontWeight: '600' },
+  filterChipText: { fontSize: 12, color: '#eeeeff' },
+  filterChipTextActive: { color: '#ff88cc', fontWeight: '' },
   customerCard:   { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 14, marginBottom: 8 },
-  customerName:   { fontSize: 15, fontWeight: '600', color: '#eeeeff' },
-  customerVisit:  { fontSize: 12, color: '#eeeeff'2, marginBottom: 3 },
-  customerMemo:   { fontSize: 12, color: '#eeeeff'3 },
+  customerName:   { fontSize: 15, fontWeight: '', color: '#eeeeff' },
+  customerVisit:  { fontSize: 12, color: '#eeeeff', marginBottom: 3 },
+  customerMemo:   { fontSize: 12, color: '#eeeeff' },
   castTagBadge:   { backgroundColor: '#aa88ff'Dim, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
-  castTagText:    { fontSize: 11, color: '#aa88ff', fontWeight: '500' },
+  castTagText:    { fontSize: 11, color: '#aa88ff', fontWeight: '' },
   visitCountBadge:{ backgroundColor: 'rgba(0,212,255,0.15)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
-  visitCountText: { fontSize: 11, color: '#00d4ff', fontWeight: '600' },
+  visitCountText: { fontSize: 11, color: '#00d4ff', fontWeight: '' },
 });
 
 const cStyles = StyleSheet.create({
   cal:          { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', padding: 12, marginBottom: 4 },
   calHeader:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  calTitle:     { fontSize: 14, fontWeight: '600', color: '#eeeeff' },
+  calTitle:     { fontSize: 14, fontWeight: '', color: '#eeeeff' },
   calDayRow:    { flexDirection: 'row', marginBottom: 6 },
-  calDayLabel:  { flex: 1, textAlign: 'center', fontSize: 10, color: '#eeeeff'3, fontWeight: '600' },
+  calDayLabel:  { flex: 1, textAlign: 'center', fontSize: 10, color: '#eeeeff', fontWeight: '600' },
   calGrid:      { flexDirection: 'row', flexWrap: 'wrap' },
-  calCell:      { width: '14.28%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 6 },
+  calCell:      { width: '.28%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 6 },
   calCellSel:   { backgroundColor: '#ff88cc' },
   calCellToday: { backgroundColor: '#aa88ff'Dim },
   calDay:       { fontSize: 13, color: '#eeeeff' },
-  calDaySel:    { color: '#1a1200', fontWeight: '700' },
-  calDayToday:  { color: '#aa88ff', fontWeight: '600' },
-  counterBtn:   { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.05)'2, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', justifyContent: 'center', alignItems: 'center' },
-  counterBtnText:{ fontSize: 20, color: '#eeeeff', fontWeight: '300' },
-  counterValue: { fontSize: 16, color: '#ff88cc', fontWeight: '600', minWidth: 60, textAlign: 'center' },
+  calDaySel:    { color: '#1a1200', fontWeight: '' },
+  calDayToday:  { color: '#aa88ff', fontWeight: '' },
+  counterBtn:   { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.18)', justifyContent: 'center', alignItems: 'center' },
+  counterBtnText:{ fontSize: 20, color: '#eeeeff', fontWeight: '' },
+  counterValue: { fontSize: 16, color: '#ff88cc', fontWeight: '', minWidth: 60, textAlign: 'center' },
 });

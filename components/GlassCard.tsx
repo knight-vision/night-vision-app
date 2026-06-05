@@ -18,7 +18,7 @@ export function GlassCard({ children, style, tint }: Props) {
         style={base}
         glassEffectStyle={{
           style: 'regular',
-          tintColor: tint ?? Colors.purple + '12',
+          tintColor: tint ?? Colors.purple + '',
           animate: true,
         }}
       >
