@@ -418,7 +418,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Text style={styles.screenTitle}>ホーム</Text>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} style={{ backgroundColor: 'transparent' }}>
         {role === 'owner' ? <OwnerHome /> : <CastHome />}
       </ScrollView>
     </SafeAreaView>

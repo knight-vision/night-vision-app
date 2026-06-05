@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { Colors } from '../constants/theme';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import { useColors } from '../constants/theme';
+import { GlassView } from 'expo-glass-effect';
 
 type Props = {
   label: string;
@@ -9,26 +10,44 @@ type Props = {
   valueColor?: string;
 };
 
-export function StatCard({ label, value, sub, subColor = Colors.text2, valueColor = Colors.text }: Props) {
+export function StatCard({ label, value, sub, subColor, valueColor }: Props) {
+  const Colors = useColors();
+  const resolvedSubColor   = subColor   ?? Colors.text2;
+  const resolvedValueColor = valueColor ?? Colors.text;
+
+  const inner = (
+    <>
+      <Text style={[styles.label, { color: Colors.text3 }]}>{label}</Text>
+      <Text style={[styles.value, { color: resolvedValueColor }]}>{value}</Text>
+      {sub && <Text style={[styles.sub, { color: resolvedSubColor }]}>{sub}</Text>}
+    </>
+  );
+
+  if (Platform.OS === 'ios') {
+    return (
+      <GlassView
+        style={[styles.card, { borderColor: Colors.borderGlow }]}
+        glassEffectStyle={{
+          style: 'regular',
+          tintColor: Colors.purple + '18',
+          animate: true,
+        }}
+      >
+        {inner}
+      </GlassView>
+    );
+  }
+
   return (
-    <View style={styles.card}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={[styles.value, { color: valueColor }]}>{value}</Text>
-      {sub && <Text style={[styles.sub, { color: subColor }]}>{sub}</Text>}
+    <View style={[styles.card, { backgroundColor: Colors.surface, borderColor: Colors.borderGlow }]}>
+      {inner}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderWidth: 0.5,
-    borderColor: Colors.borderGlow,
-    padding: 14,
-  },
-  label: { fontSize: 11, color: Colors.text3, marginBottom: 6, fontWeight: '500', letterSpacing: 0.3 },
+  card:  { flex: 1, borderRadius: 16, borderWidth: 0.5, padding: 14, overflow: 'hidden' },
+  label: { fontSize: 11, marginBottom: 6, fontWeight: '500', letterSpacing: 0.3 },
   value: { fontSize: 20, fontWeight: '600', letterSpacing: -0.3 },
   sub:   { fontSize: 11, marginTop: 3 },
 });

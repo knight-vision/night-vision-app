@@ -12,7 +12,7 @@ interface ThemeState {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
-      themeId: 'default',
+      themeId: 'neon',
       setTheme: (themeId) => set({ themeId }),
     }),
     {

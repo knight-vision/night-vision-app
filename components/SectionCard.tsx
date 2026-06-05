@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { useColors } from '../constants/theme';
-import { useThemeStore } from '../store/theme';
+import { GlassView } from 'expo-glass-effect';
 
 type Props = {
   title: string;
@@ -11,49 +11,38 @@ type Props = {
 
 export function SectionCard({ title, actionLabel, onAction, children }: Props) {
   const Colors = useColors();
-  const { themeId } = useThemeStore();
 
-  // ネオンテーマ: カード上部にアクセントライン
-  const neonLine = themeId === 'neon' ? (
-    <View style={{
-      height: 1.5,
-      marginHorizontal: -16,
-      marginTop: -16,
-      marginBottom: 14,
-      borderTopLeftRadius: 18,
-      borderTopRightRadius: 18,
-      overflow: 'hidden',
-      backgroundColor: Colors.gold,
-      opacity: 0.6,
-    }} />
-  ) : null;
+  const header = (
+    <View style={styles.header}>
+      <Text style={[styles.title, { color: Colors.text2 }]}>{title}</Text>
+      {actionLabel && (
+        <TouchableOpacity onPress={onAction} style={[styles.actionBtn, { backgroundColor: Colors.purpleDim }]}>
+          <Text style={[styles.action, { color: Colors.purple }]}>{actionLabel}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
 
-  // 星空テーマ: カードのボーダーをほんのりグロー
-  const cardStyle = [
-    styles.card,
-    {
-      backgroundColor: Colors.surface,
-      borderColor: Colors.border,
-    },
-    themeId === 'starry' && {
-      shadowColor: Colors.purple,
-      shadowOpacity: 0.15,
-      shadowRadius: 12,
-      shadowOffset: { width: 0, height: 0 },
-    },
-  ];
+  // iOS 26以上: GlassView / それ以外: 従来のグラスモーフィズム
+  if (Platform.OS === 'ios') {
+    return (
+      <GlassView
+        style={[styles.card, { borderColor: Colors.border }]}
+        glassEffectStyle={{
+          style: 'regular',
+          tintColor: Colors.purple + '15',
+          animate: true,
+        }}
+      >
+        {header}
+        {children}
+      </GlassView>
+    );
+  }
 
   return (
-    <View style={cardStyle}>
-      {neonLine}
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: Colors.text2 }]}>{title}</Text>
-        {actionLabel && (
-          <TouchableOpacity onPress={onAction} style={[styles.actionBtn, { backgroundColor: Colors.purpleDim }]}>
-            <Text style={[styles.action, { color: Colors.purple }]}>{actionLabel}</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+    <View style={[styles.card, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
+      {header}
       {children}
     </View>
   );
@@ -65,6 +54,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     padding: 16,
     marginBottom: 12,
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
