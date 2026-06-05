@@ -125,7 +125,9 @@ function TimeSelector({ value, onChange, label }: { value: string; onChange: (v:
   };
 
   const confirm = () => {
-    const h = String(HOURS[tempHIdx]).padStart(2, '0');
+    const rawH = HOURS[tempHIdx];
+    // Supabase time型は0-23のみ。25時→1時に正規化（日付跨ぎを表現）
+    const h = String(rawH >= 24 ? rawH - 24 : rawH).padStart(2, '0');
     const m = MINUTES[tempMIdx];
     onChange(`${h}:${m}`);
     setModalVisible(false);
@@ -510,6 +512,12 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   useEffect(() => { load(); }, [load]);
 
   const handleSubmit = async () => {
+    // 過去日は提出不可
+    const todayStr2 = getDateStr(new Date());
+    if (selDate < todayStr2) {
+      Alert.alert('提出できません', '過去の日にはシフト希望を出せません');
+      return;
+    }
     // 確定シフトと重複する日はブロック
     if (confirmedShifts.some((s: any) => s.date === selDate)) {
       Alert.alert('提出できません', 'この日はすでに確定シフトがあります');
