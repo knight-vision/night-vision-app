@@ -648,35 +648,22 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
           </View>
           <ScrollView style={{ padding: 20 }}>
             <Text style={styles.modalLabel}>日付</Text>
-            {/* 簡易カレンダー選択 */}
-            <View style={styles.miniCalWrap}>
-              <View style={styles.calHeader}>
-                <TouchableOpacity onPress={() => { const d = new Date(calYear, calMonth-2, 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()+1); }}>
-                  <Ionicons name="chevron-back" size={18} color={Colors.text2} />
-                </TouchableOpacity>
-                <Text style={styles.calTitle}>{calYear}年{calMonth}月</Text>
-                <TouchableOpacity onPress={() => { const d = new Date(calYear, calMonth, 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()+1); }}>
-                  <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.calDayRow}>
-                {CAL_DAYS.map(d => <Text key={d} style={styles.calDayLabel}>{d}</Text>)}
-              </View>
-              <View style={styles.calGrid}>
-                {calDays.map((day, i) => {
-                  if (!day) return <View key={`pad2-${i}`} style={styles.calCell} />;
-                  const dateStr = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                  const isSelected = dateStr === selDate;
-                  return (
-                    <TouchableOpacity key={dateStr} onPress={() => setSelDate(dateStr)}
-                      style={[styles.calCell, isSelected && styles.calCellSelected]}>
-                      <Text style={[styles.calDayNum, isSelected && { color: '#1a1200', fontWeight: '700' }]}>{day}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
-            <Text style={[styles.modalLabel, { marginTop: 16 }]}>選択日: <Text style={{ color: Colors.gold }}>{selDate}</Text></Text>
+            <MonthCalendar
+              year={calYear}
+              month={calMonth - 1}
+              onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m + 1); }}
+              onDayPress={(d) => {
+                const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                if (confirmedShifts.some((s: any) => s.date === ds)) {
+                  Alert.alert('確定済み', 'この日はすでに確定シフトがあります');
+                  return;
+                }
+                setSelDate(ds);
+              }}
+              initialSelected={new Date(selDate + 'T00:00:00')}
+              events={calendarEvents}
+            />
+            <Text style={[styles.modalLabel, { marginTop: 8 }]}>選択日: <Text style={{ color: Colors.gold }}>{selDate}</Text></Text>
 
             <Text style={[styles.modalLabel, { marginTop: 16 }]}>開始時間</Text>
             <TimeSelector value={startTime} onChange={setStartTime} label="開始" />
