@@ -10,6 +10,8 @@ import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 import { StatCard } from '../../components/StatCard';
 import { SectionCard } from '../../components/SectionCard';
+import { MonthCalendar } from '../../components/MonthCalendar';
+import { PunyTouchable } from '../../components/PunyTouchable';
 
 // ── オーナー向け ──────────────────────────────────────────────
 function OwnerResultsView({ shopId }: { shopId: string }) {
@@ -162,6 +164,12 @@ function CastPayTab({ castId, shopId }: { castId: string; shopId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
+  // refDateが変わったらrefMonthも追従
+  useEffect(() => {
+    const m = refDate.slice(0, 7);
+    if (m !== refMonth) setRefMonth(m);
+  }, [refDate]);
+
   // 期間内のシフトを絞り込んでhours/pay計算
   const calcPay = () => {
     let targetShifts: any[] = [];
@@ -223,15 +231,26 @@ function CastPayTab({ castId, shopId }: { castId: string; shopId: string }) {
 
       {/* ナビゲーション */}
       {period === 'daily' && (
-        <View style={styles.navRow}>
-          <TouchableOpacity onPress={() => setRefDate(addDay(refDate, -1))} style={styles.navBtn}>
-            <Ionicons name="chevron-back" size={18} color={Colors.text2} />
-          </TouchableOpacity>
-          <Text style={styles.navLabel}>{refDate}</Text>
-          <TouchableOpacity onPress={() => setRefDate(addDay(refDate, 1))} style={styles.navBtn}>
-            <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
-          </TouchableOpacity>
-        </View>
+        <>
+          <View style={styles.navRow}>
+            <TouchableOpacity onPress={() => setRefDate(addDay(refDate, -1))} style={styles.navBtn}>
+              <Ionicons name="chevron-back" size={18} color={Colors.text2} />
+            </TouchableOpacity>
+            <Text style={styles.navLabel}>{refDate}</Text>
+            <TouchableOpacity onPress={() => setRefDate(addDay(refDate, 1))} style={styles.navBtn}>
+              <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
+            </TouchableOpacity>
+          </View>
+          {/* カレンダー */}
+          <MonthCalendar
+            year={parseInt(refMonth.slice(0,4), 10)}
+            month={parseInt(refMonth.slice(5,7), 10) - 1}
+            onMonthChange={(y, m) => setRefMonth(`${y}-${String(m+1).padStart(2,'0')}`)}
+            onDayPress={(d) => setRefDate(getDateStr(d))}
+            initialSelected={new Date(refDate + 'T00:00:00')}
+            events={shifts.map((s: any) => ({ date: s.date, color: Colors.gold }))}
+          />
+        </>
       )}
       {period === 'weekly' && (
         <View style={styles.navRow}>

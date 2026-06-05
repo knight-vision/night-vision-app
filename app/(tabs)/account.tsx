@@ -212,8 +212,9 @@ export default function AccountScreen() {
             <Switch
               value={notifyApproved}
               onValueChange={setNotifyApproved}
-              trackColor={{ false: Colors.surface2, true: Colors.goldDim }}
-              thumbColor={notifyApproved ? Colors.gold : Colors.text3}
+              trackColor={{ false: Colors.surface2, true: "#22c55e" }}
+              ios_backgroundColor={Colors.surface2}
+              thumbColor="#ffffff"
             />
           </View>
           <View style={styles.menuItem}>
@@ -225,8 +226,9 @@ export default function AccountScreen() {
             <Switch
               value={notifyConfirmed}
               onValueChange={setNotifyConfirmed}
-              trackColor={{ false: Colors.surface2, true: Colors.goldDim }}
-              thumbColor={notifyConfirmed ? Colors.gold : Colors.text3}
+              trackColor={{ false: Colors.surface2, true: "#22c55e" }}
+              ios_backgroundColor={Colors.surface2}
+              thumbColor="#ffffff"
             />
           </View>
         </View>

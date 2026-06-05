@@ -10,6 +10,7 @@ import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 import { PunyTouchable } from '../../components/PunyTouchable';
 import { MonthCalendar } from '../../components/MonthCalendar';
+import { useRouter } from 'expo-router';
 
 const CAST_COLORS = ['#ff6b9d','#00d4ff','#ffd700','#a855f7','#00e5a0','#ff9500','#00c7be','#ff3b30','#34aadc','#4cd964'];
 const HOURS = Array.from({ length: 31 }, (_, i) => i);
@@ -504,6 +505,7 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
 
 // ── キャスト向けシフト希望提出 ──────────────────────────────────
 function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
+  const router = useRouter();
   const [view, setView] = useState<'me' | 'shop'>('me'); // タブ切り替え
   const [shifts, setShifts] = useState<any[]>([]);
   const [confirmedShifts, setConfirmedShifts] = useState<any[]>([]);
@@ -653,17 +655,21 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
       {/* 確定シフト */}
       {confirmedShifts.length > 0 && (
         <View style={{ marginBottom: 12 }}>
-          <Text style={styles.listSectionTitle}>📌 確定シフト</Text>
+          <Text style={styles.listSectionTitle}>📌 確定シフト（タップで給与確認）</Text>
           {confirmedShifts.sort((a, b) => a.date.localeCompare(b.date)).map((s: any) => (
-            <View key={s.id} style={[styles.shiftItem, { borderLeftWidth: 3, borderLeftColor: Colors.green }]}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.shiftDate}>{s.date}</Text>
-                <Text style={styles.shiftTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
+            <PunyTouchable key={s.id} scaleTo={0.97} haptic="light"
+              onPress={() => router.push('/(tabs)/results')}>
+              <View style={[styles.shiftItem, { borderLeftWidth: 3, borderLeftColor: Colors.green }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.shiftDate}>{s.date}</Text>
+                  <Text style={styles.shiftTime}>{s.start_time?.slice(0,5)}〜{s.end_time?.slice(0,5)}</Text>
+                </View>
+                <View style={{ backgroundColor: 'rgba(78,203,138,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, marginRight: 4 }}>
+                  <Text style={{ fontSize: 12, color: Colors.green, fontWeight: '600' }}>確定済み</Text>
+                </View>
+                <Text style={{ fontSize: 16, color: Colors.text3 }}>›</Text>
               </View>
-              <View style={{ backgroundColor: 'rgba(78,203,138,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
-                <Text style={{ fontSize: 12, color: Colors.green, fontWeight: '600' }}>確定済み</Text>
-              </View>
-            </View>
+            </PunyTouchable>
           ))}
         </View>
       )}
