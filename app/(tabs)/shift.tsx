@@ -217,8 +217,11 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
   const [selectedDate, setSelectedDate] = useState<string>(getDateStr(now));
   const [draft, setDraft] = useState<Record<string, { cast_id: string; start_time: string; end_time: string }[]>>({});
 
+  // 初回のみ loading=true。月切替時はバックグラウンドで取得
+  const initialLoadDone = useRef(false);
+
   const load = useCallback(async () => {
-    setLoading(true);
+    if (!initialLoadDone.current) setLoading(true);
     try {
       const wy = calYear;
       const wm = calMonth + 1;
@@ -245,7 +248,10 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
       }
       setConfirmed(allConfirmed);
       setRequests(allRequests);
-    } catch { } finally { setLoading(false); }
+    } catch { } finally {
+      setLoading(false);
+      initialLoadDone.current = true;
+    }
   }, [shopId, calYear, calMonth]);
 
   useEffect(() => { load(); }, [load]);
@@ -528,8 +534,8 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selDate, setSelDate] = useState(getDateStr(new Date()));
-  const [startTime, setStartTime] = useState(':00');
-  const [endTime, setEndTime] = useState(':00');
+  const [startTime, setStartTime] = useState('20:00');
+  const [endTime, setEndTime] = useState('24:00');
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -537,27 +543,50 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   const [calYear, setCalYear] = useState(now.getFullYear());
   const [calMonth, setCalMonth] = useState(now.getMonth() + 1);
 
-  const load = useCallback(async () => {
+  // 初回のみ: 静的データ（希望シフト・キャスト）
+  useEffect(() => {
+    if (!castId || !shopId) return;
     setLoading(true);
-    try {
-      const [reqRes, confRes, castsRes] = await Promise.all([
-        fetch(`${API_BASE}/cast-shift-request?cast_id=${castId}&shop_id=${shopId}`),
-        fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${calYear}&month=${calMonth}`),
-        fetch(`${API_BASE}/casts?shop_id=${shopId}`),
-      ]);
+    Promise.all([
+      fetch(`${API_BASE}/cast-shift-request?cast_id=${castId}&shop_id=${shopId}`),
+      fetch(`${API_BASE}/casts?shop_id=${shopId}`),
+    ]).then(async ([reqRes, castsRes]) => {
       const reqData = await reqRes.json();
       const reqArray = Array.isArray(reqData) ? reqData : (reqData?.requests || []);
       setShifts(reqArray);
+      const castData = await castsRes.json();
+      setCasts(Array.isArray(castData) ? castData : []);
+    }).catch(() => { setShifts([]); }).finally(() => setLoading(false));
+  }, [castId, shopId]);
+
+  // 月切替時: 確定シフトのみバックグラウンドで再フェッチ（loading は維持）
+  useEffect(() => {
+    if (!shopId || !castId) return;
+    fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${calYear}&month=${calMonth}`)
+      .then(r => r.json())
+      .then(confData => {
+        const confirmed = Array.isArray(confData) ? confData : (confData?.confirmed || []);
+        setAllConfirmed(confirmed);
+        setConfirmedShifts(confirmed.filter((s: any) => String(s.cast_id) === castId));
+      }).catch(() => { setAllConfirmed([]); setConfirmedShifts([]); });
+  }, [castId, shopId, calYear, calMonth]);
+
+  // 希望シフト提出後などに手動再ロード用
+  const load = useCallback(async () => {
+    if (!castId || !shopId) return;
+    try {
+      const [reqRes, confRes] = await Promise.all([
+        fetch(`${API_BASE}/cast-shift-request?cast_id=${castId}&shop_id=${shopId}`),
+        fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${calYear}&month=${calMonth}`),
+      ]);
+      const reqData = await reqRes.json();
+      setShifts(Array.isArray(reqData) ? reqData : (reqData?.requests || []));
       const confData = await confRes.json();
       const confirmed = Array.isArray(confData) ? confData : (confData?.confirmed || []);
       setAllConfirmed(confirmed);
       setConfirmedShifts(confirmed.filter((s: any) => String(s.cast_id) === castId));
-      const castData = await castsRes.json();
-      setCasts(Array.isArray(castData) ? castData : []);
-    } catch { setShifts([]); setConfirmedShifts([]); setAllConfirmed([]); } finally { setLoading(false); }
+    } catch {}
   }, [castId, shopId, calYear, calMonth]);
-
-  useEffect(() => { load(); }, [load]);
 
   const handleSubmit = async () => {
     // 過去日は提出不可

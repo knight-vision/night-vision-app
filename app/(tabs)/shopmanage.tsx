@@ -33,8 +33,8 @@ function ShopInfo({ shopId }: { shopId: string }) {
   const [budget, setBudget] = useState('');
   const [description, setDescription] = useState('');
   const [system, setSystem] = useState('');
-  const [openTime, setOpenTime] = useState(':00');
-  const [closeTime, setCloseTime] = useState(':00');
+  const [openTime, setOpenTime] = useState('18:00');
+  const [closeTime, setCloseTime] = useState('05:00');
   const [instagram, setInstagram] = useState('');
   const [xAccount, setXAccount] = useState('');
   const [tiktok, setTiktok] = useState('');
