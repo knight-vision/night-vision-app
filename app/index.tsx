@@ -65,9 +65,8 @@ function ForgotPasswordModal({ type, visible, onClose }: {
                   <Text style={[modal.badgeText, { color: accentColor }]}>送信完了</Text>
                 </View>
                 <Text style={{ color: Colors.text2, fontSize: 14, textAlign: 'center', lineHeight: 22 }}>
-                  登録済みのメールアドレスに{'
-'}新しいパスワードをお送りしました。{'
-'}メールをご確認ください。
+                  登録済みのメールアドレスに新しいパスワードをお送りしました。{`
+`}メールをご確認ください。
                 </Text>
                 <PunyTouchable style={[modal.loginBtn, { backgroundColor: accentColor, marginTop: 8 }]} onPress={handleClose} haptic="light">
                   <Text style={[modal.loginBtnText, { color: accentDark }]}>閉じる</Text>
