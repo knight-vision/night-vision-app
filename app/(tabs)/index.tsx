@@ -92,7 +92,7 @@ function WeeklyShiftTable({
               {dayShifts.length === 0 ? (
                 <Text style={wt.emptyMark}>—</Text>
               ) : (
-                dayShifts.slice(0, 4).map((s: any) => {
+                dayShifts.slice(0, 2).map((s: any) => {
                   const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
                   const color = ci >= 0 ? CAST_COLORS[ci % CAST_COLORS.length] : Colors.gold;
                   const castName = casts.find((c: any) => String(c.id) === String(s.cast_id))?.name || s.casts?.name || '?';
@@ -119,8 +119,8 @@ function WeeklyShiftTable({
                   );
                 })
               )}
-              {dayShifts.length > 4 && (
-                <Text style={wt.moreText}>+{dayShifts.length - 4}人</Text>
+              {dayShifts.length > 2 && (
+                <Text style={wt.moreText}>+{dayShifts.length - 2}人</Text>
               )}
             </View>
           </PunyTouchable>
@@ -463,7 +463,7 @@ const wt = StyleSheet.create({
   todayDot:      { width: 5, height: 5, borderRadius: 3, backgroundColor: Colors.gold, marginTop: 4 },
 
   // シフト表示エリア
-  dayBody:       { backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 5, gap: 5, minHeight: 80, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.08)', alignItems: 'center' },
+  dayBody:       { backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, paddingVertical: 6, paddingHorizontal: 5, gap: 4, height: 88, borderWidth: 0.5, borderColor: 'rgba(200,180,255,0.08)', alignItems: 'center', overflow: 'hidden', justifyContent: 'flex-start' },
   dayBodyToday:  { borderColor: 'rgba(232,180,200,0.2)' },
 
   emptyMark:     { fontSize: 16, color: 'rgba(255,255,255,0.12)', marginTop: 14, fontWeight: '300' },
