@@ -234,7 +234,7 @@ export default function AccountScreen() {
               thumbColor="#ffffff"
             />
           </View>
-        </View>
+        </GlassCard>
 
         {/* その他 */}
         <GlassCard style={styles.menuGroup}>
@@ -254,7 +254,7 @@ export default function AccountScreen() {
               <Text style={[styles.menuSub, { color: Colors.text3 }]}>v1.0.0</Text>
             </View>
           </View>
-        </View>
+        </GlassCard>
 
         <PunyTouchable style={[styles.logoutBtn, { backgroundColor: Colors.surface }]} onPress={handleLogout} haptic="warning">
           <Ionicons name="log-out-outline" size={16} color={Colors.red} />
