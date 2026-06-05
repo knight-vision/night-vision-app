@@ -352,7 +352,7 @@ export default function ShopManageScreen() {
         {TABS.map(tab => (
           <PunyTouchable key={tab.key} style={[styles.segmentBtn, activeTab === tab.key && styles.segmentBtnActive]} scaleTo={0.96} haptic="light"
             onPress={() => setActiveTab(tab.key)}>
-            <Ionicons name={tab.icon as any} size={14} color={activeTab === tab.key ? Colors.gold : Colors.text3} />
+            <Ionicons name={tab.icon as any} size={16} color={activeTab === tab.key ? Colors.gold : Colors.text2} />
             <Text style={[styles.segmentText, activeTab === tab.key && styles.segmentTextActive]}>{tab.label}</Text>
           </PunyTouchable>
         ))}
