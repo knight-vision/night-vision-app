@@ -12,6 +12,7 @@ import { StatCard } from '../../components/StatCard';
 import { SectionCard } from '../../components/SectionCard';
 import { MonthCalendar } from '../../components/MonthCalendar';
 import { PunyTouchable } from '../../components/PunyTouchable';
+import { useLocalSearchParams } from 'expo-router';
 
 // ── オーナー向け ──────────────────────────────────────────────
 function OwnerResultsView({ shopId }: { shopId: string }) {
@@ -128,11 +129,16 @@ function getWeekDates(base: string) {
   return Array.from({ length: 7 }, (_, i) => { const d = new Date(mon); d.setDate(mon.getDate() + i); return getDateStr(d); });
 }
 
-function CastPayTab({ castId, shopId }: { castId: string; shopId: string }) {
+function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
+  castId: string; shopId: string;
+  initialDate?: string;
+  initialPeriod?: PayPeriod;
+}) {
   const now = new Date();
-  const [period, setPeriod] = useState<PayPeriod>('monthly');
-  const [refDate, setRefDate] = useState(getDateStr(now)); // 日/週の基準日
-  const [refMonth, setRefMonth] = useState(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`);
+  const initDate = initialDate || getDateStr(now);
+  const [period, setPeriod] = useState<PayPeriod>(initialPeriod || 'monthly');
+  const [refDate, setRefDate] = useState(initDate); // 日/週の基準日
+  const [refMonth, setRefMonth] = useState(initDate.slice(0, 7));
   const [shifts, setShifts] = useState<any[]>([]);
   const [allowances, setAllowances] = useState<any[]>([]);
   const [castInfo, setCastInfo] = useState<any>(null);
@@ -349,6 +355,9 @@ function CastPayTab({ castId, shopId }: { castId: string; shopId: string }) {
 
 // ── キャスト向けメインビュー（給与 / 実績タブ） ─────────────
 function CastResultsView({ castId, shopId }: { castId: string; shopId: string }) {
+  const params = useLocalSearchParams<{ date?: string }>();
+  const incomingDate = typeof params.date === 'string' ? params.date : undefined;
+  // 日付パラメータが渡された場合は給与タブ＋日表示に
   const [tab, setTab] = useState<'pay' | 'perf'>('pay');
 
   return (
@@ -365,7 +374,9 @@ function CastResultsView({ castId, shopId }: { castId: string; shopId: string })
           <Text style={[styles.innerTabText, tab === 'perf' && styles.innerTabTextActive]}>実績</Text>
         </TouchableOpacity>
       </View>
-      {tab === 'pay'  && <CastPayTab  castId={castId} shopId={shopId} />}
+      {tab === 'pay'  && <CastPayTab  castId={castId} shopId={shopId}
+        initialDate={incomingDate}
+        initialPeriod={incomingDate ? 'daily' : 'monthly'} />}
       {tab === 'perf' && <CastPerformanceTab castId={castId} shopId={shopId} />}
     </>
   );

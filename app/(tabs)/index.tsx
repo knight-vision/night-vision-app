@@ -8,7 +8,6 @@ import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 import { StatCard } from '../../components/StatCard';
 import { SectionCard } from '../../components/SectionCard';
-import { MonthCalendar } from '../../components/MonthCalendar';
 
 interface DashboardData {
   monthly_sales: number;
@@ -26,10 +25,84 @@ function getDateStr(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-function fmtFull(s: string) {
+// 月曜始まりの今週の7日間
+function getWeekDates(base: Date): string[] {
+  const d = new Date(base);
+  const day = d.getDay(); // 0=日
+  const offset = day === 0 ? -6 : 1 - day; // 月曜が起点
+  d.setDate(d.getDate() + offset);
+  return Array.from({ length: 7 }, (_, i) => {
+    const x = new Date(d);
+    x.setDate(d.getDate() + i);
+    return getDateStr(x);
+  });
+}
+
+function shortDate(s: string) {
   const d = new Date(s + 'T00:00:00');
   const w = ['日','月','火','水','木','金','土'][d.getDay()];
-  return `${d.getMonth()+1}月${d.getDate()}日(${w})`;
+  return { dm: `${d.getMonth()+1}/${d.getDate()}`, w, dow: d.getDay() };
+}
+
+// ── 週間シフト表（オーナー・キャスト共通） ─────────────────
+function WeeklyShiftTable({
+  weekDates, allConfirmed, casts, highlightCastId, onDayPress,
+}: {
+  weekDates: string[];
+  allConfirmed: any[];
+  casts: any[];
+  highlightCastId?: string;
+  onDayPress?: (date: string) => void;
+}) {
+  const todayStr = getDateStr(new Date());
+  return (
+    <View style={wt.wrap}>
+      {weekDates.map(date => {
+        const { dm, w, dow } = shortDate(date);
+        const dayShifts = allConfirmed
+          .filter((s: any) => s.date === date)
+          .sort((a: any, b: any) => (a.start_time || '').localeCompare(b.start_time || ''));
+        const isToday = date === todayStr;
+        return (
+          <PunyTouchable key={date} scaleTo={0.98} haptic="light"
+            onPress={() => onDayPress?.(date)}>
+            <View style={[wt.row, isToday && wt.rowToday]}>
+              <View style={wt.dateCol}>
+                <Text style={[wt.dayOfWeek, dow === 0 && { color: '#f08098' }, dow === 6 && { color: '#a8c4f0' }, isToday && { color: Colors.gold, fontWeight: '700' }]}>{w}</Text>
+                <Text style={[wt.dayNum, isToday && { color: Colors.gold }]}>{dm}</Text>
+              </View>
+              <View style={wt.shiftsCol}>
+                {dayShifts.length === 0 ? (
+                  <Text style={wt.emptyText}>—</Text>
+                ) : (
+                  dayShifts.map((s: any) => {
+                    const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
+                    const color = ci >= 0 ? CAST_COLORS[ci % CAST_COLORS.length] : Colors.gold;
+                    const castName = casts.find((c: any) => String(c.id) === String(s.cast_id))?.name || s.casts?.name || 'キャスト';
+                    const isMe = highlightCastId && String(s.cast_id) === highlightCastId;
+                    return (
+                      <View key={s.id} style={[wt.shiftChip,
+                        { backgroundColor: color + '22', borderColor: color },
+                        isMe && { borderWidth: 1.5 },
+                      ]}>
+                        <View style={[wt.castDot, { backgroundColor: color }]} />
+                        <Text style={[wt.castName, { color }]}>
+                          {castName}{isMe ? '（自分）' : ''}
+                        </Text>
+                        <Text style={wt.shiftTime}>
+                          {(s.start_time || '').slice(0,5)}〜{(s.end_time || '').slice(0,5)}
+                        </Text>
+                      </View>
+                    );
+                  })
+                )}
+              </View>
+            </View>
+          </PunyTouchable>
+        );
+      })}
+    </View>
+  );
 }
 
 // ── オーナー版 ────────────────────────────────────────────────
@@ -37,13 +110,29 @@ function OwnerHome() {
   const { shopId } = useAuthStore();
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
+  const [allConfirmed, setAllConfirmed] = useState<any[]>([]);
+  const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const now = new Date();
+  const [weekBase, setWeekBase] = useState(now);
+  const weekDates = getWeekDates(weekBase);
 
   useEffect(() => {
     if (!shopId) return;
-    fetch(`${API_BASE}/owner/dashboard-summary?shop_id=${shopId}`)
-      .then(r => r.json()).then(setData).catch(() => {}).finally(() => setLoading(false));
-  }, [shopId]);
+    setLoading(true);
+    const y = weekBase.getFullYear();
+    const m = weekBase.getMonth() + 1;
+    Promise.all([
+      fetch(`${API_BASE}/owner/dashboard-summary?shop_id=${shopId}`).then(r => r.json()).catch(() => null),
+      fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${y}&month=${m}`).then(r => r.json()).catch(() => ({})),
+      fetch(`${API_BASE}/casts?shop_id=${shopId}`).then(r => r.json()).catch(() => []),
+    ]).then(([d, sd, cd]) => {
+      setData(d);
+      setAllConfirmed(Array.isArray(sd) ? sd : (sd?.confirmed || []));
+      setCasts(Array.isArray(cd) ? cd : []);
+    }).finally(() => setLoading(false));
+  }, [shopId, weekBase]);
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
   if (!data) return <Text style={{ color: Colors.text2, textAlign: 'center', marginTop: 40 }}>データを取得できませんでした</Text>;
@@ -68,6 +157,21 @@ function OwnerHome() {
             valueColor={data.pending_shift_count > 0 ? Colors.gold : Colors.text} />
         </PunyTouchable>
       </View>
+
+      {/* 週間確定シフト */}
+      <SectionCard title="🏪 今週の確定シフト" actionLabel="シフト管理 →" onAction={() => router.push('/(tabs)/shift')}>
+        <View style={wt.weekNav}>
+          <PunyTouchable haptic="light" onPress={() => { const d = new Date(weekBase); d.setDate(d.getDate()-7); setWeekBase(d); }} style={wt.weekNavBtn}>
+            <Text style={wt.weekNavText}>‹ 前週</Text>
+          </PunyTouchable>
+          <Text style={wt.weekRange}>{shortDate(weekDates[0]).dm} 〜 {shortDate(weekDates[6]).dm}</Text>
+          <PunyTouchable haptic="light" onPress={() => { const d = new Date(weekBase); d.setDate(d.getDate()+7); setWeekBase(d); }} style={wt.weekNavBtn}>
+            <Text style={wt.weekNavText}>次週 ›</Text>
+          </PunyTouchable>
+        </View>
+        <WeeklyShiftTable weekDates={weekDates} allConfirmed={allConfirmed} casts={casts}
+          onDayPress={() => router.push('/(tabs)/shift')} />
+      </SectionCard>
 
       {data.cast_ranking.length > 0 && (
         <SectionCard title="今月キャスト売上ランキング" actionLabel="全員表示"
@@ -108,20 +212,23 @@ function OwnerHome() {
 
 // ── キャスト版 ────────────────────────────────────────────────
 function CastHome() {
-  const { castId, shopId, name } = useAuthStore();
+  const { castId, shopId } = useAuthStore();
   const router = useRouter();
   const now = new Date();
-  const [calYear, setCalYear] = useState(now.getFullYear());
-  const [calMonth, setCalMonth] = useState(now.getMonth());  // 0-indexed
+  const [weekBase, setWeekBase] = useState(now);
   const [allConfirmed, setAllConfirmed] = useState<any[]>([]);
   const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const weekDates = getWeekDates(weekBase);
+  const y = weekBase.getFullYear();
+  const m = weekBase.getMonth() + 1;
 
   useEffect(() => {
     if (!shopId) return;
     setLoading(true);
     Promise.all([
-      fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${calYear}&month=${calMonth+1}`),
+      fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${y}&month=${m}`),
       fetch(`${API_BASE}/casts?shop_id=${shopId}`),
     ]).then(async ([r1, r2]) => {
       const d1 = await r1.json();
@@ -130,50 +237,37 @@ function CastHome() {
       const d2 = await r2.json();
       setCasts(Array.isArray(d2) ? d2 : []);
     }).catch(() => {}).finally(() => setLoading(false));
-  }, [shopId, calYear, calMonth]);
+  }, [shopId, y, m]);
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
 
-  const myShifts = allConfirmed.filter((s: any) => String(s.cast_id) === castId)
-    .sort((a: any, b: any) => a.date.localeCompare(b.date));
-  const upcomingMyShifts = myShifts.filter((s: any) => s.date >= getDateStr(now)).slice(0, 5);
-
-  // キャスト別カラーのイベント
-  const calendarEvents = allConfirmed.map((s: any) => {
-    const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
-    return { date: s.date, color: ci >= 0 ? CAST_COLORS[ci % CAST_COLORS.length] : Colors.gold };
-  });
+  // 自分の今週シフトのみ
+  const myWeekShifts = allConfirmed
+    .filter((s: any) => String(s.cast_id) === castId && weekDates.includes(s.date));
 
   return (
     <>
-      {/* 自分の次の出勤 */}
-      <SectionCard title="📅 自分の確定シフト" actionLabel="シフト画面 →" onAction={() => router.push('/(tabs)/shift')}>
-        {upcomingMyShifts.length === 0 ? (
-          <Text style={styles.empty}>確定済みのシフトはありません</Text>
-        ) : upcomingMyShifts.map((s: any) => (
-          <PunyTouchable key={s.id} scaleTo={0.97} haptic="light"
-            onPress={() => router.push('/(tabs)/results')}>
-            <View style={styles.myShiftRow}>
-              <View style={styles.myShiftDate}>
-                <Text style={styles.myShiftDateText}>{fmtFull(s.date)}</Text>
-              </View>
-              <Text style={styles.myShiftTime}>{(s.start_time || '').slice(0,5)} 〜 {(s.end_time || '').slice(0,5)}</Text>
-              <Text style={styles.myShiftArrow}>›</Text>
-            </View>
+      {/* 自分の今週シフト（タップで該当日の給与へ） */}
+      <SectionCard title="📅 自分の今週シフト" actionLabel="シフト画面 →" onAction={() => router.push('/(tabs)/shift')}>
+        <View style={wt.weekNav}>
+          <PunyTouchable haptic="light" onPress={() => { const d = new Date(weekBase); d.setDate(d.getDate()-7); setWeekBase(d); }} style={wt.weekNavBtn}>
+            <Text style={wt.weekNavText}>‹ 前週</Text>
           </PunyTouchable>
-        ))}
+          <Text style={wt.weekRange}>{shortDate(weekDates[0]).dm} 〜 {shortDate(weekDates[6]).dm}</Text>
+          <PunyTouchable haptic="light" onPress={() => { const d = new Date(weekBase); d.setDate(d.getDate()+7); setWeekBase(d); }} style={wt.weekNavBtn}>
+            <Text style={wt.weekNavText}>次週 ›</Text>
+          </PunyTouchable>
+        </View>
+        <WeeklyShiftTable weekDates={weekDates} allConfirmed={myWeekShifts} casts={casts}
+          highlightCastId={castId || undefined}
+          onDayPress={(date) => router.push({ pathname: '/(tabs)/results', params: { date } })} />
       </SectionCard>
 
-      {/* 店舗全体カレンダー */}
-      <SectionCard title="🏪 店舗の確定シフト" actionLabel="店舗全体 →" onAction={() => router.push('/(tabs)/shift')}>
-        <MonthCalendar
-          events={calendarEvents}
-          year={calYear}
-          month={calMonth}
-          onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m); }}
-          onDayPress={() => router.push('/(tabs)/shift')}
-          maxDots={4}
-        />
+      {/* 店舗全体の今週シフト */}
+      <SectionCard title="🏪 店舗の今週シフト" actionLabel="店舗全体 →" onAction={() => router.push('/(tabs)/shift')}>
+        <WeeklyShiftTable weekDates={weekDates} allConfirmed={allConfirmed} casts={casts}
+          highlightCastId={castId || undefined}
+          onDayPress={() => router.push('/(tabs)/shift')} />
       </SectionCard>
     </>
   );
@@ -208,12 +302,24 @@ const styles = StyleSheet.create({
   barTrack:       { flex: 1, height: 6, backgroundColor: Colors.surface2, borderRadius: 3, overflow: 'hidden' },
   barFill:        { height: '100%', backgroundColor: Colors.gold, borderRadius: 3 },
   barVal:         { width: 72, fontSize: 11, color: Colors.text2, textAlign: 'right' },
+});
 
-  // キャスト用
-  empty:          { fontSize: 12, color: Colors.text3, textAlign: 'center', paddingVertical: 14 },
-  myShiftRow:     { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, paddingHorizontal: 12, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
-  myShiftDate:    { flex: 1.4 },
-  myShiftDateText:{ fontSize: 13, color: Colors.text, fontWeight: '600' },
-  myShiftTime:    { flex: 1, fontSize: 13, color: Colors.gold, fontWeight: '600', textAlign: 'right' },
-  myShiftArrow:   { fontSize: 18, color: Colors.text3, marginLeft: 4 },
+const wt = StyleSheet.create({
+  weekNav:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 4 },
+  weekNavBtn:     { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, backgroundColor: Colors.surface2 },
+  weekNavText:    { fontSize: 12, color: Colors.text2, fontWeight: '500' },
+  weekRange:      { fontSize: 13, color: Colors.text, fontWeight: '600' },
+
+  wrap:           { },
+  row:            { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
+  rowToday:       { backgroundColor: 'rgba(232,180,200,0.06)' },
+  dateCol:        { width: 50, alignItems: 'center', paddingTop: 4 },
+  dayOfWeek:      { fontSize: 10, color: Colors.text3, fontWeight: '500' },
+  dayNum:         { fontSize: 14, color: Colors.text, fontWeight: '700', marginTop: 1 },
+  shiftsCol:      { flex: 1, gap: 4, paddingLeft: 4 },
+  emptyText:      { fontSize: 12, color: Colors.text3, paddingVertical: 8, paddingLeft: 4 },
+  shiftChip:      { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6, paddingHorizontal: 8, borderRadius: 8, borderWidth: 0.5 },
+  castDot:        { width: 7, height: 7, borderRadius: 3.5 },
+  castName:       { fontSize: 12, fontWeight: '600', flex: 1 },
+  shiftTime:      { fontSize: 11, color: Colors.text2, fontWeight: '500' },
 });

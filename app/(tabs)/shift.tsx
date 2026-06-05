@@ -658,7 +658,7 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
           <Text style={styles.listSectionTitle}>📌 確定シフト（タップで給与確認）</Text>
           {confirmedShifts.sort((a, b) => a.date.localeCompare(b.date)).map((s: any) => (
             <PunyTouchable key={s.id} scaleTo={0.97} haptic="light"
-              onPress={() => router.push('/(tabs)/results')}>
+              onPress={() => router.push({ pathname: '/(tabs)/results', params: { date: s.date } })}>
               <View style={[styles.shiftItem, { borderLeftWidth: 3, borderLeftColor: Colors.green }]}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.shiftDate}>{s.date}</Text>
