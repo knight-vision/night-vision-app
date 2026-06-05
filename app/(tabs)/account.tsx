@@ -279,7 +279,7 @@ const modal = StyleSheet.create({
 
 const styles = StyleSheet.create({
   safe:              { flex: 1 },
-  scroll:            { paddingHorizontal: 16, paddingBottom: 40 },
+  scroll:            { paddingHorizontal: 16, paddingBottom: 108 },
   screenTitle:       { fontSize: 20, fontWeight: '500', paddingVertical: 16 },
   profileCard:       { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 14, borderWidth: 0.5, padding: 16, marginBottom: 20 },
   profileAvatar:     { width: 52, height: 52, borderRadius: 26, borderWidth: 1.5, justifyContent: 'center', alignItems: 'center' },

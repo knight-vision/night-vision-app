@@ -901,7 +901,7 @@ const styles = StyleSheet.create({
   summaryValue:      { fontSize: 20, fontWeight: '700', marginBottom: 4 },
   summaryDetail:     { fontSize: 11, color: Colors.text2, marginTop: 2 },
   screenTitle:       { fontSize: 20, fontWeight: '500', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
-  scroll:            { paddingHorizontal: 16, paddingBottom: 40 },
+  scroll:            { paddingHorizontal: 16, paddingBottom: 108 },
   weekNav:           { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   weekBtn:           { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
   weekBtnText:       { fontSize: 13, color: Colors.text2 },

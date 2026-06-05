@@ -428,7 +428,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe:           { flex: 1, backgroundColor: Colors.bg },
   screenTitle:    { fontSize: 20, fontWeight: '500', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
-  scroll:         { paddingHorizontal: 16, paddingBottom: 40 },
+  scroll:         { paddingHorizontal: 16, paddingBottom: 108 },
   statGrid:       { flexDirection: 'row', gap: 10 },
   castRow:        { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
   castAvatar:     { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },

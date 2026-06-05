@@ -642,7 +642,7 @@ const cal = StyleSheet.create({
 const s = StyleSheet.create({
   safe:             { flex: 1, backgroundColor: Colors.bg },
   screenTitle:      { fontSize: 20, fontWeight: '500', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
-  scroll:           { paddingHorizontal: 16, paddingBottom: 40 },
+  scroll:           { paddingHorizontal: 16, paddingBottom: 108 },
   tabScroll:        { maxHeight: 48, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
   tabContent:       { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
   tab:              { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: Colors.border },

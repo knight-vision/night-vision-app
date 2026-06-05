@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   monthNav:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   monthBtn:      { padding: 6 },
   monthLabel:    { fontSize: 14, color: Colors.text, fontWeight: '500', minWidth: 80, textAlign: 'center' },
-  scroll:        { paddingHorizontal: 16, paddingBottom: 40 },
+  scroll:        { paddingHorizontal: 16, paddingBottom: 108 },
   tabScroll:     { maxHeight: 48, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
   tabContent:    { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
   tab:           { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: Colors.border },

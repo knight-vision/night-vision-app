@@ -416,7 +416,7 @@ export default function ResultsScreen() {
 const styles = StyleSheet.create({
   safe:              { flex: 1, backgroundColor: Colors.bg },
   screenTitle:       { fontSize: 20, fontWeight: '500', color: Colors.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
-  scroll:            { paddingHorizontal: 16, paddingBottom: 40 },
+  scroll:            { paddingHorizontal: 16, paddingBottom: 108 },
   emptyText:         { color: Colors.text2, textAlign: 'center', marginTop: 40 },
   statGrid:          { flexDirection: 'row', gap: 10, marginBottom: 0 },
   rankRow:           { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: Colors.border },
