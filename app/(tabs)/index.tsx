@@ -1,7 +1,8 @@
 import { ScrollView, View, Text, StyleSheet, ActivityIndicator, FlatList, Dimensions } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { PunyTouchable } from '../../components/PunyTouchable';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { Colors, fmtYen , useColors } from '../../constants/theme';
 import { useThemeStore } from '../../store/theme';
@@ -190,6 +191,17 @@ function OwnerHome() {
   useEffect(() => { fetchIfNeeded(weekBase); },    [weekBase, shopId]);
   useEffect(() => { fetchIfNeeded(reqWeekBase); }, [reqWeekBase, shopId]);
 
+  // 画面フォーカス時に当月データを強制再フェッチ（他画面での変更を反映）
+  useFocusEffect(useCallback(() => {
+    if (!shopId) return;
+    const iy = new Date().getFullYear(), im = new Date().getMonth() + 1;
+    const key = `${iy}-${im}`;
+    fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${iy}&month=${im}`)
+      .then(r => r.json())
+      .then(sd => saveMonth(key, sd))
+      .catch(() => {});
+  }, [shopId]));
+
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
   if (!data) return <Text style={{ color: Colors.text2, textAlign: 'center', marginTop: 40 }}>データを取得できませんでした</Text>;
 
@@ -358,6 +370,19 @@ function CastHome() {
 
   useEffect(() => { fetchMonthIfNeeded(weekBase); },     [weekBase, shopId]);
   useEffect(() => { fetchMonthIfNeeded(shopWeekBase); }, [shopWeekBase, shopId]);
+
+  // 画面フォーカス時に当月データを強制再フェッチ（他画面での変更を反映）
+  useFocusEffect(useCallback(() => {
+    if (!shopId) return;
+    const iy = new Date().getFullYear(), im = new Date().getMonth() + 1;
+    const key = `${iy}-${im}`;
+    fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${iy}&month=${im}`)
+      .then(r => r.json())
+      .then(sd => {
+        const shifts = Array.isArray(sd) ? sd : (sd?.confirmed || []);
+        setShiftCache(prev => ({ ...prev, [key]: shifts }));
+      }).catch(() => {});
+  }, [shopId]));
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
 
