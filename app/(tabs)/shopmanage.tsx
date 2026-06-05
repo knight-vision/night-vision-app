@@ -1,8 +1,9 @@
+import * as Haptics from 'expo-haptics';
 import { GlassCard } from '../../components/GlassCard';
 import { PunyTouchable } from '../../components/PunyTouchable';
 import {
   ScrollView, View, Text, StyleSheet,
-  TextInput, Alert, ActivityIndicator, Switch, Linking, Modal,
+  TextInput, Alert, ActivityIndicator, Switch, Linking, Modal, Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -350,11 +351,11 @@ export default function ShopManageScreen() {
       <Text style={styles.screenTitle}>店舗管理</Text>
       <View style={styles.segmentWrap}>
         {TABS.map(tab => (
-          <PunyTouchable key={tab.key} style={[styles.segmentBtn, activeTab === tab.key && styles.segmentBtnActive]} scaleTo={0.96} haptic="light"
-            onPress={() => setActiveTab(tab.key)}>
+          <Pressable key={tab.key} style={[styles.segmentBtn, activeTab === tab.key && styles.segmentBtnActive]}
+            onPress={() => { Haptics.selectionAsync().catch(() => {}); setActiveTab(tab.key); }}>
             <Ionicons name={tab.icon as any} size={16} color={activeTab === tab.key ? Colors.gold : Colors.text2} />
             <Text style={[styles.segmentText, activeTab === tab.key && styles.segmentTextActive]}>{tab.label}</Text>
-          </PunyTouchable>
+          </Pressable>
         ))}
       </View>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
