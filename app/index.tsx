@@ -13,6 +13,95 @@ import { PunyTouchable } from '../components/PunyTouchable';
 
 type LoginType = 'owner' | 'cast' | null;
 
+// ── パスワードリセットモーダル ───────────────────────────────
+function ForgotPasswordModal({ type, visible, onClose }: {
+  type: LoginType; visible: boolean; onClose: () => void;
+}) {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState('');
+
+  const isOwner = type === 'owner';
+  const endpoint = isOwner ? `${API_BASE}/reset-owner-password` : `${API_BASE}/reset-cast-password`;
+  const accentColor = isOwner ? Colors.gold : Colors.purple;
+  const accentDark  = isOwner ? '#1a1200' : '#fff';
+
+  const handleClose = () => { setEmail(''); setError(''); setDone(false); onClose(); };
+
+  const handleSubmit = async () => {
+    if (!email.trim()) { setError('メールアドレスを入力してください'); return; }
+    setLoading(true); setError('');
+    try {
+      await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      setDone(true);
+    } catch {
+      setError('通信エラーが発生しました');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <View style={modal.container}>
+          <View style={modal.header}>
+            <TouchableOpacity onPress={handleClose} style={modal.closeBtn}>
+              <Ionicons name="close" size={22} color={Colors.text2} />
+            </TouchableOpacity>
+            <Text style={modal.title}>パスワードをお忘れの方</Text>
+            <View style={{ width: 36 }} />
+          </View>
+          <View style={modal.body}>
+            {done ? (
+              <View style={{ alignItems: 'center', gap: 16, paddingVertical: 24 }}>
+                <View style={[modal.badge, { backgroundColor: isOwner ? Colors.goldDim : Colors.purpleDim, alignSelf: 'center' }]}>
+                  <Ionicons name="checkmark-circle-outline" size={20} color={accentColor} />
+                  <Text style={[modal.badgeText, { color: accentColor }]}>送信完了</Text>
+                </View>
+                <Text style={{ color: Colors.text2, fontSize: 14, textAlign: 'center', lineHeight: 22 }}>
+                  登録済みのメールアドレスに{'
+'}新しいパスワードをお送りしました。{'
+'}メールをご確認ください。
+                </Text>
+                <PunyTouchable style={[modal.loginBtn, { backgroundColor: accentColor, marginTop: 8 }]} onPress={handleClose} haptic="light">
+                  <Text style={[modal.loginBtnText, { color: accentDark }]}>閉じる</Text>
+                </PunyTouchable>
+              </View>
+            ) : (
+              <>
+                <Text style={{ color: Colors.text2, fontSize: 13, lineHeight: 20, marginBottom: 4 }}>
+                  登録済みのメールアドレスを入力してください。新しいパスワードをメールでお送りします。
+                </Text>
+                <View style={modal.inputWrap}>
+                  <Ionicons name="mail-outline" size={18} color={Colors.text3} style={modal.inputIcon} />
+                  <TextInput style={modal.input} value={email} onChangeText={setEmail}
+                    placeholder="メールアドレス" placeholderTextColor={Colors.text3}
+                    keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
+                </View>
+                {error ? <Text style={modal.errorText}>{error}</Text> : null}
+                <PunyTouchable
+                  style={[modal.loginBtn, { backgroundColor: accentColor }]}
+                  onPress={handleSubmit} disabled={loading} haptic="success">
+                  {loading
+                    ? <ActivityIndicator color={accentDark} />
+                    : <Text style={[modal.loginBtnText, { color: accentDark }]}>送信する</Text>
+                  }
+                </PunyTouchable>
+              </>
+            )}
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
 // ── ログインモーダル ─────────────────────────────────────────
 function LoginModal({ type, visible, onClose }: {
   type: LoginType; visible: boolean; onClose: () => void;
@@ -22,6 +111,7 @@ function LoginModal({ type, visible, onClose }: {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showForgot, setShowForgot] = useState(false);
   const { setOwner, setCast } = useAuthStore();
 
   const isOwner = type === 'owner';
@@ -57,51 +147,58 @@ function LoginModal({ type, visible, onClose }: {
   const handleClose = () => { setEmail(''); setPassword(''); setError(''); setShowPass(false); onClose(); };
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <View style={modal.container}>
-          <View style={modal.header}>
-            <TouchableOpacity onPress={handleClose} style={modal.closeBtn}>
-              <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
-            <Text style={modal.title}>{isOwner ? '店舗管理者ログイン' : 'キャストログイン'}</Text>
-            <View style={{ width: 36 }} />
-          </View>
-          <View style={modal.body}>
-            <View style={[modal.badge, { backgroundColor: isOwner ? Colors.goldDim : Colors.purpleDim }]}>
-              <Ionicons name={isOwner ? 'business-outline' : 'person-outline'} size={16} color={isOwner ? Colors.gold : Colors.purple} />
-              <Text style={[modal.badgeText, { color: isOwner ? Colors.gold : Colors.purple }]}>
-                {isOwner ? 'オーナー' : 'キャスト'}
-              </Text>
+    <>
+      <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+          <View style={modal.container}>
+            <View style={modal.header}>
+              <TouchableOpacity onPress={handleClose} style={modal.closeBtn}>
+                <Ionicons name="close" size={22} color={Colors.text2} />
+              </TouchableOpacity>
+              <Text style={modal.title}>{isOwner ? '店舗管理者ログイン' : 'キャストログイン'}</Text>
+              <View style={{ width: 36 }} />
             </View>
-            <View style={modal.inputWrap}>
-              <Ionicons name="mail-outline" size={18} color={Colors.text3} style={modal.inputIcon} />
-              <TextInput style={modal.input} value={email} onChangeText={setEmail}
-                placeholder="メールアドレス" placeholderTextColor={Colors.text3}
-                keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
-            </View>
-            <View style={modal.inputWrap}>
-              <Ionicons name="lock-closed-outline" size={18} color={Colors.text3} style={modal.inputIcon} />
-              <TextInput style={modal.input} value={password} onChangeText={setPassword}
-                placeholder="パスワード" placeholderTextColor={Colors.text3}
-                secureTextEntry={!showPass} autoCapitalize="none" />
-              <TouchableOpacity onPress={() => setShowPass(v => !v)} style={modal.eyeBtn}>
-                <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={18} color={Colors.text3} />
+            <View style={modal.body}>
+              <View style={[modal.badge, { backgroundColor: isOwner ? Colors.goldDim : Colors.purpleDim }]}>
+                <Ionicons name={isOwner ? 'business-outline' : 'person-outline'} size={16} color={isOwner ? Colors.gold : Colors.purple} />
+                <Text style={[modal.badgeText, { color: isOwner ? Colors.gold : Colors.purple }]}>
+                  {isOwner ? 'オーナー' : 'キャスト'}
+                </Text>
+              </View>
+              <View style={modal.inputWrap}>
+                <Ionicons name="mail-outline" size={18} color={Colors.text3} style={modal.inputIcon} />
+                <TextInput style={modal.input} value={email} onChangeText={setEmail}
+                  placeholder="メールアドレス" placeholderTextColor={Colors.text3}
+                  keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
+              </View>
+              <View style={modal.inputWrap}>
+                <Ionicons name="lock-closed-outline" size={18} color={Colors.text3} style={modal.inputIcon} />
+                <TextInput style={modal.input} value={password} onChangeText={setPassword}
+                  placeholder="パスワード" placeholderTextColor={Colors.text3}
+                  secureTextEntry={!showPass} autoCapitalize="none" />
+                <TouchableOpacity onPress={() => setShowPass(v => !v)} style={modal.eyeBtn}>
+                  <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={18} color={Colors.text3} />
+                </TouchableOpacity>
+              </View>
+              {error ? <Text style={modal.errorText}>{error}</Text> : null}
+              <PunyTouchable
+                style={[modal.loginBtn, { backgroundColor: isOwner ? Colors.gold : Colors.purple }]}
+                onPress={handleLogin} disabled={loading} haptic="success">
+                {loading
+                  ? <ActivityIndicator color={isOwner ? '#1a1200' : '#fff'} />
+                  : <Text style={[modal.loginBtnText, { color: isOwner ? '#1a1200' : '#fff' }]}>ログイン</Text>
+                }
+              </PunyTouchable>
+              {/* パスワードを忘れた方 */}
+              <TouchableOpacity onPress={() => setShowForgot(true)} style={modal.forgotBtn}>
+                <Text style={modal.forgotText}>パスワードをお忘れの方</Text>
               </TouchableOpacity>
             </View>
-            {error ? <Text style={modal.errorText}>{error}</Text> : null}
-            <PunyTouchable
-              style={[modal.loginBtn, { backgroundColor: isOwner ? Colors.gold : Colors.purple }]}
-              onPress={handleLogin} disabled={loading} haptic="success">
-              {loading
-                ? <ActivityIndicator color={isOwner ? '#1a1200' : '#fff'} />
-                : <Text style={[modal.loginBtnText, { color: isOwner ? '#1a1200' : '#fff' }]}>ログイン</Text>
-              }
-            </PunyTouchable>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
+        </KeyboardAvoidingView>
+      </Modal>
+      <ForgotPasswordModal type={type} visible={showForgot} onClose={() => setShowForgot(false)} />
+    </>
   );
 }
 
@@ -175,6 +272,8 @@ const modal = StyleSheet.create({
   errorText:    { color: Colors.red, fontSize: 12, textAlign: 'center' },
   loginBtn:     { borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 4 },
   loginBtnText: { fontSize: 15, fontWeight: '600', letterSpacing: 1 },
+  forgotBtn:    { alignItems: 'center', paddingVertical: 8 },
+  forgotText:   { fontSize: 13, color: Colors.text3, textDecorationLine: 'underline' },
 });
 
 const styles = StyleSheet.create({

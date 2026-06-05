@@ -226,6 +226,13 @@ function OwnerHome() {
         </PunyTouchable>
       </View>
 
+      {/* 週間確定シフト */}
+      <SectionCard title="🏪 今週の確定シフト" actionLabel="シフト管理 →" onAction={() => router.push('/(tabs)/shift')}>
+        <WeekNav base={weekBase} setBase={setWeekBase} />
+        <WeeklyShiftTable weekDates={weekDates} allConfirmed={allConfirmed} casts={casts}
+          onDayPress={() => router.push('/(tabs)/shift')} />
+      </SectionCard>
+
       {/* 提出された希望シフト */}
       <SectionCard title="📩 提出された希望シフト" actionLabel="シフト管理 →" onAction={() => router.push('/(tabs)/shift')}>
         <WeekNav base={reqWeekBase} setBase={setReqWeekBase} />
@@ -236,13 +243,6 @@ function OwnerHome() {
           onDayPress={() => router.push('/(tabs)/shift')}
           isPending
         />
-      </SectionCard>
-
-      {/* 週間確定シフト */}
-      <SectionCard title="🏪 今週の確定シフト" actionLabel="シフト管理 →" onAction={() => router.push('/(tabs)/shift')}>
-        <WeekNav base={weekBase} setBase={setWeekBase} />
-        <WeeklyShiftTable weekDates={weekDates} allConfirmed={allConfirmed} casts={casts}
-          onDayPress={() => router.push('/(tabs)/shift')} />
       </SectionCard>
 
       {data.cast_ranking.length > 0 && (
