@@ -96,7 +96,11 @@ function DrumColumn({ items, selectedIndex, onSelect }: {
 }
 
 // iOSドラムロール風時間選択
-function TimeSelector({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
+function TimeSelector({ value, onChange, label, minHour, minMinute }: {
+  value: string; onChange: (v: string) => void; label?: string;
+  minHour?: number;   // この時刻以降のみ選択可（HOURSのindex単位、未指定なら制限なし）
+  minMinute?: number; // minHourと同時刻の場合のみ有効
+}) {
   const [modalVisible, setModalVisible] = useState(false);
 
   const toHourIndex = (v: string): number => {
@@ -109,27 +113,48 @@ function TimeSelector({ value, onChange, label }: { value: string; onChange: (v:
     return idx >= 0 ? idx : 0;
   };
 
+  // 選択可能な時間を絞り込む
+  const visibleHours = useMemo(() => {
+    if (minHour === undefined) return HOURS;
+    return HOURS.filter(h => h >= HOURS[minHour]);
+  }, [minHour]);
+  const visibleMinutes = useMemo(() => {
+    if (minMinute === undefined) return MINUTES;
+    return MINUTES.slice(minMinute);
+  }, [minMinute]);
+
   const [tempHIdx, setTempHIdx] = useState(() => toHourIndex(value));
   const [tempMIdx, setTempMIdx] = useState(() => toMinIndex(value));
 
-  const hourLabels = HOURS.map(h => tLabel(h));
-  const minLabels  = MINUTES.map(m => `${m}分`);
+  const hourLabels = visibleHours.map(h => tLabel(h));
+  const minLabels  = visibleMinutes.map(m => `${m}分`);
 
   const currentH = toHourIndex(value);
   const currentM = toMinIndex(value);
 
   const open = () => {
-    setTempHIdx(currentH);
-    setTempMIdx(currentM);
+    // 表示用のindex変換（filteringされたインデックスにマッピング）
+    const hInVisible = visibleHours.indexOf(HOURS[currentH]);
+    setTempHIdx(hInVisible >= 0 ? hInVisible : 0);
+    // 現在の時(currentH)がminHourと同時刻でない場合は分に制限なし
+    if (minHour !== undefined && currentH === minHour && minMinute !== undefined) {
+      const mInVisible = visibleMinutes.indexOf(MINUTES[currentM]);
+      setTempMIdx(mInVisible >= 0 ? mInVisible : 0);
+    } else {
+      setTempMIdx(MINUTES.indexOf(MINUTES[currentM] || '00'));
+    }
     setModalVisible(true);
   };
 
   const confirm = () => {
-    const rawH = HOURS[tempHIdx];
+    const selectedHourValue = visibleHours[tempHIdx];
+    const selectedMinuteValue =
+      minHour !== undefined && selectedHourValue === HOURS[minHour]
+        ? visibleMinutes[tempMIdx]
+        : MINUTES[tempMIdx];
     // Supabase time型は0-23のみ。25時→1時に正規化（日付跨ぎを表現）
-    const h = String(rawH >= 24 ? rawH - 24 : rawH).padStart(2, '0');
-    const m = MINUTES[tempMIdx];
-    onChange(`${h}:${m}`);
+    const h = String(selectedHourValue >= 24 ? selectedHourValue - 24 : selectedHourValue).padStart(2, '0');
+    onChange(`${h}:${selectedMinuteValue}`);
     setModalVisible(false);
   };
 
@@ -479,8 +504,11 @@ function OwnerShiftView({ shopId }: { shopId: string }) {
 
 // ── キャスト向けシフト希望提出 ──────────────────────────────────
 function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
+  const [view, setView] = useState<'me' | 'shop'>('me'); // タブ切り替え
   const [shifts, setShifts] = useState<any[]>([]);
   const [confirmedShifts, setConfirmedShifts] = useState<any[]>([]);
+  const [allConfirmed, setAllConfirmed] = useState<any[]>([]); // 店舗全体の確定シフト
+  const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selDate, setSelDate] = useState(getDateStr(new Date()));
@@ -496,17 +524,21 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [reqRes, confRes] = await Promise.all([
+      const [reqRes, confRes, castsRes] = await Promise.all([
         fetch(`${API_BASE}/cast-shift-request?cast_id=${castId}&shop_id=${shopId}`),
         fetch(`${API_BASE}/confirm-shift?shop_id=${shopId}&year=${calYear}&month=${calMonth}`),
+        fetch(`${API_BASE}/casts?shop_id=${shopId}`),
       ]);
       const reqData = await reqRes.json();
       const reqArray = Array.isArray(reqData) ? reqData : (reqData?.requests || []);
       setShifts(reqArray);
       const confData = await confRes.json();
       const confirmed = Array.isArray(confData) ? confData : (confData?.confirmed || []);
+      setAllConfirmed(confirmed);
       setConfirmedShifts(confirmed.filter((s: any) => String(s.cast_id) === castId));
-    } catch { setShifts([]); setConfirmedShifts([]); } finally { setLoading(false); }
+      const castData = await castsRes.json();
+      setCasts(Array.isArray(castData) ? castData : []);
+    } catch { setShifts([]); setConfirmedShifts([]); setAllConfirmed([]); } finally { setLoading(false); }
   }, [castId, shopId, calYear, calMonth]);
 
   useEffect(() => { load(); }, [load]);
@@ -564,6 +596,21 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
 
   return (
     <View>
+      {/* サブタブ：自分 / 店舗全体 */}
+      <View style={styles.subTabRow}>
+        <PunyTouchable haptic="light" style={[styles.subTab, view === 'me' && styles.subTabActive]} onPress={() => setView('me')}>
+          <Text style={[styles.subTabText, view === 'me' && styles.subTabTextActive]}>📅 自分のシフト</Text>
+        </PunyTouchable>
+        <PunyTouchable haptic="light" style={[styles.subTab, view === 'shop' && styles.subTabActive]} onPress={() => setView('shop')}>
+          <Text style={[styles.subTabText, view === 'shop' && styles.subTabTextActive]}>🏪 店舗全体</Text>
+        </PunyTouchable>
+      </View>
+
+      {view === 'shop' ? (
+        <ShopShiftView allConfirmed={allConfirmed} casts={casts} calYear={calYear} calMonth={calMonth}
+          onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m + 1); }} />
+      ) : (
+        <>
       {/* 凡例 */}
       <View style={{ flexDirection: 'row', gap: 14, marginBottom: 8, paddingHorizontal: 4 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
@@ -584,6 +631,11 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
         onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m + 1); }}
         onDayPress={(d) => {
           const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+          const todayStr = getDateStr(new Date());
+          if (dateStr < todayStr) {
+            Alert.alert('過去の日付', '過去の日にはシフト希望を出せません');
+            return;
+          }
           if (confirmedDates.includes(dateStr)) {
             Alert.alert('確定済み', 'この日はすでに確定シフトがあります');
             return;
@@ -662,6 +714,11 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
               onMonthChange={(y, m) => { setCalYear(y); setCalMonth(m + 1); }}
               onDayPress={(d) => {
                 const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                const todayStr = getDateStr(new Date());
+                if (ds < todayStr) {
+                  Alert.alert('過去の日付', '過去の日にはシフト希望を出せません');
+                  return;
+                }
                 if (confirmedShifts.some((s: any) => s.date === ds)) {
                   Alert.alert('確定済み', 'この日はすでに確定シフトがあります');
                   return;
@@ -677,7 +734,20 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
             <TimeSelector value={startTime} onChange={setStartTime} label="開始" />
 
             <Text style={[styles.modalLabel, { marginTop: 16 }]}>終了時間</Text>
-            <TimeSelector value={endTime} onChange={setEndTime} label="終了" />
+            <TimeSelector
+              value={endTime}
+              onChange={setEndTime}
+              label="終了"
+              minHour={(() => {
+                // startTime "20:00" → HOURSの中で20のindexを返す
+                const sh = parseInt(startTime.split(':')[0], 10);
+                return HOURS.indexOf(sh);
+              })()}
+              minMinute={(() => {
+                const sm = startTime.split(':')[1] || '00';
+                return MINUTES.indexOf(sm);
+              })()}
+            />
 
             <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={submitting}>
               {submitting ? <ActivityIndicator color="#1a1200" /> : <Text style={styles.submitBtnText}>提出する</Text>}
@@ -686,6 +756,67 @@ function CastShiftView({ castId, shopId }: { castId: string; shopId: string }) {
           </ScrollView>
         </View>
       </Modal>
+      </>
+      )}
+    </View>
+  );
+}
+
+// ── 店舗全体シフト表示（キャスト向け閲覧専用） ─────────────────
+function ShopShiftView({ allConfirmed, casts, calYear, calMonth, onMonthChange }: {
+  allConfirmed: any[];
+  casts: any[];
+  calYear: number;
+  calMonth: number;
+  onMonthChange: (y: number, m: number) => void;
+}) {
+  const [selDate, setSelDate] = useState(getDateStr(new Date()));
+
+  // 各キャストに固定の色
+  const events: { date: string; color: string }[] = allConfirmed.map((s: any) => {
+    const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
+    return { date: s.date, color: ci >= 0 ? CAST_COLORS[ci % CAST_COLORS.length] : Colors.gold };
+  });
+
+  // 選択日の確定シフト
+  const dayShifts = allConfirmed.filter((s: any) => s.date === selDate);
+
+  return (
+    <View>
+      <Text style={{ fontSize: 12, color: Colors.text3, marginBottom: 8, paddingHorizontal: 4 }}>
+        店舗全体の確定シフト（タップで詳細）
+      </Text>
+
+      <MonthCalendar
+        events={events}
+        year={calYear}
+        month={calMonth - 1}
+        onMonthChange={onMonthChange}
+        onDayPress={(d) => setSelDate(getDateStr(d))}
+        initialSelected={new Date(selDate + 'T00:00:00')}
+        maxDots={4}
+      />
+
+      <View style={styles.shopDayCard}>
+        <Text style={styles.shopDayDate}>{fmtFull(selDate)}</Text>
+        {dayShifts.length === 0 ? (
+          <Text style={styles.shopDayEmpty}>この日は出勤予定がありません</Text>
+        ) : (
+          dayShifts.sort((a: any, b: any) => (a.start_time || '').localeCompare(b.start_time || ''))
+            .map((s: any) => {
+              const ci = casts.findIndex((c: any) => String(c.id) === String(s.cast_id));
+              const color = ci >= 0 ? CAST_COLORS[ci % CAST_COLORS.length] : Colors.gold;
+              const castName = casts.find((c: any) => String(c.id) === String(s.cast_id))?.name || s.casts?.name || 'キャスト';
+              return (
+                <View key={s.id} style={[styles.shopShiftRow, { borderLeftColor: color }]}>
+                  <View style={[styles.shopCastDot, { backgroundColor: color }]} />
+                  <Text style={[styles.shopCastName, { color }]}>{castName}さん</Text>
+                  <Text style={styles.shopShiftTime}>{(s.start_time || '').slice(0,5)} 〜 {(s.end_time || '').slice(0,5)}</Text>
+                </View>
+              );
+            })
+        )}
+      </View>
     </View>
   );
 }
@@ -729,6 +860,21 @@ const ts = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
+  // サブタブ
+  subTabRow:        { flexDirection: 'row', gap: 8, marginBottom: 14 },
+  subTab:           { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 12, backgroundColor: Colors.surface, borderWidth: 0.5, borderColor: Colors.border },
+  subTabActive:     { backgroundColor: Colors.purpleDim, borderColor: Colors.purple },
+  subTabText:       { fontSize: 13, color: Colors.text2, fontWeight: '500' },
+  subTabTextActive: { color: Colors.purple, fontWeight: '700' },
+
+  // 店舗全体ビュー
+  shopDayCard:      { backgroundColor: Colors.surface, borderRadius: 14, borderWidth: 0.5, borderColor: Colors.border, padding: 14, marginTop: 4 },
+  shopDayDate:      { fontSize: 14, fontWeight: '600', color: Colors.text, marginBottom: 10 },
+  shopDayEmpty:     { fontSize: 12, color: Colors.text3, textAlign: 'center', paddingVertical: 12 },
+  shopShiftRow:     { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, paddingHorizontal: 12, borderLeftWidth: 3, backgroundColor: Colors.surface2, borderRadius: 8, marginBottom: 6 },
+  shopCastDot:      { width: 8, height: 8, borderRadius: 4 },
+  shopCastName:     { fontSize: 13, fontWeight: '600', flex: 1 },
+  shopShiftTime:    { fontSize: 12, color: Colors.text2, fontWeight: '500' },
   safe:              { flex: 1, backgroundColor: Colors.bg },
   summaryCard:       { backgroundColor: Colors.surface, borderRadius: 12, borderWidth: 0.5, borderColor: Colors.border, padding: 12 },
   summaryLabel:      { fontSize: 11, color: Colors.text3, marginBottom: 4 },
