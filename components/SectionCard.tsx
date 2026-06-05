@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { useColors } from '../constants/theme';
 import { GlassView } from 'expo-glass-effect';
+import { PunyTouchable } from './PunyTouchable';
 
 type Props = {
   title: string;
@@ -16,7 +17,7 @@ export function SectionCard({ title, actionLabel, onAction, children }: Props) {
     <View style={styles.header}>
       <Text style={[styles.title, { color: Colors.text2 }]}>{title}</Text>
       {actionLabel && (
-        <TouchableOpacity onPress={onAction} style={[styles.actionBtn, { backgroundColor: Colors.purpleDim }]}>
+        <PunyTouchable onPress={onAction} style={[styles.actionBtn, { backgroundColor: Colors.purpleDim }]} scaleTo={0.93} haptic="light">
           <Text style={[styles.action, { color: Colors.purple }]}>{actionLabel}</Text>
         </TouchableOpacity>
       )}

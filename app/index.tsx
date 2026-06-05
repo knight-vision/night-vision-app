@@ -51,9 +51,9 @@ function ForgotPasswordModal({ type, visible, onClose }: {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <View style={modal.container}>
           <View style={modal.header}>
-            <TouchableOpacity onPress={handleClose} style={modal.closeBtn}>
+            <PunyTouchable onPress={handleClose} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
-            </TouchableOpacity>
+            </PunyTouchable>
             <Text style={modal.title}>パスワードをお忘れの方</Text>
             <View style={{ width: 36 }} />
           </View>
@@ -151,7 +151,7 @@ function LoginModal({ type, visible, onClose }: {
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
           <View style={modal.container}>
             <View style={modal.header}>
-              <TouchableOpacity onPress={handleClose} style={modal.closeBtn}>
+              <PunyTouchable onPress={handleClose} style={modal.closeBtn} scaleTo={0.88} haptic="light">
                 <Ionicons name="close" size={22} color={Colors.text2} />
               </TouchableOpacity>
               <Text style={modal.title}>{isOwner ? '店舗管理者ログイン' : 'キャストログイン'}</Text>
@@ -175,7 +175,7 @@ function LoginModal({ type, visible, onClose }: {
                 <TextInput style={modal.input} value={password} onChangeText={setPassword}
                   placeholder="パスワード" placeholderTextColor={Colors.text3}
                   secureTextEntry={!showPass} autoCapitalize="none" />
-                <TouchableOpacity onPress={() => setShowPass(v => !v)} style={modal.eyeBtn}>
+                <PunyTouchable onPress={() => setShowPass(v => !v)} style={modal.eyeBtn} scaleTo={0.88} haptic="light">
                   <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={18} color={Colors.text3} />
                 </TouchableOpacity>
               </View>
@@ -189,9 +189,9 @@ function LoginModal({ type, visible, onClose }: {
                 }
               </PunyTouchable>
               {/* パスワードを忘れた方 */}
-              <TouchableOpacity onPress={() => setShowForgot(true)} style={modal.forgotBtn}>
+              <PunyTouchable onPress={() => setShowForgot(true)} style={modal.forgotBtn} scaleTo={0.96} haptic="light">
                 <Text style={modal.forgotText}>パスワードをお忘れの方</Text>
-              </TouchableOpacity>
+              </PunyTouchable>
             </View>
           </View>
         </KeyboardAvoidingView>

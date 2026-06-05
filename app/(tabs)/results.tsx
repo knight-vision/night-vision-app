@@ -239,7 +239,7 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
       {/* 期間切替 */}
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
         {PERIODS.map(p => (
-          <TouchableOpacity key={p.key} onPress={() => setPeriod(p.key)}
+          <PunyTouchable key={p.key} onPress={() => setPeriod(p.key)} scaleTo={0.95} haptic="light"
             style={[styles.periodBtn, period === p.key && styles.periodBtnActive]}>
             <Text style={[styles.periodBtnText, period === p.key && styles.periodBtnTextActive]}>{p.label}</Text>
           </TouchableOpacity>
@@ -250,11 +250,11 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
       {period === 'daily' && (
         <>
           <View style={styles.navRow}>
-            <TouchableOpacity onPress={() => setRefDate(addDay(refDate, -1))} style={styles.navBtn}>
+            <PunyTouchable onPress={() => setRefDate(addDay(refDate, -1))} style={styles.navBtn} scaleTo={0.92} haptic="light">
               <Ionicons name="chevron-back" size={18} color={Colors.text2} />
             </TouchableOpacity>
             <Text style={styles.navLabel}>{refDate}</Text>
-            <TouchableOpacity onPress={() => setRefDate(addDay(refDate, 1))} style={styles.navBtn}>
+            <PunyTouchable onPress={() => setRefDate(addDay(refDate, 1))} style={styles.navBtn} scaleTo={0.92} haptic="light">
               <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
             </TouchableOpacity>
           </View>
@@ -271,22 +271,22 @@ function CastPayTab({ castId, shopId, initialDate, initialPeriod }: {
       )}
       {period === 'weekly' && (
         <View style={styles.navRow}>
-          <TouchableOpacity onPress={() => setRefDate(addDay(refDate, -7))} style={styles.navBtn}>
+          <PunyTouchable onPress={() => setRefDate(addDay(refDate, -7))} style={styles.navBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-back" size={18} color={Colors.text2} />
           </TouchableOpacity>
           <Text style={styles.navLabel}>{weekDates[0]?.slice(5).replace('-','/')} 〜 {weekDates[6]?.slice(5).replace('-','/')}</Text>
-          <TouchableOpacity onPress={() => setRefDate(addDay(refDate, 7))} style={styles.navBtn}>
+          <PunyTouchable onPress={() => setRefDate(addDay(refDate, 7))} style={styles.navBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
           </TouchableOpacity>
         </View>
       )}
       {period === 'monthly' && (
         <View style={styles.navRow}>
-          <TouchableOpacity onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()-1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }} style={styles.navBtn}>
+          <PunyTouchable onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()-1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }} style={styles.navBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-back" size={18} color={Colors.text2} />
           </TouchableOpacity>
           <Text style={styles.navLabel}>{refMonth}</Text>
-          <TouchableOpacity onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()+1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }} style={styles.navBtn}>
+          <PunyTouchable onPress={() => { const d = new Date(refMonth+'-01'); d.setMonth(d.getMonth()+1); setRefMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }} style={styles.navBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
           </TouchableOpacity>
         </View>
@@ -374,12 +374,12 @@ function CastResultsView({ castId, shopId }: { castId: string; shopId: string })
   return (
     <>
       <View style={styles.innerTabRow}>
-        <TouchableOpacity onPress={() => setTab('pay')}
+        <PunyTouchable onPress={() => setTab('pay')} scaleTo={0.95} haptic="light"
           style={[styles.innerTab, tab === 'pay' && styles.innerTabActive]}>
           <Ionicons name="wallet-outline" size={14} color={tab === 'pay' ? Colors.gold : Colors.text3} />
           <Text style={[styles.innerTabText, tab === 'pay' && styles.innerTabTextActive]}>給与</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setTab('perf')}
+        <PunyTouchable onPress={() => setTab('perf')} scaleTo={0.95} haptic="light"
           style={[styles.innerTab, tab === 'perf' && styles.innerTabActive]}>
           <Ionicons name="trophy-outline" size={14} color={tab === 'perf' ? Colors.gold : Colors.text3} />
           <Text style={[styles.innerTabText, tab === 'perf' && styles.innerTabTextActive]}>実績</Text>

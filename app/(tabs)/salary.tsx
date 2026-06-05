@@ -167,7 +167,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
 
   return (
     <View>
-      <TouchableOpacity style={styles.addBtn} onPress={openAdd}>
+      <PunyTouchable style={styles.addBtn} onPress={openAdd} scaleTo={0.96} haptic="medium">
         <Ionicons name="add-circle-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>手当・控除を追加</Text>
       </TouchableOpacity>
@@ -183,7 +183,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
             <Text style={[styles.allowanceAmount, { color: a.sign === '+' ? Colors.green : Colors.red }]}>
               {a.sign === '+' ? '+' : '-'}{fmtYen(a.amount)}
             </Text>
-            <TouchableOpacity onPress={() => handleDelete(a.id)} style={{ padding: 6 }}>
+            <PunyTouchable onPress={() => handleDelete(a.id)} style={{ padding: 6 }} scaleTo={0.88} haptic="medium">
               <Ionicons name="trash-outline" size={16} color={Colors.red} />
             </TouchableOpacity>
           </View>
@@ -194,7 +194,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
       <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
         <View style={modal.container}>
           <View style={modal.header}>
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={modal.closeBtn}>
+            <PunyTouchable onPress={() => setModalVisible(false)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
             </TouchableOpacity>
             <Text style={modal.title}>手当・控除を追加</Text>
@@ -205,7 +205,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
             <Text style={modal.label}>キャスト *</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
               {casts.map((c: any) => (
-                <TouchableOpacity key={c.id} onPress={() => setCastId(c.id)}
+                <PunyTouchable key={c.id} onPress={() => setCastId(c.id)} scaleTo={0.95} haptic="light"
                   style={[modal.chip, castId === c.id && modal.chipActive]}>
                   <Text style={[modal.chipText, castId === c.id && modal.chipTextActive]}>{c.name}</Text>
                 </TouchableOpacity>
@@ -218,7 +218,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
                 <Text style={modal.label}>プリセットから選択</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
                   {presets.map((p: any) => (
-                    <TouchableOpacity key={p.id} onPress={() => applyPreset(p)}
+                    <PunyTouchable key={p.id} onPress={() => applyPreset(p)} scaleTo={0.95} haptic="light"
                       style={[modal.chip, { borderColor: p.sign === '+' ? Colors.green : Colors.red }]}>
                       <Text style={[modal.chipText, { color: p.sign === '+' ? Colors.green : Colors.red }]}>
                         {p.name}
@@ -238,7 +238,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
             <Text style={modal.label}>種別 *</Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
               {(['+', '-'] as const).map(s => (
-                <TouchableOpacity key={s} onPress={() => setSign(s)}
+                <PunyTouchable key={s} onPress={() => setSign(s)} scaleTo={0.92} haptic="light"
                   style={[modal.chip, sign === s && { backgroundColor: s === '+' ? 'rgba(78,203,138,0.15)' : 'rgba(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
                   <Text style={[modal.chipText, sign === s && { color: s === '+' ? Colors.green : Colors.red }]}>
                     {s === '+' ? '手当' : '控除'}
@@ -250,7 +250,7 @@ function AllowanceManagement({ shopId, month }: { shopId: string; month: string 
             <Text style={modal.label}>金額（円）*</Text>
             <TextInput style={modal.input} value={amount} onChangeText={setAmount} placeholder="例: 1000" placeholderTextColor={Colors.text3} keyboardType="number-pad" />
 
-            <TouchableOpacity style={modal.submitBtn} onPress={handleSave} disabled={saving}>
+            <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
             </TouchableOpacity>
           </ScrollView>
@@ -322,7 +322,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
 
   return (
     <View>
-      <TouchableOpacity style={styles.addBtn} onPress={openAdd}>
+      <PunyTouchable style={styles.addBtn} onPress={openAdd} scaleTo={0.96} haptic="medium">
         <Ionicons name="add-circle-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>プリセットを追加</Text>
       </TouchableOpacity>
@@ -338,10 +338,10 @@ function PresetManagement({ shopId }: { shopId: string }) {
           <Text style={[styles.allowanceAmount, { color: p.sign === '+' ? Colors.green : Colors.red }]}>
             {p.sign === '+' ? '+' : '-'}{fmtYen(p.amount)}
           </Text>
-          <TouchableOpacity onPress={() => openEdit(p)} style={{ padding: 6 }}>
+          <PunyTouchable onPress={() => openEdit(p)} style={{ padding: 6 }} scaleTo={0.88} haptic="light">
             <Ionicons name="create-outline" size={16} color={Colors.text2} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleDelete(p.id, p.name)} style={{ padding: 6 }}>
+          <PunyTouchable onPress={() => handleDelete(p.id, p.name)} style={{ padding: 6 }} scaleTo={0.88} haptic="medium">
             <Ionicons name="trash-outline" size={16} color={Colors.red} />
           </TouchableOpacity>
         </View>
@@ -351,7 +351,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
       <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
         <View style={modal.container}>
           <View style={modal.header}>
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={modal.closeBtn}>
+            <PunyTouchable onPress={() => setModalVisible(false)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
             </TouchableOpacity>
             <Text style={modal.title}>{editTarget ? 'プリセット編集' : 'プリセット追加'}</Text>
@@ -363,7 +363,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
             <Text style={modal.label}>種別 *</Text>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               {(['+', '-'] as const).map(s => (
-                <TouchableOpacity key={s} onPress={() => setSign(s)}
+                <PunyTouchable key={s} onPress={() => setSign(s)} scaleTo={0.92} haptic="light"
                   style={[modal.chip, sign === s && { backgroundColor: s === '+' ? 'rgba(78,203,138,0.15)' : 'rgba(224,92,106,0.15)', borderColor: s === '+' ? Colors.green : Colors.red }]}>
                   <Text style={[modal.chipText, sign === s && { color: s === '+' ? Colors.green : Colors.red }]}>
                     {s === '+' ? '手当' : '控除'}
@@ -373,7 +373,7 @@ function PresetManagement({ shopId }: { shopId: string }) {
             </View>
             <Text style={modal.label}>金額（円）*</Text>
             <TextInput style={modal.input} value={amount} onChangeText={setAmount} placeholder="例: 1000" placeholderTextColor={Colors.text3} keyboardType="number-pad" />
-            <TouchableOpacity style={modal.submitBtn} onPress={handleSave} disabled={saving}>
+            <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
             </TouchableOpacity>
           </View>
@@ -409,11 +409,11 @@ export default function SalaryScreen() {
       <View style={styles.topRow}>
         <Text style={styles.screenTitle}>給与管理</Text>
         <View style={styles.monthNav}>
-          <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.monthBtn}>
+          <PunyTouchable onPress={() => changeMonth(-1)} style={styles.monthBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-back" size={18} color={Colors.text2} />
           </TouchableOpacity>
           <Text style={styles.monthLabel}>{month}</Text>
-          <TouchableOpacity onPress={() => changeMonth(1)} style={styles.monthBtn}>
+          <PunyTouchable onPress={() => changeMonth(1)} style={styles.monthBtn} scaleTo={0.92} haptic="light">
             <Ionicons name="chevron-forward" size={18} color={Colors.text2} />
           </TouchableOpacity>
         </View>
@@ -421,7 +421,7 @@ export default function SalaryScreen() {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabScroll} contentContainerStyle={styles.tabContent}>
         {TABS.map(tab => (
-          <TouchableOpacity key={tab.key} style={[styles.tab, activeTab === tab.key && styles.tabActive]}
+          <PunyTouchable key={tab.key} style={[styles.tab, activeTab === tab.key && styles.tabActive]} scaleTo={0.95} haptic="light"
             onPress={() => setActiveTab(tab.key)}>
             <Ionicons name={tab.icon as any} size={14} color={activeTab === tab.key ? Colors.gold : Colors.text3} />
             <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>{tab.label}</Text>

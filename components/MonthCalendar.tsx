@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import {
-  View, Text, StyleSheet, Pressable,
+  View, Text, StyleSheet,
   Dimensions, PanResponder,
 } from 'react-native';
 import { Colors } from '../constants/theme';
+import { PunyTouchable } from './PunyTouchable';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 
@@ -152,9 +153,9 @@ export function MonthCalendar({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => goToMonth(-1)} style={styles.navBtn}><Text style={styles.navBtnText}>‹</Text></Pressable>
+        <PunyTouchable onPress={() => goToMonth(-1)} style={styles.navBtn} scaleTo={0.88} haptic="light"><Text style={styles.navBtnText}>‹</Text></PunyTouchable>
         <Text style={styles.monthLabel}>{year}年 {month + 1}月</Text>
-        <Pressable onPress={() => goToMonth(1)} style={styles.navBtn}><Text style={styles.navBtnText}>›</Text></Pressable>
+        <PunyTouchable onPress={() => goToMonth(1)} style={styles.navBtn} scaleTo={0.88} haptic="light"><Text style={styles.navBtnText}>›</Text></PunyTouchable>
       </View>
 
       <View {...panResponder.panHandlers}>
@@ -179,7 +180,7 @@ export function MonthCalendar({
                 const dots = (eventMap.get(dateKey) ?? []).slice(0, maxDots);
 
                 return (
-                  <Pressable key={i} style={styles.cell} onPress={() => { setSelected(day); onDayPress?.(day); }}>
+                  <PunyTouchable key={i} style={styles.cell} onPress={() => { setSelected(day); onDayPress?.(day); }} scaleTo={0.92} haptic="light">
                     {holiday ? (
                       <Text style={styles.holidayText} numberOfLines={1}>{holiday}</Text>
                     ) : (
@@ -205,7 +206,7 @@ export function MonthCalendar({
                         <View key={j} style={[styles.dot, { backgroundColor: color }]} />
                       ))}
                     </View>
-                  </Pressable>
+                  </PunyTouchable>
                 );
               })}
             </View>

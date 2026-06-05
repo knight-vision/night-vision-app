@@ -174,7 +174,7 @@ function SlipInput({ shopId }: { shopId: string }) {
       {editingId && (
         <View style={s.editBanner}>
           <Text style={s.editBannerText}>✏️ 伝票を編集中</Text>
-          <TouchableOpacity onPress={resetForm} style={s.editCancelBtn}>
+          <PunyTouchable onPress={resetForm} style={s.editCancelBtn} scaleTo={0.95} haptic="light">
             <Text style={{ fontSize: 12, color: Colors.gold }}>キャンセル</Text>
           </TouchableOpacity>
         </View>
@@ -189,7 +189,7 @@ function SlipInput({ shopId }: { shopId: string }) {
       <Text style={s.sectionTitle}>支払方法</Text>
       <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
         {PAYMENT_TYPES.map(p => (
-          <TouchableOpacity key={p} onPress={() => setPayment(p)}
+          <PunyTouchable key={p} onPress={() => setPayment(p)} scaleTo={0.94} haptic="light"
             style={[s.payBtn, payment === p && s.payBtnActive]}>
             <Text style={[s.payBtnText, payment === p && s.payBtnTextActive]}>{p}</Text>
           </TouchableOpacity>
@@ -204,12 +204,12 @@ function SlipInput({ shopId }: { shopId: string }) {
             <Text style={s.fieldLabel}>キャスト名</Text>
             <View style={s.picker}>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <TouchableOpacity style={[s.pickerOption, c.cast_id === '' && s.pickerOptionActive]}
+                <PunyTouchable style={[s.pickerOption, c.cast_id === '' && s.pickerOptionActive]} scaleTo={0.94} haptic="light"
                   onPress={() => updateCastEntry(i, 'cast_id', '')}>
                   <Text style={[s.pickerOptionText, c.cast_id === '' && s.pickerOptionTextActive]}>選択なし</Text>
                 </TouchableOpacity>
                 {casts.map((cast: any) => (
-                  <TouchableOpacity key={cast.id} onPress={() => updateCastEntry(i, 'cast_id', String(cast.id))}
+                  <PunyTouchable key={cast.id} onPress={() => updateCastEntry(i, 'cast_id', String(cast.id))} scaleTo={0.94} haptic="light"
                     style={[s.pickerOption, c.cast_id === String(cast.id) && s.pickerOptionActive]}>
                     <Text style={[s.pickerOptionText, c.cast_id === String(cast.id) && s.pickerOptionTextActive]}>{cast.name}</Text>
                   </TouchableOpacity>
@@ -222,7 +222,7 @@ function SlipInput({ shopId }: { shopId: string }) {
             <View style={s.picker}>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 80 }}>
                 {SHIMEI_TYPES.map(t => (
-                  <TouchableOpacity key={t} onPress={() => updateCastEntry(i, 'type', t)}
+                  <PunyTouchable key={t} onPress={() => updateCastEntry(i, 'type', t)} scaleTo={0.94} haptic="light"
                     style={[s.pickerOption, c.type === t && s.pickerOptionActive]}>
                     <Text style={[s.pickerOptionText, c.type === t && s.pickerOptionTextActive]}>{t}</Text>
                   </TouchableOpacity>
@@ -231,7 +231,7 @@ function SlipInput({ shopId }: { shopId: string }) {
             </View>
           </View>
           {slipCasts.length > 1 && (
-            <TouchableOpacity onPress={() => setSlipCasts(prev => prev.filter((_, idx) => idx !== i))} style={{ padding: 8, marginTop: 16 }}>
+            <PunyTouchable onPress={() => setSlipCasts(prev => prev.filter((_, idx) => idx !== i))} style={{ padding: 8, marginTop: 16 }} scaleTo={0.88} haptic="medium">
               <Ionicons name="close-circle" size={20} color={Colors.red} />
             </TouchableOpacity>
           )}

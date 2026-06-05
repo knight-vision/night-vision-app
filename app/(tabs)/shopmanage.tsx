@@ -100,7 +100,7 @@ function ShopInfo({ shopId }: { shopId: string }) {
   return (
     <View>
       {/* Webサイトリンク */}
-      <TouchableOpacity style={styles.webLinkBtn} onPress={openWebsite}>
+      <PunyTouchable style={styles.webLinkBtn} onPress={openWebsite} scaleTo={0.96} haptic="light">
         <Ionicons name="globe-outline" size={18} color={Colors.gold} />
         <Text style={styles.webLinkText}>Webサイトで店舗ページを確認</Text>
         <Ionicons name="open-outline" size={16} color={Colors.gold} />
@@ -158,7 +158,7 @@ function ShopInfo({ shopId }: { shopId: string }) {
       <Field label="X（@なし）" value={xAccount} onChange={setXAccount} placeholder="例: clubnight_kr" />
       <Field label="TikTok（@なし）" value={tiktok} onChange={setTiktok} placeholder="例: clubnight_kushiro" />
 
-      <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving}>
+      <PunyTouchable style={styles.saveBtn} onPress={handleSave} disabled={saving} scaleTo={0.97} haptic="success">
         {saving ? <ActivityIndicator color="#1a1200" size="small" /> : <Text style={styles.saveBtnText}>保存する</Text>}
       </TouchableOpacity>
     </View>
@@ -249,7 +249,7 @@ function JobsSection({ shopId }: { shopId: string }) {
 
   return (
     <View>
-      <TouchableOpacity style={styles.addBtn} onPress={openAdd}>
+      <PunyTouchable style={styles.addBtn} onPress={openAdd} scaleTo={0.96} haptic="medium">
         <Ionicons name="add-circle-outline" size={16} color={Colors.gold} />
         <Text style={styles.addBtnText}>求人を追加</Text>
       </TouchableOpacity>
@@ -276,11 +276,11 @@ function JobsSection({ shopId }: { shopId: string }) {
           {job.work_days && <Text style={styles.jobInfo}>📅 {job.work_days}</Text>}
           {job.conditions && <Text style={styles.jobInfo}>👤 {job.conditions}</Text>}
           <View style={styles.jobActions}>
-            <TouchableOpacity style={styles.actionBtn} onPress={() => openEdit(job)}>
+            <PunyTouchable style={styles.actionBtn} onPress={() => openEdit(job)} scaleTo={0.92} haptic="light">
               <Ionicons name="create-outline" size={14} color={Colors.text2} />
               <Text style={styles.actionBtnText}>編集</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn} onPress={() => handleDelete(job.id, job.title)}>
+            <PunyTouchable style={styles.actionBtn} onPress={() => handleDelete(job.id, job.title)} scaleTo={0.92} haptic="medium">
               <Ionicons name="trash-outline" size={14} color={Colors.red} />
               <Text style={[styles.actionBtnText, { color: Colors.red }]}>削除</Text>
             </TouchableOpacity>
@@ -291,7 +291,7 @@ function JobsSection({ shopId }: { shopId: string }) {
       <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
         <View style={modal.container}>
           <View style={modal.header}>
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={modal.closeBtn}>
+            <PunyTouchable onPress={() => setModalVisible(false)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
               <Ionicons name="close" size={22} color={Colors.text2} />
             </TouchableOpacity>
             <Text style={modal.title}>{editTarget ? '求人を編集' : '求人を作成'}</Text>
@@ -314,7 +314,7 @@ function JobsSection({ shopId }: { shopId: string }) {
               <Text style={modal.label}>公開する</Text>
               <Switch value={isPublic} onValueChange={setIsPublic} trackColor={{ false: Colors.surface2, true: Colors.goldDim }} thumbColor={isPublic ? Colors.gold : Colors.text3} />
             </View>
-            <TouchableOpacity style={modal.submitBtn} onPress={handleSave} disabled={saving}>
+            <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
               {saving ? <ActivityIndicator color="#1a1200" /> : <Text style={modal.submitText}>保存する</Text>}
             </TouchableOpacity>
             <View style={{ height: 40 }} />
@@ -345,7 +345,7 @@ export default function ShopManageScreen() {
       <Text style={styles.screenTitle}>店舗管理</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabScroll} contentContainerStyle={styles.tabContent}>
         {TABS.map(tab => (
-          <TouchableOpacity key={tab.key} style={[styles.tab, activeTab === tab.key && styles.tabActive]}
+          <PunyTouchable key={tab.key} style={[styles.tab, activeTab === tab.key && styles.tabActive]} scaleTo={0.95} haptic="light"
             onPress={() => setActiveTab(tab.key)}>
             <Ionicons name={tab.icon as any} size={14} color={activeTab === tab.key ? Colors.gold : Colors.text3} />
             <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>{tab.label}</Text>

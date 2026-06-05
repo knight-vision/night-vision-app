@@ -82,7 +82,7 @@ function DrumColumn({ items, selectedIndex, onSelect }: {
         const isSelected = realIndex === selectedIndex;
         const isEmpty = item === '';
         return (
-          <TouchableOpacity
+          <PunyTouchable scaleTo={0.95} haptic="light"
             onPress={() => !isEmpty && onSelect(realIndex)}
             style={[ts.drumItem, isSelected && ts.drumItemActive]}
             activeOpacity={isEmpty ? 1 : 0.7}>
@@ -164,7 +164,7 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
 
   return (
     <>
-      <TouchableOpacity onPress={open} style={ts.btn}>
+      <PunyTouchable onPress={open} style={ts.btn} scaleTo={0.96} haptic="light">
         {label && <Text style={ts.btnLabel}>{label}</Text>}
         <Text style={ts.btnValue}>{tLabel(currentH)} {MINUTES[currentM]}分</Text>
         <Ionicons name="time-outline" size={14} color={Colors.gold} />
@@ -172,10 +172,10 @@ function TimeSelector({ value, onChange, label, minHour, minMinute, maxHour }: {
 
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-          <TouchableOpacity style={ts.overlay} activeOpacity={1} onPress={() => setModalVisible(false)} />
+          <PunyTouchable style={ts.overlay} activeOpacity={1} onPress={() => setModalVisible(false)} />
           <View style={ts.sheet}>
             <View style={ts.sheetHeader}>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 8 }}>
+              <PunyTouchable onPress={() => setModalVisible(false)} style={{ padding: 8 }} scaleTo={0.88} haptic="light">
                 <Text style={ts.sheetCancel}>キャンセル</Text>
               </TouchableOpacity>
               <Text style={ts.sheetTitle}>{label || '時間を選択'}</Text>

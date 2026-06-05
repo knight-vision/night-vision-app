@@ -46,7 +46,7 @@ function ChangePasswordModal({ visible, onClose, userId, role }: {
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[modal.container, { backgroundColor: Colors.bg }]}>
         <View style={[modal.header, { borderBottomColor: Colors.border }]}>
-          <TouchableOpacity onPress={onClose} style={modal.closeBtn}>
+          <PunyTouchable onPress={onClose} style={modal.closeBtn} scaleTo={0.88} haptic="light">
             <Ionicons name="close" size={22} color={Colors.text2} />
           </TouchableOpacity>
           <Text style={[modal.title, { color: Colors.text }]}>パスワード変更</Text>
@@ -104,7 +104,7 @@ function ChangeEmailModal({ visible, onClose, userId, role, currentEmail }: {
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[modal.container, { backgroundColor: Colors.bg }]}>
         <View style={[modal.header, { borderBottomColor: Colors.border }]}>
-          <TouchableOpacity onPress={onClose} style={modal.closeBtn}>
+          <PunyTouchable onPress={onClose} style={modal.closeBtn} scaleTo={0.88} haptic="light">
             <Ionicons name="close" size={22} color={Colors.text2} />
           </TouchableOpacity>
           <Text style={[modal.title, { color: Colors.text }]}>メールアドレス変更</Text>
@@ -185,8 +185,8 @@ export default function AccountScreen() {
 
         {/* アカウント設定 */}
         <View style={[styles.menuGroup, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
-          <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}
-            onPress={() => setShowPasswordModal(true)}>
+          <PunyTouchable style={[styles.menuItem, { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}
+            onPress={() => setShowPasswordModal(true)} scaleTo={0.98} haptic="light">
             <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="lock-closed-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1 }}>
               <Text style={[styles.menuLabel, { color: Colors.text }]}>パスワード変更</Text>
@@ -238,7 +238,7 @@ export default function AccountScreen() {
 
         {/* その他 */}
         <View style={[styles.menuGroup, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
-          <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}
+          <PunyTouchable style={[styles.menuItem, { borderBottomWidth: 0.5, borderBottomColor: Colors.border }]}
             onPress={() => Alert.alert('お問い合わせ', 'kushiro.night.vision@gmail.com\nまでご連絡ください')}>
             <View style={[styles.menuIconWrap, { backgroundColor: Colors.purpleDim }]}><Ionicons name="help-circle-outline" size={18} color={Colors.purple} /></View>
             <View style={{ flex: 1 }}>
