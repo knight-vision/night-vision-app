@@ -188,7 +188,6 @@ function SlipInput({ shopId }: { shopId: string }) {
       {/* 日付 */}
       <Text style={s.sectionTitle}>日付を選択</Text>
       <DatePicker value={date} onChange={setDate} />
-      <Text style={s.selectedDate}>選択日：{date}</Text>
 
       {/* 支払方法 */}
       <Text style={s.sectionTitle}>支払方法</Text>
