@@ -1,4 +1,6 @@
 import { GlassCard } from '../../components/GlassCard';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Platform } from 'react-native';
 import { PunyTouchable } from '../../components/PunyTouchable';
 import {
   ScrollView, View, Text, StyleSheet,
@@ -762,71 +764,82 @@ function DatePickerC({ value, onChange }: { value: string; onChange: (d: string)
 
 export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter }: { shopId: string; castId?: string; hideAddCastFilter?: boolean }) {
   const now = new Date();
-  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`);
   const [customers, setCustomers] = useState<any[]>([]);
   const [casts, setCasts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
   const [custName, setCustName] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [birthday, setBirthday] = useState('');
   const [castId, setCastId] = useState('');
   const [memo, setMemo] = useState('');
   const [visitDate, setVisitDate] = useState(getDateStrC(now));
-  const [visitCount, setVisitCount] = useState('');
+  const [isFavorite, setIsFavorite] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [filterCast, setFilterCast] = useState('');
-
-  const changeMonth = (delta: number) => {
-    const d = new Date(month + '-01');
-    d.setMonth(d.getMonth() + delta);
-    setMonth(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
-  };
+  const [filterCast, setFilterCast] = useState(propsCastId || '');
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      const qs = propsCastId
+        ? `shop_id=${shopId}&cast_id=${propsCastId}`
+        : `shop_id=${shopId}`;
       const [custRes, castRes] = await Promise.all([
-        fetch(`${API_BASE}/customers?shop_id=${shopId}&month=${month}`),
+        fetch(`${API_BASE}/customers?${qs}`),
         fetch(`${API_BASE}/casts?shop_id=${shopId}`),
       ]);
       const c  = await custRes.json(); setCustomers(Array.isArray(c) ? c : []);
       const ca = await castRes.json(); setCasts(Array.isArray(ca) ? ca : []);
     } catch { } finally { setLoading(false); }
-  }, [shopId, month]);
+  }, [shopId, propsCastId]);
 
   useEffect(() => { load(); }, [load]);
 
   const openAdd = () => {
     setEditTarget(null);
-    setCustName(''); setCastId(propsCastId || ''); setMemo('');
-    setVisitDate(getDateStrC(now)); setVisitCount('1');
+    setCustName(''); setNickname(''); setBirthday(''); setCastId(propsCastId || '');
+    setMemo(''); setVisitDate(getDateStrC(now)); setIsFavorite(false);
     setModalVisible(true);
   };
 
   const openEdit = (c: any) => {
     setEditTarget(c);
     setCustName(c.name || '');
+    setNickname(c.nickname || '');
+    setBirthday(c.birthday || '');
     setCastId(c.cast_id ? String(c.cast_id) : '');
     setMemo(c.memo || '');
     setVisitDate(c.visit_date || getDateStrC(now));
-    setVisitCount(String(c.visit_count || 1));
+    setIsFavorite(!!c.is_favorite);
     setModalVisible(true);
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
+      const body = {
+        shop_id: shopId,
+        cast_id: castId || null,
+        visit_date: visitDate,
+        name: custName || '名前なし',
+        nickname: nickname || null,
+        birthday: birthday || null,
+        memo: memo || null,
+        is_favorite: isFavorite,
+      };
       if (editTarget) {
         await fetch(`${API_BASE}/customers`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: editTarget.id, name: custName || '名前なし', memo, visit_count: Number(visitCount) || 1 }),
+          body: JSON.stringify({ id: editTarget.id, ...body }),
         });
       } else {
         await fetch(`${API_BASE}/customers`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ shop_id: shopId, cast_id: castId || null, visit_date: visitDate, name: custName || '名前なし', memo, visit_count: Number(visitCount) || 1 }),
+          body: JSON.stringify(body),
         });
       }
       setModalVisible(false);
@@ -844,18 +857,34 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
     ]);
   };
 
-  const filtered = filterCast ? customers.filter((c: any) => String(c.cast_id) === filterCast) : customers;
+  const toggleFavorite = async (c: any) => {
+    const next = !c.is_favorite;
+    setCustomers(cs => cs.map(x => x.id === c.id ? { ...x, is_favorite: next } : x));
+    try {
+      await fetch(`${API_BASE}/customers`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: c.id, is_favorite: next }),
+      });
+    } catch {
+      setCustomers(cs => cs.map(x => x.id === c.id ? { ...x, is_favorite: !next } : x));
+    }
+  };
+
+  const fmtJpDate = (s: string | null | undefined): string => {
+    if (!s) return '';
+    const m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+    if (!m) return s;
+    return `${m[1]}年${parseInt(m[2])}月${parseInt(m[3])}日`;
+  };
+
+  let filtered = filterCast ? customers.filter((c: any) => String(c.cast_id) === filterCast) : customers;
+  if (onlyFavorites) filtered = filtered.filter((c: any) => c.is_favorite);
 
   if (loading) return <ActivityIndicator color={Colors.gold} style={{ marginTop: 40 }} />;
 
   return (
     <View>
-      <View style={styles.monthNav}>
-        <PunyTouchable onPress={() => changeMonth(-1)} style={styles.monthBtn} scaleTo={0.92} haptic="light"><Ionicons name="chevron-back" size={18} color={Colors.text2} /></PunyTouchable>
-        <Text style={styles.monthLabel}>{month}</Text>
-        <PunyTouchable onPress={() => changeMonth(1)} style={styles.monthBtn} scaleTo={0.92} haptic="light"><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></PunyTouchable>
-      </View>
-
       {!hideAddCastFilter && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
           {[{ id: '', name: '全員' }, ...casts].map((c: any) => (
@@ -867,29 +896,39 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
         </ScrollView>
       )}
 
-      <PunyTouchable style={styles.addBtn} onPress={openAdd} scaleTo={0.96} haptic="medium">
-        <Ionicons name="person-add-outline" size={16} color={Colors.gold} />
-        <Text style={styles.addBtnText}>顧客を追加</Text>
-      </PunyTouchable>
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+        <PunyTouchable style={[styles.addBtn, { flex: 1 }]} onPress={openAdd} scaleTo={0.96} haptic="medium">
+          <Ionicons name="person-add-outline" size={16} color={Colors.gold} />
+          <Text style={styles.addBtnText}>顧客を追加</Text>
+        </PunyTouchable>
+        <PunyTouchable onPress={() => setOnlyFavorites(v => !v)} scaleTo={0.94} haptic="light"
+          style={[styles.filterChip, onlyFavorites && styles.filterChipActive, { paddingHorizontal: 14, flexDirection: 'row', gap: 4, alignItems: 'center' }]}>
+          <Ionicons name={onlyFavorites ? 'star' : 'star-outline'} size={14} color={onlyFavorites ? Colors.gold : Colors.text3} />
+          <Text style={[styles.filterChipText, onlyFavorites && styles.filterChipTextActive]}>お気に入り</Text>
+        </PunyTouchable>
+      </View>
 
-      {filtered.length === 0 && <Text style={styles.empty}>この月の顧客データがありません</Text>}
+      {filtered.length === 0 && <Text style={styles.empty}>顧客データがありません</Text>}
 
       {filtered.map((c: any) => {
         const cast = casts.find((ca: any) => String(ca.id) === String(c.cast_id));
+        const displayDate = c.created_at ? c.created_at.slice(0,10) : c.visit_date;
         return (
           <View key={c.id} style={styles.customerCard}>
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                 <Text style={styles.customerName}>{c.name}</Text>
-                {cast && <View style={styles.castTagBadge}><Text style={styles.castTagText}>{cast.name}</Text></View>}
-                {(c.visit_count || 0) > 1 && (
-                  <View style={styles.visitCountBadge}><Text style={styles.visitCountText}>{c.visit_count}回目</Text></View>
-                )}
+                {c.nickname ? <Text style={[styles.customerName, { color: Colors.text2, fontSize: 13 }]}>（{c.nickname}）</Text> : null}
+                {cast && !propsCastId && <View style={styles.castTagBadge}><Text style={styles.castTagText}>{cast.name}</Text></View>}
               </View>
-              <Text style={styles.customerVisit}>📅 {c.visit_date}</Text>
+              <Text style={styles.customerVisit}>登録日：{fmtJpDate(displayDate)}</Text>
+              {c.birthday ? <Text style={styles.customerVisit}>🎂 {fmtJpDate(c.birthday)}</Text> : null}
               {c.memo ? <Text style={styles.customerMemo}>📝 {c.memo}</Text> : null}
             </View>
             <View style={{ gap: 6 }}>
+              <PunyTouchable onPress={() => toggleFavorite(c)} style={styles.iconBtn} scaleTo={0.88} haptic="light">
+                <Ionicons name={c.is_favorite ? 'star' : 'star-outline'} size={18} color={c.is_favorite ? Colors.gold : Colors.text3} />
+              </PunyTouchable>
               <PunyTouchable onPress={() => openEdit(c)} style={styles.iconBtn} scaleTo={0.88} haptic="light">
                 <Ionicons name="create-outline" size={18} color={Colors.text2} />
               </PunyTouchable>
@@ -908,18 +947,62 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
               <Ionicons name="close" size={22} color={Colors.text2} />
             </PunyTouchable>
             <Text style={modal.title}>{editTarget ? '顧客を編集' : '顧客を追加'}</Text>
-            <View style={{ width: 36 }} />
+            <PunyTouchable onPress={() => setIsFavorite(v => !v)} style={modal.closeBtn} scaleTo={0.88} haptic="light">
+              <Ionicons name={isFavorite ? 'star' : 'star-outline'} size={22} color={isFavorite ? Colors.gold : Colors.text3} />
+            </PunyTouchable>
           </View>
           <ScrollView style={{ padding: 20 }}>
             <Text style={modal.label}>顧客名</Text>
             <TextInput style={modal.input} value={custName} onChangeText={setCustName}
               placeholder="例: 田中様" placeholderTextColor={Colors.text3} />
 
+            <Text style={modal.label}>呼び方（あだ名）</Text>
+            <TextInput style={modal.input} value={nickname} onChangeText={setNickname}
+              placeholder="例: たなかちゃん" placeholderTextColor={Colors.text3} />
+
+            <Text style={modal.label}>誕生日</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <DateTimePicker
+                value={birthday ? new Date(birthday + 'T00:00:00') : new Date(1990, 0, 1)}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'compact' : 'default'}
+                themeVariant="dark"
+                locale="ja-JP"
+                accentColor="#ff88cc"
+                onChange={(_e, selected) => {
+                  if (selected) {
+                    const ds = `${selected.getFullYear()}-${String(selected.getMonth()+1).padStart(2,'0')}-${String(selected.getDate()).padStart(2,'0')}`;
+                    setBirthday(ds);
+                  }
+                }}
+              />
+              {birthday ? (
+                <PunyTouchable onPress={() => setBirthday('')} scaleTo={0.92} haptic="light"
+                  style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                  <Text style={{ color: Colors.text3, fontSize: 12 }}>クリア</Text>
+                </PunyTouchable>
+              ) : null}
+            </View>
+
             {!editTarget && (
               <>
                 <Text style={modal.label}>来店日</Text>
-                <DatePickerC value={visitDate} onChange={setVisitDate} />
-                <Text style={[modal.label, { marginTop: 8 }]}>選択日: <Text style={{ color: Colors.gold }}>{visitDate}</Text></Text>
+                <View style={{ marginBottom: 12 }}>
+                  <DateTimePicker
+                    value={new Date(visitDate + 'T00:00:00')}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'compact' : 'default'}
+                    themeVariant="dark"
+                    locale="ja-JP"
+                    accentColor="#ff88cc"
+                    onChange={(_e, selected) => {
+                      if (selected) {
+                        const ds = `${selected.getFullYear()}-${String(selected.getMonth()+1).padStart(2,'0')}-${String(selected.getDate()).padStart(2,'0')}`;
+                        setVisitDate(ds);
+                      }
+                    }}
+                  />
+                </View>
                 {!hideAddCastFilter && (
                   <>
                     <Text style={[modal.label, { marginTop: 12 }]}>担当キャスト</Text>
@@ -935,17 +1018,6 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
                 )}
               </>
             )}
-
-            <Text style={modal.label}>来店回数</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-              <PunyTouchable onPress={() => setVisitCount(v => String(Math.max(1, Number(v) - 1)))} style={cStyles.counterBtn}>
-                <Text style={cStyles.counterBtnText}>−</Text>
-              </PunyTouchable>
-              <Text style={cStyles.counterValue}>{visitCount}回目</Text>
-              <PunyTouchable onPress={() => setVisitCount(v => String(Number(v) + 1))} style={cStyles.counterBtn}>
-                <Text style={cStyles.counterBtnText}>＋</Text>
-              </PunyTouchable>
-            </View>
 
             <Text style={modal.label}>メモ</Text>
             <TextInput style={[modal.input, { height: 100, textAlignVertical: 'top' }]}
