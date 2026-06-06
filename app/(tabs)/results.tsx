@@ -368,7 +368,7 @@ function CastResultsView({ castId, shopId }: { castId: string; shopId: string })
   const params = useLocalSearchParams<{ date?: string }>();
   const incomingDate = typeof params.date === 'string' ? params.date : undefined;
   // 日付パラメータが渡された場合は給与タブ＋日表示に
-  const [tab, setTab] = useState<'pay' | 'perf'>('pay');
+  const [tab, setTab] = useState<'pay' | 'perf' | 'customers'>('pay');
 
   return (
     <>
@@ -383,11 +383,17 @@ function CastResultsView({ castId, shopId }: { castId: string; shopId: string })
           <Ionicons name="trophy-outline" size={14} color={tab === 'perf' ? Colors.gold : Colors.text3} />
           <Text style={[styles.segmentText, tab === 'perf' && styles.segmentTextActive]}>実績</Text>
         </PunyTouchable>
+        <PunyTouchable onPress={() => setTab('customers')} scaleTo={0.96} haptic="light"
+          style={[styles.segmentBtn, tab === 'customers' && styles.segmentBtnActive]}>
+          <Ionicons name="people-outline" size={14} color={tab === 'customers' ? Colors.gold : Colors.text3} />
+          <Text style={[styles.segmentText, tab === 'customers' && styles.segmentTextActive]}>顧客</Text>
+        </PunyTouchable>
       </View>
       {tab === 'pay'  && <CastPayTab  castId={castId} shopId={shopId}
         initialDate={incomingDate}
         initialPeriod={incomingDate ? 'daily' : 'monthly'} />}
       {tab === 'perf' && <CastPerformanceTab castId={castId} shopId={shopId} />}
+      {tab === 'customers' && <CustomerSection shopId={shopId} castId={castId} hideAddCastFilter />}
     </>
   );
 }

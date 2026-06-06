@@ -11,7 +11,7 @@ import { Colors, fmtYen , useColors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 
-type ManageTab = 'casts' | 'salary' | 'results' | 'customers';
+type ManageTab = 'casts' | 'salary' | 'results';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // キャスト一覧
@@ -760,7 +760,7 @@ function DatePickerC({ value, onChange }: { value: string; onChange: (d: string)
   );
 }
 
-function CustomerSection({ shopId }: { shopId: string }) {
+export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter }: { shopId: string; castId?: string; hideAddCastFilter?: boolean }) {
   const now = new Date();
   const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`);
   const [customers, setCustomers] = useState<any[]>([]);
@@ -798,8 +798,8 @@ function CustomerSection({ shopId }: { shopId: string }) {
 
   const openAdd = () => {
     setEditTarget(null);
-    setCustName(''); setCastId(''); setMemo('');
-    setVisitDate(getDateStrC(now)); setVisitCount('');
+    setCustName(''); setCastId(propsCastId || ''); setMemo('');
+    setVisitDate(getDateStrC(now)); setVisitCount('1');
     setModalVisible(true);
   };
 
@@ -856,14 +856,16 @@ function CustomerSection({ shopId }: { shopId: string }) {
         <PunyTouchable onPress={() => changeMonth(1)} style={styles.monthBtn} scaleTo={0.92} haptic="light"><Ionicons name="chevron-forward" size={18} color={Colors.text2} /></PunyTouchable>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-        {[{ id: '', name: '全員' }, ...casts].map((c: any) => (
-          <PunyTouchable key={c.id} onPress={() => setFilterCast(c.id)}
-            style={[styles.filterChip, filterCast === c.id && styles.filterChipActive]}>
-            <Text style={[styles.filterChipText, filterCast === c.id && styles.filterChipTextActive]}>{c.name}</Text>
-          </PunyTouchable>
-        ))}
-      </ScrollView>
+      {!hideAddCastFilter && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+          {[{ id: '', name: '全員' }, ...casts].map((c: any) => (
+            <PunyTouchable key={c.id} onPress={() => setFilterCast(c.id)}
+              style={[styles.filterChip, filterCast === c.id && styles.filterChipActive]}>
+              <Text style={[styles.filterChipText, filterCast === c.id && styles.filterChipTextActive]}>{c.name}</Text>
+            </PunyTouchable>
+          ))}
+        </ScrollView>
+      )}
 
       <PunyTouchable style={styles.addBtn} onPress={openAdd} scaleTo={0.96} haptic="medium">
         <Ionicons name="person-add-outline" size={16} color={Colors.gold} />
@@ -918,15 +920,19 @@ function CustomerSection({ shopId }: { shopId: string }) {
                 <Text style={modal.label}>来店日</Text>
                 <DatePickerC value={visitDate} onChange={setVisitDate} />
                 <Text style={[modal.label, { marginTop: 8 }]}>選択日: <Text style={{ color: Colors.gold }}>{visitDate}</Text></Text>
-                <Text style={[modal.label, { marginTop: 12 }]}>担当キャスト</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-                  {[{ id: '', name: '未設定' }, ...casts].map((c: any) => (
-                    <PunyTouchable key={c.id} onPress={() => setCastId(c.id)} scaleTo={0.95} haptic="light"
-                      style={[modal.chip, castId === c.id && modal.chipActive]}>
-                      <Text style={[modal.chipText, castId === c.id && modal.chipTextActive]}>{c.name}</Text>
-                    </PunyTouchable>
-                  ))}
-                </ScrollView>
+                {!hideAddCastFilter && (
+                  <>
+                    <Text style={[modal.label, { marginTop: 12 }]}>担当キャスト</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+                      {[{ id: '', name: '未設定' }, ...casts].map((c: any) => (
+                        <PunyTouchable key={c.id} onPress={() => setCastId(c.id)} scaleTo={0.95} haptic="light"
+                          style={[modal.chip, castId === c.id && modal.chipActive]}>
+                          <Text style={[modal.chipText, castId === c.id && modal.chipTextActive]}>{c.name}</Text>
+                        </PunyTouchable>
+                      ))}
+                    </ScrollView>
+                  </>
+                )}
               </>
             )}
 
@@ -971,7 +977,6 @@ export default function ManageScreen() {
     { key: 'casts',     label: 'キャスト',  icon: 'people-outline' },
     { key: 'salary',    label: '給与管理',  icon: 'wallet-outline' },
     { key: 'results',   label: '成績',      icon: 'trophy-outline' },
-    { key: 'customers', label: '顧客管理',  icon: 'person-circle-outline' },
   ];
 
   if (!shopId) return null;
@@ -992,7 +997,6 @@ export default function ManageScreen() {
         {activeTab === 'casts'     && <CastManagement shopId={shopId} />}
         {activeTab === 'salary'    && <SalarySection shopId={shopId} />}
         {activeTab === 'results'   && <ResultsSection shopId={shopId} />}
-        {activeTab === 'customers' && <CustomerSection shopId={shopId} />}
       </ScrollView>
     </SafeAreaView>
   );
