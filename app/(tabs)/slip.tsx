@@ -2,7 +2,7 @@ import { GlassCard } from '../../components/GlassCard';
 import { PunyTouchable } from '../../components/PunyTouchable';
 import {
   ScrollView, View, Text, StyleSheet,
-  TextInput, Alert, ActivityIndicator, Modal,
+  TextInput, Alert, ActivityIndicator, Modal, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect, useCallback } from 'react';
@@ -11,6 +11,7 @@ import { Colors, fmtYen , useColors } from '../../constants/theme';
 import { API_BASE } from '../../constants/api';
 import { useAuthStore } from '../../store/auth';
 import { MonthCalendar } from '../../components/MonthCalendar';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 type SlipTab = 'input' | 'sales' | 'menus';
 
@@ -27,24 +28,26 @@ function fmtDateLabel(ds: string) {
   return `${d.getMonth()+1}/${d.getDate()}(${CAL_DAYS[d.getDay() === 0 ? 6 : d.getDay()-1]})`;
 }
 
-// ── ミニカレンダー（MonthCalendarラッパー） ─────────────────
+// ── コンパクト日付ピッカー（iOSネイティブ） ───────────────────
 function DatePicker({ value, onChange }: { value: string; onChange: (d: string) => void }) {
   const initDate = new Date(value + 'T00:00:00');
-  const [year, setYear] = useState(initDate.getFullYear());
-  const [month, setMonth] = useState(initDate.getMonth());
-
   return (
-    <MonthCalendar
-      year={year}
-      month={month}
-      onMonthChange={(y, m) => { setYear(y); setMonth(m); }}
-      onDayPress={(d) => {
-        const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        onChange(ds);
-      }}
-      initialSelected={initDate}
-      events={[{ date: value, color: Colors.gold }]}
-    />
+    <View style={{ alignItems: 'flex-start', marginBottom: 8 }}>
+      <DateTimePicker
+        value={initDate}
+        mode="date"
+        display={Platform.OS === 'ios' ? 'compact' : 'default'}
+        themeVariant="dark"
+        locale="ja-JP"
+        accentColor="#ff88cc"
+        onChange={(_event, selected) => {
+          if (selected) {
+            const ds = `${selected.getFullYear()}-${String(selected.getMonth()+1).padStart(2,'0')}-${String(selected.getDate()).padStart(2,'0')}`;
+            onChange(ds);
+          }
+        }}
+      />
+    </View>
   );
 }
 
