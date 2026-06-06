@@ -89,6 +89,11 @@ export default function TabLayout() {
         tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'trophy' : 'trophy-outline'} size={24} color={color} />,
         href: isOwner ? null : undefined,
       }} />
+      <Tabs.Screen name="customers" options={{
+        title: '顧客',
+        tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'people' : 'people-outline'} size={24} color={color} />,
+        href: isOwner ? null : undefined,
+      }} />
       <Tabs.Screen name="account" options={{
         title: 'アカウント',
         tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />,
