@@ -776,6 +776,15 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
   const [memo, setMemo] = useState('');
   const [visitDate, setVisitDate] = useState(getDateStrC(now));
   const [isFavorite, setIsFavorite] = useState(false);
+  // 追加フィールド
+  const [favoriteDrink, setFavoriteDrink] = useState('');
+  const [contact, setContact] = useState('');
+  const [occupation, setOccupation] = useState('');
+  const [referralSource, setReferralSource] = useState('');
+  const [ngTopics, setNgTopics] = useState('');
+  const [vipRank, setVipRank] = useState<'normal' | 'silver' | 'gold' | 'platinum'>('normal');
+  const [budget, setBudget] = useState('');
+  const [tagsInput, setTagsInput] = useState(''); // カンマ区切り入力
   const [saving, setSaving] = useState(false);
   const [filterCast, setFilterCast] = useState(propsCastId || '');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
@@ -801,6 +810,8 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
     setEditTarget(null);
     setCustName(''); setNickname(''); setBirthday(''); setCastId(propsCastId || '');
     setMemo(''); setVisitDate(getDateStrC(now)); setIsFavorite(false);
+    setFavoriteDrink(''); setContact(''); setOccupation(''); setReferralSource('');
+    setNgTopics(''); setVipRank('normal'); setBudget(''); setTagsInput('');
     setModalVisible(true);
   };
 
@@ -813,12 +824,21 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
     setMemo(c.memo || '');
     setVisitDate(c.visit_date || getDateStrC(now));
     setIsFavorite(!!c.is_favorite);
+    setFavoriteDrink(c.favorite_drink || '');
+    setContact(c.contact || '');
+    setOccupation(c.occupation || '');
+    setReferralSource(c.referral_source || '');
+    setNgTopics(c.ng_topics || '');
+    setVipRank(c.vip_rank || 'normal');
+    setBudget(c.budget ? String(c.budget) : '');
+    setTagsInput(Array.isArray(c.tags) ? c.tags.join(', ') : '');
     setModalVisible(true);
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
+      const tags = tagsInput.split(/[,、]/).map(t => t.trim()).filter(Boolean);
       const body = {
         shop_id: shopId,
         cast_id: castId || null,
@@ -828,6 +848,14 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
         birthday: birthday || null,
         memo: memo || null,
         is_favorite: isFavorite,
+        favorite_drink: favoriteDrink || null,
+        contact: contact || null,
+        occupation: occupation || null,
+        referral_source: referralSource || null,
+        ng_topics: ngTopics || null,
+        vip_rank: vipRank,
+        budget: budget ? Number(budget) : null,
+        tags: tags.length ? tags : null,
       };
       if (editTarget) {
         await fetch(`${API_BASE}/customers`, {
@@ -919,11 +947,36 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                 <Text style={styles.customerName}>{c.name}</Text>
                 {c.nickname ? <Text style={[styles.customerName, { color: Colors.text2, fontSize: 13 }]}>（{c.nickname}）</Text> : null}
+                {c.vip_rank && c.vip_rank !== 'normal' ? (
+                  <View style={{
+                    paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, borderWidth: 0.5,
+                    backgroundColor: c.vip_rank === 'platinum' ? 'rgba(220,200,255,0.2)' : c.vip_rank === 'gold' ? 'rgba(255,200,100,0.2)' : 'rgba(200,200,220,0.15)',
+                    borderColor: c.vip_rank === 'platinum' ? '#dcc8ff' : c.vip_rank === 'gold' ? '#ffc864' : '#c8c8dc',
+                  }}>
+                    <Text style={{ fontSize: 10, fontWeight: '700', color: c.vip_rank === 'platinum' ? '#dcc8ff' : c.vip_rank === 'gold' ? '#ffc864' : '#c8c8dc' }}>
+                      {c.vip_rank === 'platinum' ? '◆ PLATINUM' : c.vip_rank === 'gold' ? '★ GOLD' : '● SILVER'}
+                    </Text>
+                  </View>
+                ) : null}
                 {cast && !propsCastId && <View style={styles.castTagBadge}><Text style={styles.castTagText}>{cast.name}</Text></View>}
               </View>
               <Text style={styles.customerVisit}>登録日：{fmtJpDate(displayDate)}</Text>
               {c.birthday ? <Text style={styles.customerVisit}>🎂 {fmtJpDate(c.birthday)}</Text> : null}
+              {c.favorite_drink ? <Text style={styles.customerVisit}>🍷 {c.favorite_drink}</Text> : null}
+              {c.contact ? <Text style={styles.customerVisit}>📱 {c.contact}</Text> : null}
+              {c.occupation ? <Text style={styles.customerVisit}>💼 {c.occupation}</Text> : null}
+              {c.budget ? <Text style={styles.customerVisit}>💰 想定単価 ¥{Number(c.budget).toLocaleString()}</Text> : null}
+              {c.ng_topics ? <Text style={[styles.customerVisit, { color: Colors.red }]}>⚠️ NG: {c.ng_topics}</Text> : null}
               {c.memo ? <Text style={styles.customerMemo}>📝 {c.memo}</Text> : null}
+              {Array.isArray(c.tags) && c.tags.length > 0 ? (
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                  {c.tags.map((t: string, i: number) => (
+                    <View key={i} style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, backgroundColor: 'rgba(170,136,255,0.15)', borderWidth: 0.5, borderColor: 'rgba(170,136,255,0.4)' }}>
+                      <Text style={{ fontSize: 10, color: Colors.purple, fontWeight: '600' }}>#{t}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
             </View>
             <View style={{ gap: 6 }}>
               <PunyTouchable onPress={() => toggleFavorite(c)} style={styles.iconBtn} scaleTo={0.88} haptic="light">
@@ -1019,10 +1072,53 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
               </>
             )}
 
+            <Text style={modal.label}>好きな飲み物</Text>
+            <TextInput style={modal.input} value={favoriteDrink} onChangeText={setFavoriteDrink}
+              placeholder="例: 山崎ハイボール、シャンパン" placeholderTextColor={Colors.text3} />
+
+            <Text style={modal.label}>連絡先（LINE・電話など）</Text>
+            <TextInput style={modal.input} value={contact} onChangeText={setContact}
+              placeholder="例: LINE: tanaka123 / 090-xxxx-xxxx" placeholderTextColor={Colors.text3} />
+
+            <Text style={modal.label}>職業</Text>
+            <TextInput style={modal.input} value={occupation} onChangeText={setOccupation}
+              placeholder="例: IT経営者" placeholderTextColor={Colors.text3} />
+
+            <Text style={modal.label}>VIPランク</Text>
+            <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
+              {([
+                { id: 'normal',   label: '通常',     color: '#666688' },
+                { id: 'silver',   label: 'シルバー', color: '#c8c8dc' },
+                { id: 'gold',     label: 'ゴールド', color: '#ffc864' },
+                { id: 'platinum', label: 'プラチナ', color: '#dcc8ff' },
+              ] as const).map(r => (
+                <PunyTouchable key={r.id} onPress={() => setVipRank(r.id)} scaleTo={0.93} haptic="light"
+                  style={[modal.chip, { flex: 1, alignItems: 'center' }, vipRank === r.id && { backgroundColor: r.color + '33', borderColor: r.color }]}>
+                  <Text style={[modal.chipText, vipRank === r.id && { color: r.color, fontWeight: '700' }]}>{r.label}</Text>
+                </PunyTouchable>
+              ))}
+            </View>
+
+            <Text style={modal.label}>想定単価（円）</Text>
+            <TextInput style={modal.input} value={budget} onChangeText={setBudget}
+              placeholder="例: 30000" placeholderTextColor={Colors.text3} keyboardType="numeric" />
+
+            <Text style={modal.label}>来店経路</Text>
+            <TextInput style={modal.input} value={referralSource} onChangeText={setReferralSource}
+              placeholder="例: 田中様の紹介、SNS、通りすがり" placeholderTextColor={Colors.text3} />
+
+            <Text style={modal.label}>タグ（カンマ区切り）</Text>
+            <TextInput style={modal.input} value={tagsInput} onChangeText={setTagsInput}
+              placeholder="例: 太客, 同伴常連, 指名のみ" placeholderTextColor={Colors.text3} />
+
+            <Text style={modal.label}>NGトピック</Text>
+            <TextInput style={modal.input} value={ngTopics} onChangeText={setNgTopics}
+              placeholder="例: 離婚の話、健康問題" placeholderTextColor={Colors.text3} />
+
             <Text style={modal.label}>メモ</Text>
             <TextInput style={[modal.input, { height: 100, textAlignVertical: 'top' }]}
               value={memo} onChangeText={setMemo}
-              placeholder="好きなお酒、話題、次回への引き継ぎなど"
+              placeholder="その他自由記述"
               placeholderTextColor={Colors.text3} multiline />
 
             <PunyTouchable style={modal.submitBtn} onPress={handleSave} scaleTo={0.97} haptic="success">
