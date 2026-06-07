@@ -944,17 +944,17 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                 <Text style={styles.customerName}>{c.name}</Text>
                 {c.nickname ? <Text style={[styles.customerName, { color: Colors.text2, fontSize: 13 }]}>（{c.nickname}）</Text> : null}
-                {c.vip_rank && c.vip_rank !== 'normal' ? (
-                  <View style={{
-                    paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, borderWidth: 0.5,
-                    backgroundColor: c.vip_rank === 'platinum' ? 'rgba(220,200,255,0.2)' : c.vip_rank === 'gold' ? 'rgba(255,200,100,0.2)' : 'rgba(200,200,220,0.15)',
-                    borderColor: c.vip_rank === 'platinum' ? '#dcc8ff' : c.vip_rank === 'gold' ? '#ffc864' : '#c8c8dc',
-                  }}>
-                    <Text style={{ fontSize: 10, fontWeight: '700', color: c.vip_rank === 'platinum' ? '#dcc8ff' : c.vip_rank === 'gold' ? '#ffc864' : '#c8c8dc' }}>
-                      {c.vip_rank === 'platinum' ? '◆ PLATINUM' : c.vip_rank === 'gold' ? '★ GOLD' : '● SILVER'}
-                    </Text>
-                  </View>
-                ) : null}
+                {c.vip_rank && c.vip_rank !== 'normal' ? (() => {
+                  const stars = c.vip_rank === 'platinum' ? 3 : c.vip_rank === 'gold' ? 2 : 1;
+                  const color = c.vip_rank === 'platinum' ? '#dcc8ff' : c.vip_rank === 'gold' ? '#ffc864' : '#c8c8dc';
+                  return (
+                    <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
+                      {[...Array(stars)].map((_, i) => (
+                        <Ionicons key={i} name="star" size={14} color={color} />
+                      ))}
+                    </View>
+                  );
+                })() : null}
                 {cast && !propsCastId && <View style={styles.castTagBadge}><Text style={styles.castTagText}>{cast.name}</Text></View>}
               </View>
               <Text style={styles.customerVisit}>登録日：{fmtJpDate(displayDate)}</Text>
@@ -1079,14 +1079,20 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
             <Text style={modal.label}>VIPランク</Text>
             <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
               {([
-                { id: 'normal',   label: '通常',     color: '#666688' },
-                { id: 'silver',   label: 'シルバー', color: '#c8c8dc' },
-                { id: 'gold',     label: 'ゴールド', color: '#ffc864' },
-                { id: 'platinum', label: 'プラチナ', color: '#dcc8ff' },
+                { id: 'normal',   stars: 0, color: '#666688' },
+                { id: 'silver',   stars: 1, color: '#c8c8dc' },
+                { id: 'gold',     stars: 2, color: '#ffc864' },
+                { id: 'platinum', stars: 3, color: '#dcc8ff' },
               ] as const).map(r => (
                 <PunyTouchable key={r.id} onPress={() => setVipRank(r.id)} scaleTo={0.93} haptic="light"
-                  style={[modal.chip, { flex: 1, alignItems: 'center' }, vipRank === r.id && { backgroundColor: r.color + '33', borderColor: r.color }]}>
-                  <Text style={[modal.chipText, vipRank === r.id && { color: r.color, fontWeight: '700' }]}>{r.label}</Text>
+                  style={[modal.chip, { flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 2, paddingVertical: 10 }, vipRank === r.id && { backgroundColor: r.color + '33', borderColor: r.color }]}>
+                  {r.stars === 0 ? (
+                    <Text style={[modal.chipText, vipRank === r.id && { color: r.color, fontWeight: '700' }]}>通常</Text>
+                  ) : (
+                    [...Array(r.stars)].map((_, i) => (
+                      <Ionicons key={i} name={vipRank === r.id ? 'star' : 'star-outline'} size={16} color={vipRank === r.id ? r.color : Colors.text3} />
+                    ))
+                  )}
                 </PunyTouchable>
               ))}
             </View>
