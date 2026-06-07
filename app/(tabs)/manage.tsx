@@ -778,7 +778,6 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
   const [isFavorite, setIsFavorite] = useState(false);
   // 追加フィールド
   const [favoriteDrink, setFavoriteDrink] = useState('');
-  const [contact, setContact] = useState('');
   const [occupation, setOccupation] = useState('');
   const [referralSource, setReferralSource] = useState('');
   const [ngTopics, setNgTopics] = useState('');
@@ -810,7 +809,7 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
     setEditTarget(null);
     setCustName(''); setNickname(''); setBirthday(''); setCastId(propsCastId || '');
     setMemo(''); setVisitDate(getDateStrC(now)); setIsFavorite(false);
-    setFavoriteDrink(''); setContact(''); setOccupation(''); setReferralSource('');
+    setFavoriteDrink(''); setOccupation('経営者'); setReferralSource('');
     setNgTopics(''); setVipRank('normal'); setBudget(''); setTagsInput('');
     setModalVisible(true);
   };
@@ -825,7 +824,6 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
     setVisitDate(c.visit_date || getDateStrC(now));
     setIsFavorite(!!c.is_favorite);
     setFavoriteDrink(c.favorite_drink || '');
-    setContact(c.contact || '');
     setOccupation(c.occupation || '');
     setReferralSource(c.referral_source || '');
     setNgTopics(c.ng_topics || '');
@@ -849,7 +847,6 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
         memo: memo || null,
         is_favorite: isFavorite,
         favorite_drink: favoriteDrink || null,
-        contact: contact || null,
         occupation: occupation || null,
         referral_source: referralSource || null,
         ng_topics: ngTopics || null,
@@ -963,7 +960,6 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
               <Text style={styles.customerVisit}>登録日：{fmtJpDate(displayDate)}</Text>
               {c.birthday ? <Text style={styles.customerVisit}>🎂 {fmtJpDate(c.birthday)}</Text> : null}
               {c.favorite_drink ? <Text style={styles.customerVisit}>🍷 {c.favorite_drink}</Text> : null}
-              {c.contact ? <Text style={styles.customerVisit}>📱 {c.contact}</Text> : null}
               {c.occupation ? <Text style={styles.customerVisit}>💼 {c.occupation}</Text> : null}
               {c.budget ? <Text style={styles.customerVisit}>💰 想定単価 ¥{Number(c.budget).toLocaleString()}</Text> : null}
               {c.ng_topics ? <Text style={[styles.customerVisit, { color: Colors.red }]}>⚠️ NG: {c.ng_topics}</Text> : null}
@@ -1009,7 +1005,7 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
             <TextInput style={modal.input} value={custName} onChangeText={setCustName}
               placeholder="例: 田中様" placeholderTextColor={Colors.text3} />
 
-            <Text style={modal.label}>呼び方（あだ名）</Text>
+            <Text style={modal.label}>呼び方（ニックネーム）</Text>
             <TextInput style={modal.input} value={nickname} onChangeText={setNickname}
               placeholder="例: たなかちゃん" placeholderTextColor={Colors.text3} />
 
@@ -1075,10 +1071,6 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
             <Text style={modal.label}>好きな飲み物</Text>
             <TextInput style={modal.input} value={favoriteDrink} onChangeText={setFavoriteDrink}
               placeholder="例: 山崎ハイボール、シャンパン" placeholderTextColor={Colors.text3} />
-
-            <Text style={modal.label}>連絡先（LINE・電話など）</Text>
-            <TextInput style={modal.input} value={contact} onChangeText={setContact}
-              placeholder="例: LINE: tanaka123 / 090-xxxx-xxxx" placeholderTextColor={Colors.text3} />
 
             <Text style={modal.label}>職業</Text>
             <TextInput style={modal.input} value={occupation} onChangeText={setOccupation}
