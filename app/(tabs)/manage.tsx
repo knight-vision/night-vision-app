@@ -946,11 +946,10 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
                 {c.nickname ? <Text style={[styles.customerName, { color: Colors.text2, fontSize: 13 }]}>（{c.nickname}）</Text> : null}
                 {c.vip_rank && c.vip_rank !== 'normal' ? (() => {
                   const stars = c.vip_rank === 'platinum' ? 3 : c.vip_rank === 'gold' ? 2 : 1;
-                  const color = c.vip_rank === 'platinum' ? '#dcc8ff' : c.vip_rank === 'gold' ? '#ffc864' : '#c8c8dc';
                   return (
                     <View style={{ flexDirection: 'row', gap: 1, alignItems: 'center' }}>
                       {[...Array(stars)].map((_, i) => (
-                        <Ionicons key={i} name="star" size={14} color={color} />
+                        <Ionicons key={i} name="star" size={14} color="#ffc864" />
                       ))}
                     </View>
                   );
@@ -1079,18 +1078,18 @@ export function CustomerSection({ shopId, castId: propsCastId, hideAddCastFilter
             <Text style={modal.label}>VIPランク</Text>
             <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
               {([
-                { id: 'normal',   stars: 0, color: '#666688' },
-                { id: 'silver',   stars: 1, color: '#c8c8dc' },
-                { id: 'gold',     stars: 2, color: '#ffc864' },
-                { id: 'platinum', stars: 3, color: '#dcc8ff' },
+                { id: 'normal',   stars: 0 },
+                { id: 'silver',   stars: 1 },
+                { id: 'gold',     stars: 2 },
+                { id: 'platinum', stars: 3 },
               ] as const).map(r => (
                 <PunyTouchable key={r.id} onPress={() => setVipRank(r.id)} scaleTo={0.93} haptic="light"
-                  style={[modal.chip, { flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 2, paddingVertical: 10 }, vipRank === r.id && { backgroundColor: r.color + '33', borderColor: r.color }]}>
+                  style={[modal.chip, { flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 2, paddingVertical: 10 }, vipRank === r.id && { backgroundColor: 'rgba(255,200,100,0.2)', borderColor: '#ffc864' }]}>
                   {r.stars === 0 ? (
-                    <Text style={[modal.chipText, vipRank === r.id && { color: r.color, fontWeight: '700' }]}>通常</Text>
+                    <Text style={[modal.chipText, vipRank === r.id && { color: '#ffc864', fontWeight: '700' }]}>通常</Text>
                   ) : (
                     [...Array(r.stars)].map((_, i) => (
-                      <Ionicons key={i} name={vipRank === r.id ? 'star' : 'star-outline'} size={16} color={vipRank === r.id ? r.color : Colors.text3} />
+                      <Ionicons key={i} name={vipRank === r.id ? 'star' : 'star-outline'} size={16} color="#ffc864" />
                     ))
                   )}
                 </PunyTouchable>
